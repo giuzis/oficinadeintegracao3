@@ -6,6 +6,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:bluber/cameraqrcodepage.dart';
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:flutter/services.dart';
 
 // faz uma animaçãozinha para ir para outra página (faz a página subir)
 Route _QRCodeRoute() {
@@ -40,6 +42,7 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   TabController _tabController;
 
+  String _barcode = "";
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
@@ -86,9 +89,7 @@ class _MyHomePageState extends State<MyHomePage>
             ? FloatingActionButton(
                 backgroundColor: Colors.blueGrey,
                 child: Icon(Icons.apps),
-                onPressed: () {
-                  Navigator.of(context).push(_QRCodeRoute());
-                },
+                onPressed: scan,
               )
             : FloatingActionButton(
                 backgroundColor: Colors.blueGrey,
@@ -130,6 +131,29 @@ class _MyHomePageState extends State<MyHomePage>
         setState(() {});
       });
   }
+
+//Funcao utilizada para scannear o QrCode 
+  Future scan() async {
+    try {
+      String barcode = await BarcodeScanner.scan();
+      setState(() => this._barcode = barcode);
+      print(_barcode);
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          this._barcode = 'Usuário não tem permissão para utilizar a câmera';
+        });
+      } else {
+        setState(() => this._barcode = 'Erro Desconhecido: $e');
+      }
+    } on FormatException {
+      setState(() => this._barcode =
+          'Nulo, o usuário pressionou o botão de retorno antes de scannear algo');
+    } catch (e) {
+      setState(() => this._barcode = 'Erro Desconhecido : $e');
+    }
+  }
+
 
   // função necessária para trobar o floatingbutton de acordo com a aba
   // não sei direito para que serve
