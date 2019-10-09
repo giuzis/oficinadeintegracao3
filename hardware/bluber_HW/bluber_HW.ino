@@ -1,10 +1,19 @@
-#include "bluber_HW.h"
+#include "bluber_modules.h"
 
 /* Global vars */
 uint8_t stateflag = 0;
 
 /* DC Motor Module */
 Motor* motor;
+
+/* GSM Module */
+SoftwareSerial GSMSerial(GSM_TX, GSM_RX); //SIM800L Tx & Rx is connected to Arduino #3 & #2
+
+/* GPS Module */
+TinyGPS gps;
+SoftwareSerial GPSSerial(GPS_RX, GPS_TX);
+
+void BluetoothInterrupt(){};
 
 void setup() {
 	/* Serial Monitor */
@@ -18,22 +27,24 @@ void setup() {
 
 	/* Bluetooth Module */
   BluetoothInterrupt();// sends a menu to the remote
-  attachInterrupt(2, BluetoothInterrupt, CHANGE);// attach BT STATE pin to PIN 3, this provides a user menu on connection
+  attachInterrupt(2, BluetoothInterrupt, RISING);// attach BT STATE pin to PIN 3, this provides a user menu on connection
 
 	/* Gyroscope Module */
 
-
   /* GPS Module */
+  GPSSerial.begin(GPS_Serial_Baud);
 
   /* GSM Module */
+  //Begin serial communication with Arduino and SIM800L
+  GSMSerial.begin(GSM_Serial_Baud);
 
-
-
-
+  /* Buzzer Module */
 }
 
-/* General System Functions */
+/* Start up and tests functions */
+void startUp(){}
 
+/* General System Functions */
 void Unavailable(){}
 void LockFromUnavailable(){
 
