@@ -13,6 +13,9 @@ SoftwareSerial GSMSerial(GSM_TX, GSM_RX); //SIM800L Tx & Rx is connected to Ardu
 TinyGPS gps;
 SoftwareSerial GPSSerial(GPS_RX, GPS_TX);
 
+/* Bluetooth Module */
+SoftwareSerial BTSerial(BT_RX,BT_TX);
+
 void BluetoothInterrupt(){};
 
 void setup() {
@@ -26,6 +29,7 @@ void setup() {
   motor->setSpeed(100);
 
 	/* Bluetooth Module */
+  BTSerial.begin(9600);
   BluetoothInterrupt();// sends a menu to the remote
   attachInterrupt(2, BluetoothInterrupt, RISING);// attach BT STATE pin to PIN 3, this provides a user menu on connection
 

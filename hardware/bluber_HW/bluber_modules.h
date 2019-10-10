@@ -10,6 +10,9 @@
 #define GSM_TX 8
 #define GSM_Serial_Baud 9600
 
+#define BT_RX 11
+#define BT_TX 11
+
 
 void Unavailable();
 void LockFromUnavailable();
