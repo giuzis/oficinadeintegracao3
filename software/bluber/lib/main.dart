@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bluber/myhomepage.dart';
+import 'emviagempage.dart';
+import 'novabluber.dart';
+import 'encerrarviagem.dart';
 
 void main() => runApp(MyApp());
 
@@ -10,6 +13,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Bluber',
       debugShowCheckedModeBanner: false,
+      routes: <String, WidgetBuilder>{
+        '/emviagem': (BuildContext context) => EmViagemPage(),
+        '/novabluber': (BuildContext context) => NovaBluberPage(),
+        '/encerrarviagem': (BuildContext context) => ViagemEncerradaPage(),
+      },
       theme: ThemeData(
         // This is the theme of your application.
         //
