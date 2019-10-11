@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class fotoBike extends StatefulWidget {
+class FotoBike extends StatefulWidget {
   @override
-  _fotoBikeState createState() => _fotoBikeState();
+  _FotoBikeState createState() => _FotoBikeState();
 }
 
-class _fotoBikeState extends State<fotoBike> {
+class _FotoBikeState extends State<FotoBike> {
   @override
   Widget build(BuildContext context) {
     return Container();
