@@ -3,30 +3,11 @@
     _googleMap1()
     _googleMap2()
 */
-
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:bluber/cameraqrcodepage.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
-
-// faz uma animaçãozinha para ir para outra página (faz a página subir)
-Route _QRCodeRoute() {
-  return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => QRCodePage(),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      var begin = Offset(0.0, 1.0);
-      var end = Offset.zero;
-      var curve = Curves.ease;
-
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-      return SlideTransition(
-        position: animation.drive(tween),
-        child: child,
-      );
-    },
-  );
-}
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -40,9 +21,22 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
+  Completer<GoogleMapController> _controller = Completer();
+
+  static final CameraPosition _kGooglePlex = CameraPosition(
+    target: LatLng(37.42796133580664, -122.085749655962),
+    zoom: 14.4746,
+  );
+
+  static final CameraPosition _kLake = CameraPosition(
+      bearing: 192.8334901395799,
+      target: LatLng(37.43296265331129, -122.08832357078792),
+      tilt: 59.440717697143555,
+      zoom: 19.151926040649414);
+
   TabController _tabController;
 
-  String _barcode = "";
+  String _barcode = "E";
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
@@ -89,13 +83,15 @@ class _MyHomePageState extends State<MyHomePage>
             ? FloatingActionButton(
                 backgroundColor: Colors.blueGrey,
                 child: Icon(Icons.apps),
-                onPressed: scan,
+                onPressed: () {
+                  scan('/emviagem');
+                },
               )
             : FloatingActionButton(
                 backgroundColor: Colors.blueGrey,
                 child: Icon(Icons.add),
                 onPressed: () {
-                  Navigator.of(context).push(_QRCodeRoute());
+                  scan('/novabluber');
                 },
               ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -132,42 +128,39 @@ class _MyHomePageState extends State<MyHomePage>
       });
   }
 
-//Funcao utilizada para scannear o QrCode 
-  Future scan() async {
+  //Funcao utilizada para scannear o QrCode
+  Future scan(String page) async {
     try {
       String barcode = await BarcodeScanner.scan();
-      setState(() => this._barcode = barcode);
+      setState(() {
+        this._barcode = barcode;
+        // vai apra a outra página
+        // aqui vai ter que ter alguma coisa para conectar o celular e a bike via bluetooth
+        // para ver se ela está disponível e se o código confere
+        Navigator.of(context).pushReplacementNamed(page);
+      });
       print(_barcode);
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {
-          this._barcode = 'Usuário não tem permissão para utilizar a câmera';
+          this._barcode = 'E';
         });
       } else {
-        setState(() => this._barcode = 'Erro Desconhecido: $e');
+        setState(() => this._barcode = 'E');
       }
     } on FormatException {
-      setState(() => this._barcode =
-          'Nulo, o usuário pressionou o botão de retorno antes de scannear algo');
+      setState(() => this._barcode = 'E');
     } catch (e) {
-      setState(() => this._barcode = 'Erro Desconhecido : $e');
+      setState(() => this._barcode = 'E');
     }
   }
 
-
-  // função necessária para trobar o floatingbutton de acordo com a aba
+  // função necessária para trocar o floatingbutton de acordo com a aba
   // não sei direito para que serve
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  void _scanQRCode() {
-    // se não usar setState, a frase não se modifica
-    setState(() {
-      Navigator.of(context).push(_QRCodeRoute());
-    });
   }
 
   // widget que define o banner do drawer
@@ -254,7 +247,13 @@ class _MyHomePageState extends State<MyHomePage>
   // modificar essas duas funções para incluir o mapa
   // tutorial que pode ajudar https://www.youtube.com/watch?v=lNqEfnnmoHk&t=347s
   Widget _googleMap1(BuildContext context) {
-    return Center(child: Text("Mapa1", style: TextStyle(fontSize: 30.0)));
+    return GoogleMap(
+      mapType: MapType.normal,
+      initialCameraPosition: _kGooglePlex,
+      onMapCreated: (GoogleMapController controller) {
+        _controller.complete(controller);
+      },
+    );
   }
 
   Widget _googleMap2(BuildContext context) {
