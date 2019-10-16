@@ -70,15 +70,15 @@ class _EmViagemPageState extends State<EmViagemPage> {
             ),
           ),
           _googleMap(),
-          Padding(
-            padding: EdgeInsetsDirectional.only(top: 640.0, start: 130.0),
-            child: RaisedButton(
-              onPressed: () {
-                Navigator.of(context).pushReplacementNamed('/encerrarviagem');
-              },
-              child: Text('Encerrar viagem', style: TextStyle(fontSize: 20)),
-            ),
-          ),
+          // Padding(
+          //   padding: EdgeInsetsDirectional.only(top: 640.0, start: 130.0),
+          //   child: RaisedButton(
+          //     onPressed: () {
+          //       Navigator.of(context).pushReplacementNamed('/encerrarviagem');
+          //     },
+          //     child: Text('Encerrar viagem', style: TextStyle(fontSize: 20)),
+          //   ),
+          // ),
           //para usar com a biblioteca "slider_button" instalada
           // Padding(
           //   padding: EdgeInsetsDirectional.only(top: 640.0, start: 70.0),
@@ -107,6 +107,15 @@ class _EmViagemPageState extends State<EmViagemPage> {
           // ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.blueGrey,
+        icon: Icon(Icons.directions_bike),
+        label: Text('Encerrar viagem!'),
+        onPressed: () {
+          Navigator.of(context).pushReplacementNamed('/encerrarviagem');
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
