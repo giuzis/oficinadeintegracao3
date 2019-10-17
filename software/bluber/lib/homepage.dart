@@ -25,8 +25,6 @@ class _MyHomePageState extends State<MyHomePage>
   GoogleMapController mapController;
   Location location = Location();
 
-  TabController _tabController;
-
   String _barcode = "E";
   // aqui no build que tudo acontece
   @override
@@ -141,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage>
             padding: EdgeInsets.only(top: 105.0, left: 110.0),
             // e-mail do usuário
             child: Text(
-              "enricobebe@gmail.com",
+              "enrico@gmail.com",
               style: TextStyle(
                 fontWeight: FontWeight.normal,
                 fontSize: 14.0,
@@ -167,10 +165,12 @@ class _MyHomePageState extends State<MyHomePage>
         ListTile(
           title: Text("Minha carteira",
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.normal)),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).pushNamed('/minhacarteira');
+          },
         ),
         ListTile(
-          title: Text("Meu Bluber corridas",
+          title: Text("Meu Bluber",
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.normal)),
           onTap: () {},
         )
@@ -197,10 +197,6 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {
       mapController = controller;
     });
-  }
-
-  Widget _googleMap2(BuildContext context) {
-    return Center(child: Text("Mapa2", style: TextStyle(fontSize: 30.0)));
   }
 
   _animateToUser() async {
