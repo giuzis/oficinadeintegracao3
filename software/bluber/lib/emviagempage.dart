@@ -1,17 +1,35 @@
 import 'package:flutter/material.dart';
-//import 'package:slider/slider_button.dart';
 
-// QR Code page
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+
+//import 'package:slider/slider_button.dart';
 class EmViagemPage extends StatefulWidget {
   @override
   _EmViagemPageState createState() => _EmViagemPageState();
 }
 
 class _EmViagemPageState extends State<EmViagemPage> {
-  Widget _googleMap() {
-    return Center(
-      child: Text('Mapa aqui', style: TextStyle(fontSize: 30)),
+  GoogleMapController mapController;
+  Location location = Location();
+
+  Widget _googleMap(BuildContext context) {
+    return GoogleMap(
+      mapType: MapType.normal,
+      initialCameraPosition: CameraPosition(
+        target: LatLng(37.42796133580664, -122.085749655962),
+        zoom: 15,
+      ),
+      onMapCreated: _onMapCreated,
+      myLocationEnabled: true,
+      compassEnabled: true,
     );
+  }
+
+  _onMapCreated(GoogleMapController controller) {
+    setState(() {
+      mapController = controller;
+    });
   }
 
   Widget build(BuildContext context) {
@@ -21,6 +39,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
       ),
       body: Stack(
         children: <Widget>[
+          _googleMap(context),
           Container(
             color: Colors.blue,
             height: 80.0,
@@ -69,16 +88,15 @@ class _EmViagemPageState extends State<EmViagemPage> {
               ],
             ),
           ),
-          _googleMap(),
-          Padding(
-            padding: EdgeInsetsDirectional.only(top: 640.0, start: 130.0),
-            child: RaisedButton(
-              onPressed: () {
-                Navigator.of(context).pushReplacementNamed('/encerrarviagem');
-              },
-              child: Text('Encerrar viagem', style: TextStyle(fontSize: 20)),
-            ),
-          ),
+          // Padding(
+          //   padding: EdgeInsetsDirectional.only(top: 640.0, start: 130.0),
+          //   child: RaisedButton(
+          //     onPressed: () {
+          //       Navigator.of(context).pushReplacementNamed('/encerrarviagem');
+          //     },
+          //     child: Text('Encerrar viagem', style: TextStyle(fontSize: 20)),
+          //   ),
+          // ),
           //para usar com a biblioteca "slider_button" instalada
           // Padding(
           //   padding: EdgeInsetsDirectional.only(top: 640.0, start: 70.0),
@@ -107,6 +125,15 @@ class _EmViagemPageState extends State<EmViagemPage> {
           // ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.blueGrey,
+        icon: Icon(Icons.directions_bike),
+        label: Text('Encerrar viagem!'),
+        onPressed: () {
+          Navigator.of(context).pushReplacementNamed('/encerrarviagem');
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
