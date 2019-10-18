@@ -32,7 +32,7 @@ class Motor{
       pinMode(this->_stPin, OUTPUT);
       pinMode(this->_rstPin, OUTPUT);
       pinMode(this->_enPin, OUTPUT);
-      
+
       digitalWrite(this->_rstPin, HIGH); // Active low
       digitalWrite(this->_enPin, HIGH); // Active low
     }
