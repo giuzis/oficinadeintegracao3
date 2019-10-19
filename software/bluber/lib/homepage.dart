@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:qrcode_reader/qrcode_reader.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -22,8 +24,8 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   GoogleMapController mapController;
   Location location = Location();
-
   Future<String> _barcodeString;
+  
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
@@ -57,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage>
           backgroundColor: Colors.blueGrey,
           icon: Icon(Icons.directions_bike),
           label: Text('Quero pedalar!'),
-          onPressed: () {
+          onPressed: (){ 
             setState(() {
             _barcodeString = new QRCodeReader()
                 .setAutoFocusIntervalInMs(200)
@@ -72,6 +74,8 @@ class _MyHomePageState extends State<MyHomePage>
               _barcodeString = null;
               Navigator.of(context).pushReplacementNamed('/emviagem');
             }
+            
+            //bluetoothTest();
           },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -134,6 +138,32 @@ class _MyHomePageState extends State<MyHomePage>
         ],
       ),
     );
+  }
+
+  //Bluetooth function
+  Future bluetoothTest() async {
+  // Some simplest connection :F
+  String address;
+
+    try {
+        BluetoothConnection connection = await BluetoothConnection.toAddress(address);
+        print('Connected to the device');
+
+        // connection.input.listen((Uint8Li  st data) {
+        //     print('Data incoming: ${ascii.decode(data)}');
+        //     connection.output.add(data); // Sending data
+
+        //     if (ascii.decode(data).contains('!')) {
+        //         connection.finish(); // Closing connection
+        //         print('Disconnecting by local host');
+        //     }
+        // }).onDone(() {
+        //     print('Disconnected by remote request');
+        // });
+    }
+    catch (exception) {
+        print('Cannot connect, exception occured');
+    } 
   }
 
   // widget que define a lista do drawer

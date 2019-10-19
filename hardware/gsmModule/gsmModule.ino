@@ -37,7 +37,7 @@ void setup()
   mySerial.println("AT+CPIN?");
   updateSerial();
   delay(1000);
-  mySerial.println("AT+CSTT=\"tim.br\", \"tim\", \"tim\"");
+  mySerial.println("AT+CSTT=\"timbrasil.br\", \"tim\", \"tim\"");
   updateSerial();
   delay(1000);
   mySerial.println("AT+CIICR");
@@ -46,16 +46,20 @@ void setup()
   mySerial.println("AT+CIFSR");
   updateSerial();
   delay(1000);
-  mySerial.println("AT+CIPSTART=\"TCP\",\"bluberstg.firebaseio.com\",80");
+  mySerial.println("AT+CIPSTART=\"TCP\",\"74.124.194.252\",80");
   updateSerial();
   delay(3000);
-  mySerial.println("AT+CIPSEND=50");
+  mySerial.println("AT+CIPSEND=61");
   updateSerial();
   delay(1000);
-  mySerial.println("POST /users.json HTTP/1.1 { \"alarm\": \"jonas\" }");
+  int teste = mySerial.println("GET https://www.m2msupport.net/m2msupport/http_get_test.php");
+  Serial.println(teste);
+  updateSerial(); 
+  delay(5000);
   updateSerial();
-  //mySerial.println("AT+CIPSHUT");
-  //updateSerial();
+  delay(5000);
+  mySerial.println("AT+CIPSHUT");
+  updateSerial();
 }
 
 void loop()
