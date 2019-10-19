@@ -6,8 +6,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 
 // essa classe nunca é modificada
@@ -25,7 +25,6 @@ class _MyHomePageState extends State<MyHomePage>
   GoogleMapController mapController;
   Location location = Location();
 
-  File _image;
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
@@ -60,7 +59,8 @@ class _MyHomePageState extends State<MyHomePage>
           icon: Icon(Icons.directions_bike),
           label: Text('Quero pedalar!'),
           onPressed: () {
-            getImage();
+            bluetoothTest();
+            //Navigator.of(context).pushReplacementNamed('/emviagem');
           },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -125,13 +125,30 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  //Image Picker
-  Future getImage() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+  //Bluetooth function
+  Future bluetoothTest() async {
+  // Some simplest connection :F
+  String address;
 
-    setState(() {
-      _image = image;
-    });
+    try {
+        BluetoothConnection connection = await BluetoothConnection.toAddress(address);
+        print('Connected to the device');
+
+        // connection.input.listen((Uint8Li  st data) {
+        //     print('Data incoming: ${ascii.decode(data)}');
+        //     connection.output.add(data); // Sending data
+
+        //     if (ascii.decode(data).contains('!')) {
+        //         connection.finish(); // Closing connection
+        //         print('Disconnecting by local host');
+        //     }
+        // }).onDone(() {
+        //     print('Disconnected by remote request');
+        // });
+    }
+    catch (exception) {
+        print('Cannot connect, exception occured');
+    } 
   }
 
   // widget que define a lista do drawer

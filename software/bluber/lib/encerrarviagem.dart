@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 // QR Code page
 class ViagemEncerradaPage extends StatefulWidget {
@@ -8,6 +10,19 @@ class ViagemEncerradaPage extends StatefulWidget {
 }
 
 class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
+  File _image;
+
+  //Image Picker
+  Future getImage(String page) async {
+    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+
+    setState(() {
+      _image = image;
+    });
+
+    Navigator.of(context).pushReplacementNamed(page);
+  }
+  
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -94,7 +109,8 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Finalizar avaliação'),
         onPressed: () {
-          Navigator.of(context).pushReplacementNamed('/');
+          getImage('/');
+          // Navigator.of(context).pushReplacementNamed('/');
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
