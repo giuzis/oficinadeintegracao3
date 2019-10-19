@@ -6,6 +6,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -22,7 +25,7 @@ class _MyHomePageState extends State<MyHomePage>
   GoogleMapController mapController;
   Location location = Location();
 
-  String _barcode = "E";
+  File _image;
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
@@ -57,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage>
           icon: Icon(Icons.directions_bike),
           label: Text('Quero pedalar!'),
           onPressed: () {
-            //scan('/emviagem');
+            getImage();
           },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -120,6 +123,15 @@ class _MyHomePageState extends State<MyHomePage>
         ],
       ),
     );
+  }
+
+  //Image Picker
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+
+    setState(() {
+      _image = image;
+    });
   }
 
   // widget que define a lista do drawer
