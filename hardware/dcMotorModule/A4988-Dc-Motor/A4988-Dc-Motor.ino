@@ -10,7 +10,7 @@ void setup(){
   motor = new Motor();
   motor->setPins(12, 11, 10); // step, enable, reset
   motor->stop();
-  motor->setSpeed(50);
+  motor->setSpeed(75);
 }
 
 void loop(){
