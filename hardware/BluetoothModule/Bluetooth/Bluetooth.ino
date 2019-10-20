@@ -1,6 +1,8 @@
 #include <SoftwareSerial.h>
 //Declaração de Variáveis
 
+SoftwareSerial BTSerial(4,5);// rx=4 tx=5 - arduino refference
+
 int pushButton = 2;
 int led = 13;
 int stateOfButton =0;
@@ -10,7 +12,7 @@ char buf;
 
 void setup() {
   // declaração dos pinos e inicialização
-  Serial.begin(9600);
+  BTSerial.begin(9600);
   pinMode(pushButton, INPUT);
   pinMode(led, OUTPUT);
   delay(1000);
@@ -42,9 +44,9 @@ void loop() {
 void verificaComandoCelular()
 {
   int watchDogCounter = 0;
-  while( Serial.available() > 0)
+  while( BTSerial.available() > 0)
   {
-    buf = Serial.read();
+    buf = BTSerial.read();
 
      //Caracter L para ligar o led
      Serial.println(buf);

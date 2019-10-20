@@ -1,6 +1,7 @@
 //Carrega a biblioteca SoftwareSerial
 #include <SoftwareSerial.h>
  
+ SoftwareSerial BTSerial(4,5);
  
 int pushButton = 2;// digital pin 10 will read the state of a pushbutton
 int led =13;
@@ -11,6 +12,7 @@ char buf;
 void setup()
 {
   Serial.begin(9600);
+  BTSerial.begin(9600);
   pinMode(pushButton, INPUT);
   pinMode(led, OUTPUT);
   delay(1000); 
@@ -44,9 +46,9 @@ void loop()
 void verificaComandoCelular()
 {
   int watchDogCounter=0;
-  while( Serial.available() > 0 )
+  while( BTSerial.available() > 0 )
   {
-     buf = Serial.read();
+     buf = BTSerial.read();
      //Caracter L  para ligar o led
      Serial.println(buf);
      if (buf == 'L')

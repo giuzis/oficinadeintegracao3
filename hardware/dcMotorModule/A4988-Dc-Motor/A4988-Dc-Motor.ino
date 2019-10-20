@@ -8,16 +8,17 @@ Motor* motor;
 
 void setup(){
   motor = new Motor();
-  motor->setPins(3, 5, 4); // step, enable, reset
+  motor->setPins(12, 11, 10); // step, enable, reset
   motor->stop();
-  motor->setSpeed(100);
+  motor->setSpeed(75);
 }
 
 void loop(){
   motor->toggleDirection();
   motor->run();
-  delay(1000);
+  delay(500);
   
   motor->stop();
-  delay(5000);  
+  delay(1000);
+
 }

@@ -1,7 +1,7 @@
 #include <SoftwareSerial.h>
 
 //Create software serial object to communicate with SIM800L
-SoftwareSerial mySerial(3, 2); //SIM800L Tx & Rx is connected to Arduino #3 & #2
+SoftwareSerial mySerial(6, 7); //SIM800L Tx & Rx is connected to Arduino #3 & #2
 
 void setup()
 {
@@ -13,20 +13,53 @@ void setup()
 
   Serial.println("Initializing..."); 
   delay(1000);
-
   mySerial.println("AT"); //Once the handshake test is successful, it will back to OK
   updateSerial();
-  mySerial.println("AT+CSQ"); //Once the handshake test is successful, it will back to OK
+  delay(1000);
+  mySerial.println("ATE1&W"); //Once the handshake test is successful, it will back to OK
   updateSerial();
-  mySerial.println("AT+CMGF=1"); // Configuring TEXT mode
+  delay(1000);
+  mySerial.println("AT+HTTPINIT"); // Configuring TEXT mode
   updateSerial();
-  mySerial.println("AT+COPS=?");//change ZZ with country code and xxxxxxxxxxx with phone number to sms
+  delay(1000);
+  mySerial.println("AT+HTTPSSL=1"); // Configuring TEXT mode
   updateSerial();
-  mySerial.println("AT+CBC");//change ZZ with country code and xxxxxxxxxxx with phone number to sms
+  delay(1000);
+  mySerial.println("AT+CGATT?"); // Configuring TEXT mode
   updateSerial();
-  //mySerial.print("4/28"); //text content
-  //updateSerial();
-  //mySerial.write(26);
+  delay(1000);
+  mySerial.println("AT+CIPMUX=0"); // Configuring TEXT mode
+  updateSerial();
+  delay(1000);
+  mySerial.println("AT+CFUN=1"); // Enable All
+  updateSerial();
+  delay(1000);
+  mySerial.println("AT+CPIN?");
+  updateSerial();
+  delay(1000);
+  mySerial.println("AT+CSTT=\"timbrasil.br\", \"tim\", \"tim\"");
+  updateSerial();
+  delay(1000);
+  mySerial.println("AT+CIICR");
+  updateSerial();
+  delay(1000);
+  mySerial.println("AT+CIFSR");
+  updateSerial();
+  delay(1000);
+  mySerial.println("AT+CIPSTART=\"TCP\",\"74.124.194.252\",80");
+  updateSerial();
+  delay(3000);
+  mySerial.println("AT+CIPSEND=61");
+  updateSerial();
+  delay(1000);
+  int teste = mySerial.println("GET https://www.m2msupport.net/m2msupport/http_get_test.php");
+  Serial.println(teste);
+  updateSerial(); 
+  delay(5000);
+  updateSerial();
+  delay(5000);
+  mySerial.println("AT+CIPSHUT");
+  updateSerial();
 }
 
 void loop()
