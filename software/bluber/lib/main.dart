@@ -4,6 +4,7 @@ import 'emviagempage.dart';
 import 'novabluber.dart';
 import 'encerrarviagem.dart';
 import 'minhacarteira.dart';
+import 'login.dart';
 
 void main() => runApp(MyApp());
 
@@ -16,9 +17,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
         '/emviagem': (BuildContext context) => EmViagemPage(),
+        '/login': (BuildContext context) => LoginPage(),
         '/novabluber': (BuildContext context) => NovaBluberPage(),
         '/encerrarviagem': (BuildContext context) => ViagemEncerradaPage(),
         '/minhacarteira': (BuildContext context) => MinhaCarteiraPage(),
+        '/homepage': (BuildContext context) => MyHomePage(),
       },
       theme: ThemeData(
         // This is the theme of your application.
