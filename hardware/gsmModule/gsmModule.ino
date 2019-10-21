@@ -3,6 +3,8 @@
 //Create software serial object to communicate with SIM800L
 SoftwareSerial mySerial(6, 7); //SIM800L Tx & Rx is connected to Arduino #3 & #2
 
+#define FIREBASE_AUTH "AIzaSyDltM0SHD4-L76U4ymzfGxXmRCmiZFwmEo"
+
 void setup()
 {
   //Begin serial communication with Arduino and Arduino IDE (Serial Monitor)
@@ -46,13 +48,15 @@ void setup()
   mySerial.println("AT+CIFSR");
   updateSerial();
   delay(1000);
-  mySerial.println("AT+CIPSTART=\"TCP\",\"74.124.194.252\",80");
+  mySerial.println("AT+CIPSTART=\"TCP\",\"bluberstg.firebaseio.com\",80");
   updateSerial();
   delay(3000);
-  mySerial.println("AT+CIPSEND=61");
+  mySerial.println("AT+CIPSEND=66");
   updateSerial();
   delay(1000);
-  int teste = mySerial.println("GET https://www.m2msupport.net/m2msupport/http_get_test.php");
+  int teste = mySerial.println(
+    "GET /users/alarm.json HTTP/1.1\r\n"
+    "Host: bluberstg.firebaseio.com\r\n");
   Serial.println(teste);
   updateSerial(); 
   delay(5000);
