@@ -12,12 +12,41 @@ class _LoginPageState extends State<LoginPage> {
       color: Colors.blue,
       child: Center(
         child: Container(
-          height: 100,
-          width: 100,
-          color: Colors.white,
-          child: RaisedButton(
-            color: Colors.grey,
-            onPressed: () {},
+          height: 60,
+          width: 400,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+          child: SizedBox.expand(
+            child: FlatButton(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    "Login com Google",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                      fontSize: 20,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                  Container(
+                    child: SizedBox(
+                      child: Image.asset("images/google-icon-1.png"),
+                      height: 28,
+                      width: 28,
+                    ),
+                  )
+                ],
+              ),
+              onPressed: () {
+                Navigator.of(context).pushReplacementNamed('/homepage');
+              },
+            ),
           ),
         ),
       ),

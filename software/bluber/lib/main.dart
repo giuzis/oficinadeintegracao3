@@ -4,6 +4,7 @@ import 'emviagempage.dart';
 import 'novabluber.dart';
 import 'encerrarviagem.dart';
 import 'minhacarteira.dart';
+import 'adicionarcreditos.dart';
 import 'login.dart';
 
 void main() => runApp(MyApp());
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
         '/encerrarviagem': (BuildContext context) => ViagemEncerradaPage(),
         '/minhacarteira': (BuildContext context) => MinhaCarteiraPage(),
         '/homepage': (BuildContext context) => MyHomePage(),
+        '/addcreditos': (BuildContext context) => AddCreditosPage(),
       },
       theme: ThemeData(
         // This is the theme of your application.
@@ -36,7 +38,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',
       ),
-      home: MyHomePage(title: 'Bluber'),
+      home: LoginPage(),
     );
   }
 }
