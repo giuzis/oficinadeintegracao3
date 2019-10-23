@@ -6,9 +6,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'dart:io';
+import 'dart:typed_data';
 
+//Bibliotecas para o bluetooth
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'dart:async';
 
+//import 'package:bluber/Bluetooth.dart';
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -59,7 +64,9 @@ class _MyHomePageState extends State<MyHomePage>
           icon: Icon(Icons.directions_bike),
           label: Text('Quero pedalar!'),
           onPressed: () {
-            bluetoothTest();
+            BluetoothRequest();
+            getBluetoothState();
+            //print(_bluetoothState);
             //Navigator.of(context).pushReplacementNamed('/emviagem');
           },
         ),
@@ -124,32 +131,83 @@ class _MyHomePageState extends State<MyHomePage>
       ),
     );
   }
+  //Funções do Bluetooth - To do 
+  //Variáveis
+  BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
+  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
+  List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
+  bool isDiscovering;
 
-  //Bluetooth function
-  Future bluetoothTest() async {
-  // Some simplest connection :F
-  String address;
-
-    try {
-        BluetoothConnection connection = await BluetoothConnection.toAddress(address);
-        print('Connected to the device');
-
-        // connection.input.listen((Uint8Li  st data) {
-        //     print('Data incoming: ${ascii.decode(data)}');
-        //     connection.output.add(data); // Sending data
-
-        //     if (ascii.decode(data).contains('!')) {
-        //         connection.finish(); // Closing connection
-        //         print('Disconnecting by local host');
-        //     }
-        // }).onDone(() {
-        //     print('Disconnected by remote request');
-        // });
-    }
-    catch (exception) {
-        print('Cannot connect, exception occured');
-    } 
+  //Pede para ligar o bluetooth
+  Future BluetoothRequest() async { // async lambda seems to not working
+    await FlutterBluetoothSerial.instance.requestEnable();
   }
+
+  // Pega o status atual do bluetooth
+  Future getBluetoothState() async {
+    FlutterBluetoothSerial.instance.state.then((state) {
+      setState(() { _bluetoothState = state; });
+    });
+    print(_bluetoothState);
+    bluetoothDiscovery();
+  }
+
+  void bluetoothDiscovery() {
+
+    int index = 0;
+    
+    _streamSubscription = FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
+      setState(() { 
+        results.add(r);
+        index=index+1;
+      });
+    });
+
+    if(results[index].device.address == '20:16:07:25:05:13'){
+      print('Descobri o HC-05');
+      bluetoothConection(results[index].device.address);
+    }  
+
+    // _streamSubscription.onDone(() {
+    //   setState(() { isDiscovering = false; });
+    // });
+  }
+
+  Future bluetoothConection(String address) async {
+      // Some simplest connection :F
+      try {
+          BluetoothConnection connection = await BluetoothConnection.toAddress(address);
+          print('Connected to the device');
+
+          connection.input.listen((Uint8List data) {
+              
+              // connection.output.add(data); // Sending data
+
+              // if (ascii.decode(data).contains('!')) {
+              //     connection.finish(); // Closing connection
+              //     print('Disconnecting by local host');
+              // }
+          }).onDone(() {
+              print('Disconnected by remote request');
+          });
+      }
+      catch (exception) {
+          print('Cannot connect, exception occured');
+      }
+  }
+
+  //Descobrindo Dispositivos
+  // void DiscoveryDevices () {
+  //   BluetoothDiscoveryResult result = results[];
+
+  //     results[results.indexOf(result)] = BluetoothDiscoveryResult(
+  //         device: BluetoothDevice(
+  //           name: result.device.name ?? '',
+  //           address: result.device.address,
+  //           type: result.device.type
+  //         ), 
+  //       );
+  // }
 
   // widget que define a lista do drawer
   Widget _bannerList() {
