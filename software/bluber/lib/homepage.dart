@@ -6,15 +6,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:qrcode_reader/qrcode_reader.dart';
+//import 'package:qrcode_reader/qrcode_reader.dart';
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-
+import 'package:flutter/services.dart';
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  // MyHomePage({Key key, this.title}) : super(key: key);
 
-  final String title;
+  // final String title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -24,62 +25,45 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   GoogleMapController mapController;
   Location location = Location();
-  Future<String> _barcodeString;
-  
+  String _barcode = "";
+
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
     // nossa página inicial será um definida por um controle de abas
-    return DefaultTabController(
-      length: 2,
-
-      // scaffold é o "esqueleto" padrão dos aplicativos material que deixa tudo mais fácil
-      child: Scaffold(
-        // característica do scaffold é a appbar já pronta (parte de cima da aplicação)
-        appBar: AppBar(
-          title: Text(widget.title), //título da app
-        ),
-
-        // drawer é o "menu" onde tem o perfil do usuário e outras coisinhas
-        drawer: Drawer(
-          // o widget "column" permite colocar vários widgets um em cima do outro (ou embaixo dependendo do ponto de vista)
-          child: Column(
-            // nesse caso coloquei as funções _bannerDrawer e _bannerList que retornam os widgets
-            children: <Widget>[
-              _bannerDrawer(),
-              _bannerList(),
-            ],
-          ),
-        ),
-        // com tabview definimos o que será mostrado em cada tab
-        body: _googleMap1(context),
-
-        // é o botão que leva a outra página (nesse caso)
-        floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: Colors.blueGrey,
-          icon: Icon(Icons.directions_bike),
-          label: Text('Quero pedalar!'),
-          onPressed: (){ 
-            setState(() {
-            _barcodeString = new QRCodeReader()
-                .setAutoFocusIntervalInMs(200)
-                .setForceAutoFocus(true)
-                .setTorchEnabled(false)
-                .setHandlePermissions(true)
-                .setExecuteAfterPermissionGranted(true)
-                .scan();
-            });
-            if(_barcodeString != null){
-              print('FOOOOOOOOOOOOOOOOOOOOOOOOOOI');
-              _barcodeString = null;
-              Navigator.of(context).pushReplacementNamed('/emviagem');
-            }
-            
-            //bluetoothTest();
-          },
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    return Scaffold(
+      // característica do scaffold é a appbar já pronta (parte de cima da aplicação)
+      appBar: AppBar(
+        title: Text("Bluber"), //título da app
       ),
+
+      // drawer é o "menu" onde tem o perfil do usuário e outras coisinhas
+      drawer: Drawer(
+        // o widget "column" permite colocar vários widgets um em cima do outro (ou embaixo dependendo do ponto de vista)
+        child: Column(
+          // nesse caso coloquei as funções _bannerDrawer e _bannerList que retornam os widgets
+          children: <Widget>[
+            _bannerDrawer(),
+            _bannerList(),
+          ],
+        ),
+      ),
+      // com tabview definimos o que será mostrado em cada tab
+      body: _googleMap1(context),
+
+      // é o botão que leva a outra página (nesse caso)
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.blueGrey,
+        icon: Icon(Icons.directions_bike),
+        label: Text('Quero pedalar!'),
+        onPressed: () {
+          // para não precisar usar o barcode_scan comente a função abaixo e descomente a linha abaixo dela
+          scan();
+
+          //bluetoothTest();
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -142,28 +126,28 @@ class _MyHomePageState extends State<MyHomePage>
 
   //Bluetooth function
   Future bluetoothTest() async {
-  // Some simplest connection :F
-  String address;
+    // Some simplest connection :F
+    String address;
 
     try {
-        BluetoothConnection connection = await BluetoothConnection.toAddress(address);
-        print('Connected to the device');
+      BluetoothConnection connection =
+          await BluetoothConnection.toAddress(address);
+      print('Connected to the device');
 
-        // connection.input.listen((Uint8Li  st data) {
-        //     print('Data incoming: ${ascii.decode(data)}');
-        //     connection.output.add(data); // Sending data
+      // connection.input.listen((Uint8Li  st data) {
+      //     print('Data incoming: ${ascii.decode(data)}');
+      //     connection.output.add(data); // Sending data
 
-        //     if (ascii.decode(data).contains('!')) {
-        //         connection.finish(); // Closing connection
-        //         print('Disconnecting by local host');
-        //     }
-        // }).onDone(() {
-        //     print('Disconnected by remote request');
-        // });
+      //     if (ascii.decode(data).contains('!')) {
+      //         connection.finish(); // Closing connection
+      //         print('Disconnecting by local host');
+      //     }
+      // }).onDone(() {
+      //     print('Disconnected by remote request');
+      // });
+    } catch (exception) {
+      print('Cannot connect, exception occured');
     }
-    catch (exception) {
-        print('Cannot connect, exception occured');
-    } 
   }
 
   // widget que define a lista do drawer
@@ -223,5 +207,30 @@ class _MyHomePageState extends State<MyHomePage>
         ),
       ),
     );
+  }
+
+  Future scan() async {
+    try {
+      String barcode = await BarcodeScanner.scan().then((barcode) {
+        setState(() {
+          this._barcode = barcode;
+        });
+        print(this._barcode);
+        Navigator.of(context).pushReplacementNamed('/emviagem');
+      });
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
+        });
+      } else {
+        setState(() => this._barcode = 'Error desconocido $e');
+      }
+    } on FormatException {
+      setState(() => this._barcode =
+          'nulo, el usuario presionó el botón de volver antes de escanear algo)');
+    } catch (e) {
+      setState(() => this._barcode = 'Error desconocido : $e');
+    }
   }
 }
