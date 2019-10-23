@@ -31,7 +31,7 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
         backgroundColor: Colors.blueGrey,
         label: Text('Adicionar mais créditos'),
         onPressed: () {
-          Navigator.of(context).pushReplacementNamed('/');
+          Navigator.of(context).pushReplacementNamed('/addcreditos');
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

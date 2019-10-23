@@ -6,7 +6,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'dart:io';
 import 'dart:typed_data';
 
 //Bibliotecas para o bluetooth
@@ -14,12 +13,15 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
 
 //import 'package:bluber/Bluetooth.dart';
+//import 'package:qrcode_reader/qrcode_reader.dart';
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:flutter/services.dart';
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  // MyHomePage({Key key, this.title}) : super(key: key);
 
-  final String title;
+  // final String title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -29,20 +31,17 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   GoogleMapController mapController;
   Location location = Location();
+  String _barcode = "";
 
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
     // nossa página inicial será um definida por um controle de abas
-    return DefaultTabController(
-      length: 2,
-
-      // scaffold é o "esqueleto" padrão dos aplicativos material que deixa tudo mais fácil
-      child: Scaffold(
-        // característica do scaffold é a appbar já pronta (parte de cima da aplicação)
-        appBar: AppBar(
-          title: Text(widget.title), //título da app
-        ),
+    return Scaffold(
+      // característica do scaffold é a appbar já pronta (parte de cima da aplicação)
+      appBar: AppBar(
+        title: Text("Bluber"), //título da app
+      ),
 
         // drawer é o "menu" onde tem o perfil do usuário e outras coisinhas
         drawer: Drawer(
@@ -67,11 +66,11 @@ class _MyHomePageState extends State<MyHomePage>
             BluetoothRequest();
             getBluetoothState();
             //print(_bluetoothState);
-            //Navigator.of(context).pushReplacementNamed('/emviagem');
-          },
-        ),
+            //scan();
+          },),
+      // com tabview definimos o que será mostrado em cada tab
+      // é o botão que leva a outra página (nesse caso)
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      ),
     );
   }
 
@@ -266,5 +265,30 @@ class _MyHomePageState extends State<MyHomePage>
         ),
       ),
     );
+  }
+
+  Future scan() async {
+    try {
+      String barcode = await BarcodeScanner.scan().then((barcode) {
+        setState(() {
+          this._barcode = barcode;
+        });
+        print(this._barcode);
+        Navigator.of(context).pushReplacementNamed('/emviagem');
+      });
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
+        });
+      } else {
+        setState(() => this._barcode = 'Error desconocido $e');
+      }
+    } on FormatException {
+      setState(() => this._barcode =
+          'nulo, el usuario presionó el botón de volver antes de escanear algo)');
+    } catch (e) {
+      setState(() => this._barcode = 'Error desconocido : $e');
+    }
   }
 }

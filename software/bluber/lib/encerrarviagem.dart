@@ -22,7 +22,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
 
     Navigator.of(context).pushReplacementNamed(page);
   }
-  
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -109,7 +109,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Finalizar avaliação'),
         onPressed: () {
-          getImage('/');
+          getImage('/homepage');
           // Navigator.of(context).pushReplacementNamed('/');
         },
       ),
