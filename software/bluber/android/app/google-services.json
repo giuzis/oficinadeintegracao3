@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "489495635539",
+    "firebase_url": "https://bluberstg.firebaseio.com",
+    "project_id": "bluberstg",
+    "storage_bucket": "bluberstg.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:489495635539:android:0c07cc74b72ac7ddbb08a6",
+        "android_client_info": {
+          "package_name": "com.example.bluber"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "489495635539-6dbscctdt72req6o4fh94d47uqjidaov.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bluber",
+            "certificate_hash": "24f58c506139225f0d3427c580c214f5cf47a286"
+          }
+        },
+        {
+          "client_id": "489495635539-em0etf3mvuni4mjcittv01365pek6mai.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyt3Pi5VCEfL2cYDTozkEq4uoMHAVSqRg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "489495635539-em0etf3mvuni4mjcittv01365pek6mai.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

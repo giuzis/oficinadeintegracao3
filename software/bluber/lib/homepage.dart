@@ -12,10 +12,13 @@ import 'dart:typed_data';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
 
+//Chamando Login para pegar dados
+import 'package:bluber/login.dart';
+
 //import 'package:bluber/Bluetooth.dart';
 //import 'package:qrcode_reader/qrcode_reader.dart';
-import 'package:barcode_scan/barcode_scan.dart';
-import 'package:flutter/services.dart';
+// import 'package:barcode_scan/barcode_scan.dart';
+// import 'package:flutter/services.dart';
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -31,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   GoogleMapController mapController;
   Location location = Location();
-  String _barcode = "";
+  // String _barcode = "";
 
   // aqui no build que tudo acontece
   @override
@@ -63,8 +66,8 @@ class _MyHomePageState extends State<MyHomePage>
           icon: Icon(Icons.directions_bike),
           label: Text('Quero pedalar!'),
           onPressed: () {
-            BluetoothRequest();
-            getBluetoothState();
+            //BluetoothRequest();
+            //getBluetoothState();
             //print(_bluetoothState);
             //scan();
           },),
@@ -95,7 +98,10 @@ class _MyHomePageState extends State<MyHomePage>
             child: CircleAvatar(
               radius: 40.0,
               // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
-              backgroundImage: AssetImage("images/bebe2.jpeg"),
+              backgroundImage: NetworkImage(
+                  imageUrl,
+                ),
+              backgroundColor: Colors.transparent,
             ),
           ),
 
@@ -104,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage>
             padding: EdgeInsets.only(top: 75.0, left: 110.0),
             // nome do usuário
             child: Text(
-              "Enrico Manfron",
+              name,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 25.0,
@@ -267,28 +273,28 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  Future scan() async {
-    try {
-      String barcode = await BarcodeScanner.scan().then((barcode) {
-        setState(() {
-          this._barcode = barcode;
-        });
-        print(this._barcode);
-        Navigator.of(context).pushReplacementNamed('/emviagem');
-      });
-    } on PlatformException catch (e) {
-      if (e.code == BarcodeScanner.CameraAccessDenied) {
-        setState(() {
-          this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
-        });
-      } else {
-        setState(() => this._barcode = 'Error desconocido $e');
-      }
-    } on FormatException {
-      setState(() => this._barcode =
-          'nulo, el usuario presionó el botón de volver antes de escanear algo)');
-    } catch (e) {
-      setState(() => this._barcode = 'Error desconocido : $e');
+//   Future scan() async {
+//     try {
+//       String barcode = await BarcodeScanner.scan().then((barcode) {
+//         setState(() {
+//           this._barcode = barcode;
+//         });
+//         print(this._barcode);
+//         Navigator.of(context).pushReplacementNamed('/emviagem');
+//       });
+//     } on PlatformException catch (e) {
+//       if (e.code == BarcodeScanner.CameraAccessDenied) {
+//         setState(() {
+//           this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
+//         });
+//       } else {
+//         setState(() => this._barcode = 'Error desconocido $e');
+//       }
+//     } on FormatException {
+//       setState(() => this._barcode =
+//           'nulo, el usuario presionó el botón de volver antes de escanear algo)');
+//     } catch (e) {
+//       setState(() => this._barcode = 'Error desconocido : $e');
+//     }
+//   }
     }
-  }
-}
