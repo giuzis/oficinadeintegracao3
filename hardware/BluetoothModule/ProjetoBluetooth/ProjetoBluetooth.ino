@@ -1,7 +1,7 @@
 //Carrega a biblioteca SoftwareSerial
 #include <SoftwareSerial.h>
  
- SoftwareSerial BTSerial(4,5);
+SoftwareSerial BTSerial(4,5);
  
 int pushButton = 2;// digital pin 10 will read the state of a pushbutton
 int led =13;
@@ -18,33 +18,21 @@ void setup()
   delay(1000); 
 
   handleConnectionLED();// sends a menu to the remote
-  attachInterrupt(1, handleConnectionLED, CHANGE);// attach BT STATE pin to PIN 3, this provides a user menu on connection
+  attachInterrupt(digitalPinToInterrupt(2), handleConnectionLED, CHANGE);// attach BT STATE pin to PIN 3, this provides a user menu on connection
 
 }
  
 void loop()
 {
- 
-  if(LastState != digitalRead(pushButton) )
-  {
-    if( digitalRead(pushButton) == HIGH)
-    {
-      Serial.println("Estado da chave= Ligado");
-      LastState = HIGH;
-    }
-    else
-    {
-      Serial.println("Estado da chave= Desligado");
-      LastState = LOW;
-    }
-  }
-  
   verificaComandoCelular();
   delay(1000);
 }
 
 void verificaComandoCelular()
 {
+    BTSerial.print(BTSerial.available());
+
+  //BTSerial.print("Teste\n");
   int watchDogCounter=0;
   while( BTSerial.available() > 0 )
   {
@@ -67,7 +55,7 @@ void verificaComandoCelular()
 }
 
 void handleConnectionLED() {
-  switch (digitalRead(3)) {// watch the interrupt pin (UNO)
+  switch (digitalRead(2)) {// watch the interrupt pin (UNO)
   case LOW:// lost connection
      digitalWrite(led,LOW);// shows an external LED for connection status
      Serial.println("Desconectado");

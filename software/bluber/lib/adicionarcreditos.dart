@@ -6,12 +6,8 @@ class AddCreditosPage extends StatefulWidget {
 }
 
 class _AddCreditosPageState extends State<AddCreditosPage> {
-  bool _pressed1 = true;
-  bool _pressed2 = true;
-  bool _pressed3 = true;
-  bool _pressed4 = true;
-  bool _pressed5 = true;
-  bool _pressed6 = true;
+  int _pressed = 0;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +32,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                     color: Colors.blue,
                     width: 2,
                   ),
-                  color: _pressed1 ? Colors.white : Colors.blue,
+                  color: _pressed == 1 ? Colors.blue : Colors.white,
                   borderRadius: BorderRadius.all(
                     Radius.circular(10),
                   ),
@@ -46,12 +42,12 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                     child: Center(
                       child: Text(
                         "1,00 BTC",
-                        style: TextStyle(fontSize: 20),
+                        
                       ),
                     ),
                     onPressed: () {
                       setState(() {
-                        _pressed1 = !_pressed1;
+                        _pressed = 1;
                       });
                     },
                   ),
@@ -65,7 +61,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                     color: Colors.blue,
                     width: 2,
                   ),
-                  color: _pressed2 ? Colors.white : Colors.blue,
+                  color: _pressed == 2 ? Colors.blue : Colors.white,
                   borderRadius: BorderRadius.all(
                     Radius.circular(10),
                   ),
@@ -74,13 +70,13 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "1,00 BTC",
-                        style: TextStyle(fontSize: 20),
+                        "2,00 BTC",
+                        
                       ),
                     ),
                     onPressed: () {
                       setState(() {
-                        _pressed2 = !_pressed2;
+                        _pressed = 2;
                       });
                     },
                   ),
@@ -102,7 +98,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                     color: Colors.blue,
                     width: 2,
                   ),
-                  color: _pressed3 ? Colors.white : Colors.blue,
+                  color: _pressed == 3 ? Colors.blue : Colors.white,
                   borderRadius: BorderRadius.all(
                     Radius.circular(10),
                   ),
@@ -111,13 +107,13 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "1,00 BTC",
-                        style: TextStyle(fontSize: 20),
+                        "3,00 BTC",
+                        
                       ),
                     ),
                     onPressed: () {
                       setState(() {
-                        _pressed3 = !_pressed3;
+                        _pressed = 3;
                       });
                     },
                   ),
@@ -131,7 +127,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                     color: Colors.blue,
                     width: 2,
                   ),
-                  color: _pressed4 ? Colors.white : Colors.blue,
+                  color: _pressed == 4 ? Colors.blue : Colors.white,
                   borderRadius: BorderRadius.all(
                     Radius.circular(10),
                   ),
@@ -140,13 +136,13 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "1,00 BTC",
-                        style: TextStyle(fontSize: 20),
+                        "4,00 BTC",
+                        
                       ),
                     ),
                     onPressed: () {
                       setState(() {
-                        _pressed4 = !_pressed4;
+                        _pressed = 4;
                       });
                     },
                   ),
@@ -168,7 +164,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                     color: Colors.blue,
                     width: 2,
                   ),
-                  color: _pressed5 ? Colors.white : Colors.blue,
+                  color: _pressed == 5 ? Colors.blue : Colors.white,
                   borderRadius: BorderRadius.all(
                     Radius.circular(10),
                   ),
@@ -177,13 +173,13 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "1,00 BTC",
-                        style: TextStyle(fontSize: 20),
+                        "5,00 BTC",
+                        
                       ),
                     ),
                     onPressed: () {
                       setState(() {
-                        _pressed5 = !_pressed5;
+                        _pressed = 5;
                       });
                     },
                   ),
@@ -197,7 +193,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                     color: Colors.blue,
                     width: 2,
                   ),
-                  color: _pressed6 ? Colors.white : Colors.blue,
+                  color: _pressed == 6 ? Colors.blue : Colors.white,
                   borderRadius: BorderRadius.all(
                     Radius.circular(10),
                   ),
@@ -206,13 +202,13 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "1,00 BTC",
-                        style: TextStyle(fontSize: 20),
+                        "6,00 BTC",
+                        
                       ),
                     ),
                     onPressed: () {
                       setState(() {
-                        _pressed6 = !_pressed6;
+                        _pressed = 6;
                       });
                     },
                   ),
@@ -221,20 +217,49 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
             ],
           ),
           Container(
-            height: 200,
+            height: 300,
           ),
-          FloatingActionButton.extended(
+          
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
             backgroundColor: Colors.grey,
             label: Text(
               "Adicionar bitcoins",
-              style: TextStyle(fontSize: 20),
             ),
             onPressed: () {
-              Navigator.of(context).pushReplacementNamed('/minhacarteira');
+              _neverSatisfied();
+              //Navigator.of(context).pushReplacementNamed('/minhacarteira');
+            },
+          ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Future<void> _neverSatisfied() async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        //title: Text('Rewind and remember'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Créditos adicionados!'),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Ok'),
+            onPressed: () {
+              Navigator.of(context).pop();
             },
           ),
         ],
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 }
