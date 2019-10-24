@@ -15,58 +15,56 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.grey,
         label: Text('Adicionar novo Bluber'),
-        onPressed: (){
-
-        },
+        onPressed: () {},
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: 
-              _corridasList(),
+      body: _corridasList(),
     );
   }
 
-   Widget _corridasList() {
+  Widget _corridasList() {
     return ListView(
       shrinkWrap: true,
       children: const <Widget>[
-    Card(
-      child: ListTile(
-        title: Text('00/00/00'),
-        trailing: Text('0,00 BTC'),
-      ),
-    ),
-    Card(
-      child: ListTile(
-        title: Text('00/00/00'),
-        trailing: Text('0,00 BTC'),
-      ),
-    ),
-    Card(
-      child: ListTile(
-        title: Text('00/00/00'),
-        trailing: Text('0,00 BTC'),
-      ),
-    ),
-    Card(
-      child: ListTile(
-        title: Text('00/00/00'),
-        trailing: Text('0,00 BTC'),
-      ),
-    ),
-    Card(
-      child: ListTile(
-        title: Text('00/00/00'),
-        trailing: Text('0,00 BTC'),
-      ),
-    ),
-    Card(
-      child: ListTile(
-        title: Text('00/00/00'),
-        trailing: Text('0,00 BTC'),
-      ),
-    ),
-  ],
+        Card(
+          child: ListTile(
+            leading: Icon(Icons.directions_bike),
+            title: Text('00/00/00'),
+            subtitle: Text('0,00 BTC'),
+            trailing: Icon(Icons.arrow_right),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text('00/00/00'),
+            trailing: Text('0,00 BTC'),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text('00/00/00'),
+            trailing: Text('0,00 BTC'),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text('00/00/00'),
+            trailing: Text('0,00 BTC'),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text('00/00/00'),
+            trailing: Text('0,00 BTC'),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text('00/00/00'),
+            trailing: Text('0,00 BTC'),
+          ),
+        ),
+      ],
     );
-   }
+  }
 }
-

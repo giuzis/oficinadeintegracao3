@@ -43,34 +43,35 @@ class _MyHomePageState extends State<MyHomePage>
         title: Text("Bluber"), //título da app
       ),
 
-        // drawer é o "menu" onde tem o perfil do usuário e outras coisinhas
-        drawer: Drawer(
-          // o widget "column" permite colocar vários widgets um em cima do outro (ou embaixo dependendo do ponto de vista)
-          child: Column(
-            // nesse caso coloquei as funções _bannerDrawer e _bannerList que retornam os widgets
-            children: <Widget>[
-              _bannerDrawer(),
-              _bannerList(),
-            ],
-          ),
+      // drawer é o "menu" onde tem o perfil do usuário e outras coisinhas
+      drawer: Drawer(
+        // o widget "column" permite colocar vários widgets um em cima do outro (ou embaixo dependendo do ponto de vista)
+        child: Column(
+          // nesse caso coloquei as funções _bannerDrawer e _bannerList que retornam os widgets
+          children: <Widget>[
+            _bannerDrawer(),
+            _bannerList(),
+          ],
         ),
-        // com tabview definimos o que será mostrado em cada tab
-        body: _googleMap1(context),
+      ),
+      // com tabview definimos o que será mostrado em cada tab
+      body: _googleMap1(context),
 
-        // é o botão que leva a outra página (nesse caso)
-        floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: Colors.blueGrey,
-          icon: Icon(Icons.directions_bike),
-          label: Text('Quero pedalar!'),
-          onPressed: () {
-            BluetoothRequest();
-            getBluetoothState();
-            //print(_bluetoothState);
-            //scan();
-          },),
+      // é o botão que leva a outra página (nesse caso)
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.blueGrey,
+        icon: Icon(Icons.directions_bike),
+        label: Text('Quero pedalar!'),
+        onPressed: () {
+          // BluetoothRequest();
+          // getBluetoothState();
+          //print(_bluetoothState);
+          scan();
+        },
+      ),
       // com tabview definimos o que será mostrado em cada tab
       // é o botão que leva a outra página (nesse caso)
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -130,7 +131,8 @@ class _MyHomePageState extends State<MyHomePage>
       ),
     );
   }
-  //Funções do Bluetooth - To do 
+
+  //Funções do Bluetooth - To do
   //Variáveis
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
   StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
@@ -138,34 +140,37 @@ class _MyHomePageState extends State<MyHomePage>
   bool isDiscovering;
 
   //Pede para ligar o bluetooth
-  Future BluetoothRequest() async { // async lambda seems to not working
+  Future BluetoothRequest() async {
+    // async lambda seems to not working
     await FlutterBluetoothSerial.instance.requestEnable();
   }
 
   // Pega o status atual do bluetooth
   Future getBluetoothState() async {
     FlutterBluetoothSerial.instance.state.then((state) {
-      setState(() { _bluetoothState = state; });
+      setState(() {
+        _bluetoothState = state;
+      });
     });
     print(_bluetoothState);
     bluetoothDiscovery();
   }
 
   void bluetoothDiscovery() {
-
     int index = 0;
-    
-    _streamSubscription = FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
-      setState(() { 
+
+    _streamSubscription =
+        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
+      setState(() {
         results.add(r);
-        index=index+1;
+        index = index + 1;
       });
     });
 
-    if(results[index].device.address == '20:16:07:25:05:13'){
+    if (results[index].device.address == '20:16:07:25:05:13') {
       print('Descobri o HC-05');
       bluetoothConection(results[index].device.address);
-    }  
+    }
 
     // _streamSubscription.onDone(() {
     //   setState(() { isDiscovering = false; });
@@ -173,26 +178,25 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   Future bluetoothConection(String address) async {
-      // Some simplest connection :F
-      try {
-          BluetoothConnection connection = await BluetoothConnection.toAddress(address);
-          print('Connected to the device');
+    // Some simplest connection :F
+    try {
+      BluetoothConnection connection =
+          await BluetoothConnection.toAddress(address);
+      print('Connected to the device');
 
-          connection.input.listen((Uint8List data) {
-              
-              // connection.output.add(data); // Sending data
+      connection.input.listen((Uint8List data) {
+        // connection.output.add(data); // Sending data
 
-              // if (ascii.decode(data).contains('!')) {
-              //     connection.finish(); // Closing connection
-              //     print('Disconnecting by local host');
-              // }
-          }).onDone(() {
-              print('Disconnected by remote request');
-          });
-      }
-      catch (exception) {
-          print('Cannot connect, exception occured');
-      }
+        // if (ascii.decode(data).contains('!')) {
+        //     connection.finish(); // Closing connection
+        //     print('Disconnecting by local host');
+        // }
+      }).onDone(() {
+        print('Disconnected by remote request');
+      });
+    } catch (exception) {
+      print('Cannot connect, exception occured');
+    }
   }
 
   //Descobrindo Dispositivos
@@ -204,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage>
   //           name: result.device.name ?? '',
   //           address: result.device.address,
   //           type: result.device.type
-  //         ), 
+  //         ),
   //       );
   // }
 
