@@ -170,7 +170,9 @@ class _MyHomePageState extends State<MyHomePage>
         ListTile(
           title: Text("Meu Bluber",
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.normal)),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).pushNamed('/meubluber');
+          },
         )
       ],
     );
