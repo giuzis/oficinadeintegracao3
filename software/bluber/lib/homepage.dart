@@ -12,6 +12,9 @@ import 'dart:typed_data';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
 
+//Chamando Login para pegar dados
+import 'package:bluber/login.dart';
+
 //import 'package:bluber/Bluetooth.dart';
 //import 'package:qrcode_reader/qrcode_reader.dart';
 import 'package:barcode_scan/barcode_scan.dart';
@@ -19,10 +22,6 @@ import 'package:flutter/services.dart';
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
-  // MyHomePage({Key key, this.title}) : super(key: key);
-
-  // final String title;
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -96,7 +95,10 @@ class _MyHomePageState extends State<MyHomePage>
             child: CircleAvatar(
               radius: 40.0,
               // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
-              backgroundImage: AssetImage("images/bebe2.jpeg"),
+              backgroundImage: NetworkImage(
+                imageUrl,
+              ),
+              backgroundColor: Colors.transparent,
             ),
           ),
 
@@ -105,24 +107,10 @@ class _MyHomePageState extends State<MyHomePage>
             padding: EdgeInsets.only(top: 75.0, left: 110.0),
             // nome do usuário
             child: Text(
-              "Enrico Manfron",
+              name,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 25.0,
-                color: Colors.white,
-              ),
-            ),
-          ),
-
-          // padding do e-mail do user
-          Padding(
-            padding: EdgeInsets.only(top: 105.0, left: 110.0),
-            // e-mail do usuário
-            child: Text(
-              "enrico@gmail.com",
-              style: TextStyle(
-                fontWeight: FontWeight.normal,
-                fontSize: 14.0,
                 color: Colors.white,
               ),
             ),
@@ -220,7 +208,9 @@ class _MyHomePageState extends State<MyHomePage>
         ListTile(
           title: Text("Minhas corridas",
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.normal)),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).pushNamed('/corridas');
+          },
         ),
         ListTile(
           title: Text("Minha carteira",
@@ -275,7 +265,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   Future scan() async {
     try {
-      String barcode = await BarcodeScanner.scan().then((barcode) {
+      await BarcodeScanner.scan().then((barcode) {
         setState(() {
           this._barcode = barcode;
         });
