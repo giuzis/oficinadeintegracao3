@@ -7,8 +7,8 @@
 #define GPS_TX 9
 #define GPS_Serial_Baud 9600
 
-#define GSM_RX 7
-#define GSM_TX 8
+#define GSM_RX 6
+#define GSM_TX 7
 #define GSM_Serial_Baud 9600
 
 #define BT_RX 4
