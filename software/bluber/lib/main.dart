@@ -6,6 +6,7 @@ import 'encerrarviagem.dart';
 import 'minhacarteira.dart';
 import 'adicionarcreditos.dart';
 import 'login.dart';
+import 'meubluber.dart';
 
 void main() => runApp(MyApp());
 
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
         '/minhacarteira': (BuildContext context) => MinhaCarteiraPage(),
         '/homepage': (BuildContext context) => MyHomePage(),
         '/addcreditos': (BuildContext context) => AddCreditosPage(),
+        '/meubluber': (BuildContext context) => MeuBluberPage(),
       },
       theme: ThemeData(
         // This is the theme of your application.

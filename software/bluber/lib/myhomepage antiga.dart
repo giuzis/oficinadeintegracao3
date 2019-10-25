@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   TabController _tabController;
 
-  String _barcode = "E";
+  // String _barcode = "E";
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
