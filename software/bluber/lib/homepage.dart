@@ -69,7 +69,8 @@ class _MyHomePageState extends State<MyHomePage>
             //BluetoothRequest();
             //getBluetoothState();
             //print(_bluetoothState);
-            //scan();
+            Navigator.of(context).pushNamed('/encerrarviagem');
+
           },),
       // com tabview definimos o que será mostrado em cada tab
       // é o botão que leva a outra página (nesse caso)

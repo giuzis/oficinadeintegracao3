@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
+// import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
 import 'dart:io';
 
 // QR Code page
@@ -10,18 +13,41 @@ class ViagemEncerradaPage extends StatefulWidget {
 }
 
 class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
+  String _uploadedFileURL;
   File _image;
 
   //Image Picker
-  Future getImage(String page) async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
-
-    setState(() {
-      _image = image;
+  Future getImage(context) async {
+    await (ImagePicker.pickImage(source: ImageSource.camera)).then((image){
+   
+      setState(() {
+          _image = image;
+        });
+        
+        uploadFile();
     });
 
-    Navigator.of(context).pushReplacementNamed(page);
+    Navigator.of(context).pushReplacementNamed('/homepage');
+  
   }
+  
+  Future uploadFile() async {   
+
+   final String fileName = "test";
+ 
+   StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName);    
+   StorageUploadTask uploadTask = storageReference.putFile(_image);
+
+   await uploadTask.onComplete;    
+   print('File Uploaded');    
+   storageReference.getDownloadURL().then((fileURL) {    
+     setState(() {    
+       _uploadedFileURL = fileURL;    
+     });    
+   });    
+
+   print(_uploadedFileURL);
+ }  
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,11 +135,12 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Finalizar avaliação'),
         onPressed: () {
-          getImage('/homepage');
-          // Navigator.of(context).pushReplacementNamed('/');
+          getImage(context);
+          // Navigator.of(context).pushReplacementNamed('/homepage');
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
+
 }
