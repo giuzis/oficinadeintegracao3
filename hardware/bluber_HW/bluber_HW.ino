@@ -1,9 +1,9 @@
 #include "bluber_modules.h"
 
 /* Global vars */
-uint8_t stateflag = 2;              // variavel
+uint8_t stateflag = 0;              // variavel
 bool enable_con = false;
-float lat, lon, old_lat, old_lon;
+float lat, lon, old_lat, old_lon, old_lat_t, old_lon_t;
 
 // -> Gyro vars
 bool flag_gyro = true;
@@ -14,7 +14,7 @@ Motor* motor;
 /* GSM Module */
 SoftwareSerial GSMSerial(6, 7); //SIM800L Tx & Rx is connected to Arduino #3 & #2
 String gsmcheck;
-bool send2server = true;
+bool send2server = false;
 
 void PrepareGSM(){
   GSMSerial.println("AT+SAPBR=1,1");
@@ -84,29 +84,9 @@ char buf;
 
 void verifyCharFromApp(){
   
-  //Serial.println(BTSerial.available());
-  int watchDogCounter=0;
-  while( BTSerial.available() > 2 )
-  {
-      BTSerial.print("Disp\n");
-
+  if( BTSerial.available()){
      buf = BTSerial.read();
-     //Caracter L  para ligar o led
-     Serial.println(buf);
-     if (buf == 'L')
-      digitalWrite(13, HIGH);
-
-     //Caracter D  para desligar o led
-     if (buf == 'D')
-      digitalWrite(13, LOW);
-     
-    //se ficar mais de 5 segundos no loop,sai automaticamente
-    delay(100);
-    watchDogCounter++;
-    if(watchDogCounter >50)
-      break;
   }
-
 }
 
 /* Gyro Module */
@@ -178,7 +158,7 @@ void setup() {
   motor->setSpeed(50);
  
 	/* Bluetooth Module */
-//  BTSerial.begin(9600);
+  BTSerial.begin(9600);
  
   BluetoothInterrupt();// sends a menu to the remote
   attachInterrupt(digitalPinToInterrupt(2), BluetoothInterrupt, CHANGE);
@@ -197,7 +177,7 @@ void setup() {
 
 //  /* GSM Module */
 //  //Begin serial communication with Arduino and SIM800L
-  GSMSerial.begin(GSM_Serial_Baud);
+  //GSMSerial.begin(GSM_Serial_Baud);
   GSMSerial.println("AT"); //Once the handshake test is successful, it will back to OK
   updateSerial();
   GSMSerial.println("AT+SAPBR=3,1,\"APN\",\"tim\""); //Signal quality test, value range is 0-31 , 31 is the best
@@ -215,14 +195,10 @@ void Unavailable(){
 
     // Read BT Data 
     verifyCharFromApp();
-    delay(1000);
     
-    Serial.println("DENTRO");
-
-    Serial.println(buf);
+    //Serial.println(buf);
     //Serial.println(stateflag);
     if(buf == 'L'){ // L to lock
-      Serial.println("Foi!");
       stateflag = 1;
     }
 }
@@ -235,7 +211,7 @@ void LockFromUnavailable(){
   motor->run();
 
   // While does not have an LOW input
-  while(digitalRead(SENSOR_LOCK)); // Check sensors
+  //while(digitalRead(SENSOR_LOCK)); // Check sensors
   
   motor->stop();
    
@@ -251,15 +227,24 @@ void BikeStop(){
   unsigned long currentMillis = millis();
   //Serial.println("Bikestop");
 
-  float lat = -25.440843;
-  float lon = -49.268730;
-
-	// GPS Read location
+//  float lat = -25.440843;
+//  float lon = -49.268730;
+  int lat_t = -25.440843;
+  int lon_t = -49.268730;
+  
+//	// GPS Read location
 //  if (GPS.encode(GPSSerial.read()) == true) {
-//  	GPS.f_get_position(&lat, &lon);
-//  	if(old_lat != lat || old_lon != lon){
+//  	//GPS.f_get_position(&lat, &lon);
+//
+//    // Math to calculate if the measure is equal to old values
+//    lat_t = 10000*lat;
+//    lon_t = 10000*lat;
+//   
+//  	if(old_lat_t != lat_t || old_lon_t != lon_t){
 //  		old_lat = lat;
 //  		old_lon = lon;
+//      old_lat_t = lat;
+//      old_lon_t = lon;
 //  		send2server = true;
 //  	}
 //  }
@@ -268,7 +253,7 @@ void BikeStop(){
   		send2server = false;
       // PrepareGSM
       PrepareGSM();
-      // SendGSM
+     // SendGSM
       SendLat2Server(lat);
       SendLong2Server(lon);
       // End GSM();
@@ -311,6 +296,7 @@ void BikeStop(){
 
   // Read BT Data 
   verifyCharFromApp();
+  //Serial.println(buf);
 
   // Go to BikeWaitRenting if 'R'
   if(buf == 'R')
@@ -371,7 +357,6 @@ void UnlockFromRent(){
   motor->toggleDirection();
 }
 void BikeRented(){
-	char buf;
 	// GPS Read Location
 
 	// GPS Send to the server
@@ -413,13 +398,21 @@ void LockFromEndTrip(){
   motor->toggleDirection();
 }
 
+// Simulating a state machine
+int sf=15;
 void loop() {
-  // Simulating a state machine
 
   if(!(stateflag >=0 && stateflag < 10)){
   	Serial.println("Error - stateflag");
     while(1);
   }
+
+  if(sf != stateflag){
+    sf = stateflag;
+    Serial.println("Variavel:");
+    Serial.println(stateflag); 
+    Serial.println(sf);      
+    }
 
   switch(stateflag){
     
