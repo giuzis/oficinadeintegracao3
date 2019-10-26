@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'functionsdatabase.dart';
 import 'dart:async';
 
 class LoginPage extends StatefulWidget {
@@ -10,33 +10,27 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-  //Variáveis usadas no sign in + autenticação
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+//Variáveis usadas no sign in + autenticação
+final GoogleSignIn googleSignIn = GoogleSignIn();
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Variáveis usadas para enviar dados ao DB
-  final databaseReference = FirebaseDatabase.instance.reference();
+// Variáveis usadas para enviar dados ao DB
+final databaseReference = FirebaseDatabase.instance.reference();
 
-
-  //Dados dos usuários
-  String name;
-  String email;
-  String imageUrl; 
-
-class _LoginPageState extends State<LoginPage> {  
+class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
       child: Center(
         child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              FlutterLogo(size: 150),
-              SizedBox(height: 50),
-              _signInButton()
-            ],
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            FlutterLogo(size: 150),
+            SizedBox(height: 50),
+            _signInButton()
+          ],
           // height: 60,
           // width: 400,
           // decoration: BoxDecoration(
@@ -79,22 +73,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _signInButton() {
-
-      return OutlineButton(
+    return OutlineButton(
       splashColor: Colors.grey,
       onPressed: () {
         signInWithGoogle().whenComplete(() {
-          // createRecord();
           Navigator.of(context).pushReplacementNamed('/homepage');
-      // Navigator.of(context).push(
-      //   MaterialPageRoute(
-      //     builder: (context) {
-      //       return FirstScreen();
-      //     },
-      //   ),
-      // );
-    });
-
+        });
       },
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
       highlightElevation: 0,
@@ -120,7 +104,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-
   }
 }
 
@@ -141,12 +124,12 @@ Future<String> signInWithGoogle() async {
   assert(user.displayName != null);
   assert(user.photoUrl != null);
 
-  name = user.displayName;
-  email = user.email;
-  imageUrl = user.photoUrl;
+  String name = user.displayName;
+  String email = user.email;
+  String imageUrl = user.photoUrl;
 //Pega apenas o primeiro nome da pessoa
   if (name.contains(" ")) {
-   name = name.substring(0, name.indexOf(" "));
+    name = name.substring(0, name.indexOf(" "));
   }
 
   assert(!user.isAnonymous);
@@ -155,32 +138,13 @@ Future<String> signInWithGoogle() async {
   final FirebaseUser currentUser = await _auth.currentUser();
   assert(user.uid == currentUser.uid);
 
-  // Firestore.instance
-  //   .collection('users')
-  //   .add({
-  //     "name": 'Marcelle',
-  //     "email": 'email@gmail.com'
-  // });
+  UserData(name, email, null);
 
   return 'signInWithGoogle succeeded: $user';
 }
 
-void signOutGoogle() async{
+void signOutGoogle() async {
   await googleSignIn.signOut();
 
   print("User Sign Out");
 }
-
-// Funções utilizadas para enviar dados ao DB
-//Função para enviar dados ao Real time database
-void createRecord(){
-  databaseReference.child("1").set({
-    'name': name,
-    'email': email
-  });
-  databaseReference.child("2").set({
-    'name': 'Marcelle',
-    'email': 'qualquercosia@gmail.com'
-  });
-}
-

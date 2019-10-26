@@ -11,10 +11,9 @@ import 'package:bluber/Bluetooth.dart';
 //Chamando Login para pegar dados
 import 'package:bluber/login.dart';
 
-//import 'package:bluber/Bluetooth.dart';
-//import 'package:qrcode_reader/qrcode_reader.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
+import 'functionsdatabase.dart';
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -91,25 +90,26 @@ class _MyHomePageState extends State<MyHomePage>
           // padding ajuda a alocar os widgets no lugar que queremos
 
           // padding da imagem do user
-          Padding(
-            padding: EdgeInsets.only(
-                top: 55.0, left: 10.0), // define as coordenadas do widget
-            child: CircleAvatar(
-              radius: 40.0,
-              // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
-              backgroundImage: NetworkImage(
-                imageUrl,
-              ),
-              backgroundColor: Colors.transparent,
-            ),
-          ),
+          // Padding(
+          //   padding: EdgeInsets.only(
+          //       top: 55.0, left: 10.0), // define as coordenadas do widget
+          //   child: CircleAvatar(
+          //     radius: 40.0,
+          //     // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
+          //     backgroundImage: NetworkImage(
+          //       imageUrl,
+          //     ),
+          //     backgroundColor: Colors.transparent,
+          //   ),
+          // ),
 
           // padding do nome do user
           Padding(
             padding: EdgeInsets.only(top: 75.0, left: 110.0),
             // nome do usuário
             child: Text(
-              name,
+              'Giuliana',
+              //UserData.getName(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 25.0,
