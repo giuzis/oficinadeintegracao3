@@ -3,8 +3,13 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
+import 'dart:convert' show utf8;
 
-
+//Variáveis de Transição do Bluetooth
+String lock = 'L';      //Fechar a trava da Bike
+String unlock = 'U';    //Abrir a trava
+String waitRent = 'R'; //Quando alguém ler o QRCode esse sinal deve ser enviado
+String endTrip = 'E';   //Encerra a viagem
 
 class Bluetooth extends StatefulWidget {
   @override
@@ -19,6 +24,10 @@ class _BlueetothState extends State<Bluetooth> {
   List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
   bool Discovered = false;
   String HC05Adress = '20:16:07:25:05:13';
+  
+  //Variáveis de conexão
+  BluetoothConnection _connection;
+  bool isConnected = false;
 
   
   @override
@@ -43,21 +52,27 @@ class _BlueetothState extends State<Bluetooth> {
               }
             },
           ),
+          RaisedButton(
+            child: Text('Enviar U'),
+            onPressed: () {
+              _sendMessage('U');
+            },
+          ),
         ],
       )
     );
   }
 
+  //Pega o status do bluetooth
    Future getBluetoothState() async {
     FlutterBluetoothSerial.instance.state.then((state) {
       setState(() { _bluetoothState = state; });
-      print(_bluetoothState);
-      bluetoothDiscovery();
+      
     });
   }
 
+  //Descobre os dispositivos de Bluetooth
   void bluetoothDiscovery() {
-    
     _streamSubscription = FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
       setState(() { 
         results.add(r);
@@ -68,10 +83,7 @@ class _BlueetothState extends State<Bluetooth> {
     for(int i=0;i<results.length;i++){
       if(results[i].device.address == HC05Adress){
         print('Descobri o HC-05');
-        
-        _streamSubscription.onDone(() {
           setState(() { Discovered = true; });
-        });
       }
     }
   }
@@ -86,23 +98,46 @@ class _BlueetothState extends State<Bluetooth> {
   Future bluetoothConection() async {
       // Some simplest connection :F
       try {
-          BluetoothConnection connection = await BluetoothConnection.toAddress(HC05Adress);
-          print('Connected to the device');
+          await BluetoothConnection.toAddress(HC05Adress)
+          .then((connection){
+              print('Connected to the device');
 
-          connection.input.listen((Uint8List data) {
-              
-              // connection.output.add(data); // Sending data
+              setState(() {
+                _connection = connection;
+                isConnected = true;
+              });
 
-              // if (ascii.decode(data).contains('!')) {
-              //     connection.finish(); // Closing connection
-              //     print('Disconnecting by local host');
-              // }
-          }).onDone(() {
-              print('Disconnected by remote request');
           });
+            
+            // connection.input.listen((Uint8List data) {
+            // }).onDone(() {
+            //   print('Disconnected by remote request');
+            // });
       }
       catch (exception) {
           print('Cannot connect, exception occured');
       }
     }
+
+  //Envia mensagem
+  void _sendMessage(String text) async {
+    text = text.trim();
+
+    if (text.length > 0)  {
+      try {
+        print('Enviando texto: '+ text);
+        _connection.output.add(utf8.encode(text + "\r\n"));
+        await _connection.output.allSent;
+      }
+      catch (e) {
+        // Ignore error, but notify state
+        setState(() {});
+      }
+    }
+  }
+
+  //Interpreta as mensagens do servidor e envia msg
+  void serverMessages(){
+
+  }
   }
