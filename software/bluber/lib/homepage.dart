@@ -50,6 +50,10 @@ class _MyHomePageState extends State<MyHomePage>
           children: <Widget>[
             _bannerDrawer(),
             _bannerList(),
+            Padding(
+              padding: EdgeInsets.only(top: 380),
+              child: _signOutButton(),
+            )
           ],
         ),
       ),
@@ -65,9 +69,11 @@ class _MyHomePageState extends State<MyHomePage>
           // BluetoothRequest();
           // getBluetoothState();
           //print(_bluetoothState);
+          //Navigator.of(context).pushNamed('/encerrarviagem');
           scan();
         },
       ),
+
       // com tabview definimos o que será mostrado em cada tab
       // é o botão que leva a outra página (nesse caso)
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -286,5 +292,23 @@ class _MyHomePageState extends State<MyHomePage>
     } catch (e) {
       setState(() => this._barcode = 'Error desconocido : $e');
     }
+  }
+
+  Widget _signOutButton() {
+    return ListTile(
+      leading: Icon(Icons.power_settings_new),
+      title: Text("Sair da conta",
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.normal, color: Colors.grey)),
+      onTap: () {
+        signOutGoogle();
+        Navigator.of(context).pushReplacementNamed('/');
+      },
+    );
+  }
+
+  void signOutGoogle() async {
+    await googleSignIn.signOut();
+    print("User Sign Out");
   }
 }
