@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'homepage.dart';
 import 'emviagempage.dart';
-import 'novabluber.dart';
 import 'encerrarviagem.dart';
 import 'minhacarteira.dart';
 import 'adicionarcreditos.dart';
 import 'login.dart';
 import 'meubluber.dart';
 import 'Bluetooth.dart';
+import 'historicobluber.dart';
+import 'cadastronovobluber.dart';
+import 'historicocorridas.dart';
 
 void main() => runApp(MyApp());
 
@@ -21,12 +23,14 @@ class MyApp extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         '/emviagem': (BuildContext context) => EmViagemPage(),
         '/login': (BuildContext context) => LoginPage(),
-        '/novabluber': (BuildContext context) => NovaBluberPage(),
+        '/novobluber': (BuildContext context) => NovoBluberPage(),
+        '/historicobluber': (BuildContext context) => HistoricoBluberPage(),
         '/encerrarviagem': (BuildContext context) => ViagemEncerradaPage(),
         '/minhacarteira': (BuildContext context) => MinhaCarteiraPage(),
         '/homepage': (BuildContext context) => MyHomePage(),
         '/addcreditos': (BuildContext context) => AddCreditosPage(),
         '/meubluber': (BuildContext context) => MeuBluberPage(),
+        '/corridas': (BuildContext context) => HistoricoCorridasPage(),
       },
       theme: ThemeData(
         // This is the theme of your application.
