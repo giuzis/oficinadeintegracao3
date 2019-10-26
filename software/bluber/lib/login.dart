@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
+  //Variáveis usadas no sign in + autenticação
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  //Dados dos usuários
+  // Variáveis usadas para enviar dados ao DB
+  final databaseReference = FirebaseDatabase.instance.reference();
 
+
+  //Dados dos usuários
   String name;
   String email;
-  String imageUrl;  
-
+  String imageUrl; 
 
 class _LoginPageState extends State<LoginPage> {  
   @override
@@ -78,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
       splashColor: Colors.grey,
       onPressed: () {
         signInWithGoogle().whenComplete(() {
+          // createRecord();
           Navigator.of(context).pushReplacementNamed('/homepage');
       // Navigator.of(context).push(
       //   MaterialPageRoute(
@@ -117,6 +124,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+//Funções da autenticação - sign in com o gmail
 Future<String> signInWithGoogle() async {
   final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
   final GoogleSignInAuthentication googleSignInAuthentication =
@@ -136,6 +144,10 @@ Future<String> signInWithGoogle() async {
   name = user.displayName;
   email = user.email;
   imageUrl = user.photoUrl;
+//Pega apenas o primeiro nome da pessoa
+  if (name.contains(" ")) {
+   name = name.substring(0, name.indexOf(" "));
+  }
 
   assert(!user.isAnonymous);
   assert(await user.getIdToken() != null);
@@ -143,13 +155,32 @@ Future<String> signInWithGoogle() async {
   final FirebaseUser currentUser = await _auth.currentUser();
   assert(user.uid == currentUser.uid);
 
-  return 'signInWithGoogle succeeded: $user';
+  // Firestore.instance
+  //   .collection('users')
+  //   .add({
+  //     "name": 'Marcelle',
+  //     "email": 'email@gmail.com'
+  // });
 
+  return 'signInWithGoogle succeeded: $user';
 }
 
 void signOutGoogle() async{
   await googleSignIn.signOut();
 
   print("User Sign Out");
-
 }
+
+// Funções utilizadas para enviar dados ao DB
+//Função para enviar dados ao Real time database
+void createRecord(){
+  databaseReference.child("1").set({
+    'name': name,
+    'email': email
+  });
+  databaseReference.child("2").set({
+    'name': 'Marcelle',
+    'email': 'qualquercosia@gmail.com'
+  });
+}
+
