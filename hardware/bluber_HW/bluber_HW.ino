@@ -3,7 +3,8 @@
 /* Global vars */
 uint8_t stateflag = 0;              // variavel
 bool enable_con = false;
-float lat, lon, old_lat, old_lon, old_lat_t, old_lon_t;
+float lat, lon, old_lat, old_lon;
+int32_t  old_lat_t, old_lon_t;
 
 // -> Gyro vars
 bool flag_gyro = true;
@@ -75,12 +76,12 @@ void SendLong2Server(float GPS_long){
 
 /* GPS Module */
 TinyGPS GPS;
-SoftwareSerial GPSSerial(GPS_RX, GPS_TX);
+SoftwareSerial GPSSerial(9, 8);
 
 /* Bluetooth Module */
 SoftwareSerial BTSerial(4,5);
 //int led =13;
-char buf;
+char buf='\0';
 
 void verifyCharFromApp(){
   
@@ -120,20 +121,14 @@ const int speakerPin = 13;                                  //suggest PWM pin, d
 void BluetoothInterrupt(){  
   switch (digitalRead(2)) {// watch the interrupt pin (UNO)
   case LOW:// lost connection
-//     digitalWrite(led,LOW);// shows an external LED for connection status
      enable_con = false;
      Serial.println("Desconectado");
      break;
   case HIGH:// got connection
-//     digitalWrite(led,HIGH);
-     // Enable the connection flag
      enable_con = true;
      Serial.println("Connectado");                                        
      break;
   }
-
-       enable_con = true;
-
 
 };
 void setup() {
@@ -173,11 +168,11 @@ void setup() {
   initializeMovedRecord();    
 
   /* GPS Module */
-//  GPSSerial.begin(GPS_Serial_Baud);
+//  GPSSerial.begin(9600);
 
 //  /* GSM Module */
 //  //Begin serial communication with Arduino and SIM800L
-  //GSMSerial.begin(GSM_Serial_Baud);
+//  GSMSerial.begin(GSM_Serial_Baud);
   GSMSerial.println("AT"); //Once the handshake test is successful, it will back to OK
   updateSerial();
   GSMSerial.println("AT+SAPBR=3,1,\"APN\",\"tim\""); //Signal quality test, value range is 0-31 , 31 is the best
@@ -211,7 +206,7 @@ void LockFromUnavailable(){
   motor->run();
 
   // While does not have an LOW input
-  //while(digitalRead(SENSOR_LOCK)); // Check sensors
+ // while(digitalRead(SENSOR_LOCK)); // Check sensors
   
   motor->stop();
    
@@ -225,78 +220,77 @@ void BikeStop(){
 
   // Get new timer for each round of the loop
   unsigned long currentMillis = millis();
-  //Serial.println("Bikestop");
-
-//  float lat = -25.440843;
-//  float lon = -49.268730;
-  int lat_t = -25.440843;
-  int lon_t = -49.268730;
-  
-//	// GPS Read location
-//  if (GPS.encode(GPSSerial.read()) == true) {
-//  	//GPS.f_get_position(&lat, &lon);
+  int32_t lat_t,lon_t;
+ 
+//  while (GPSSerial.available()) {
+//  	// GPS Read location
+//    if (GPS.encode(GPSSerial.read()) == 1) {
+//      
+//    	GPS.f_get_position(&lat, &lon);
+////      Serial.print("Latitude:");Serial.println(lat,6);
+////      Serial.print("Longitude:");Serial.println(lon,6);
+//      
+//      // Math to calculate if the measure is equal to old values
+//      lat_t = 10000*lat;
+//      lon_t = 10000*lon;
 //
-//    // Math to calculate if the measure is equal to old values
-//    lat_t = 10000*lat;
-//    lon_t = 10000*lat;
-//   
-//  	if(old_lat_t != lat_t || old_lon_t != lon_t){
-//  		old_lat = lat;
-//  		old_lon = lon;
-//      old_lat_t = lat;
-//      old_lon_t = lon;
-//  		send2server = true;
-//  	}
+//    if(old_lat_t != lat_t || old_lon_t != lon_t){
+//        old_lat_t = lat_t;
+//        old_lon_t = lon_t;
+//    		send2server = true;
+//    	}
+//    }
 //  }
-
-  if(send2server == true){
-  		send2server = false;
-      // PrepareGSM
-      PrepareGSM();
-     // SendGSM
-      SendLat2Server(lat);
-      SendLong2Server(lon);
-      // End GSM();
-      EndGSM();
-  }
-
-  if(flag_gyro == true){
-
-    // start reading the MPU on a regular basis (if outside of the upfront settle time) and then check to see if device has been stolen after each reading
-    if (((currentMillis - previousMPUmillis) > readMPUinterval) && (isStolen == false) && (currentMillis > (endOfSetupMillis + upfrontSettleTime))){
+  
+//  if(send2server == true){
+//      Serial.println("Envia para o server");
+//  		send2server = false;
+////      // PrepareGSM
+////      PrepareGSM();
+////      // SendGSM
+////      SendLat2Server(lat);
+////      SendLong2Server(lon);
+////      // End GSM();
+////      EndGSM();
+//  }
+//
+//  if(flag_gyro == true){
+//
+//    // start reading the MPU on a regular basis (if outside of the upfront settle time) and then check to see if device has been stolen after each reading
+//    if (((currentMillis - previousMPUmillis) > readMPUinterval) && (isStolen == false) && (currentMillis > (endOfSetupMillis + upfrontSettleTime))){
+//      
+//      // read the MPU and process the data
+//      checkPositionChangeAndShiftRecord();
+//      //printMovedRecord();                                                              
+//      isStolen = checkIfStolen();
+//      previousMPUmillis = currentMillis;     //reset timer
+//    } 
+//
+//    // Send Alarm notification
+//    if (isStolen == true){
+//      Serial.println("ROBARO");      
+////      // PrepareGSM
+////      PrepareGSM();
+////      // SendGSM
+////      SendAlarm2Server();
+////      // End GSM();
+////      EndGSM();
+//      }
+//  }
       
-      // read the MPU and process the data
-      checkPositionChangeAndShiftRecord();
-      printMovedRecord();                                                              
-      isStolen = checkIfStolen();
-      previousMPUmillis = currentMillis;     //reset timer
-    } 
 
-    // Send Alarm notification
-    if (isStolen == true){
-      Serial.println("ROBARO");      
-      // PrepareGSM
-      PrepareGSM();
-      // SendGSM
-      SendAlarm2Server();
-      // End GSM();
-      EndGSM();
-      }
-  }
-      
-
-  // Enable Buzzer
-  // take action if stolen
-  if (isStolen == true) {
-
-    speakerState = true;
-    flag_gyro = false;
-    speakerPlayBuzzer(speakerState);                                               //see comment above about the speaker play function
-  }
+//  // Enable Buzzer
+//  // take action if stolen
+//  if (isStolen == true) {
+//    speakerState = true;
+//    flag_gyro = false;
+//    speakerPlayBuzzer(speakerState);                                               //see comment above about the speaker play function
+//  }
 
   // Read BT Data 
   verifyCharFromApp();
-  //Serial.println(buf);
+  if(buf != '\0')
+    Serial.println(buf);
 
   // Go to BikeWaitRenting if 'R'
   if(buf == 'R')
@@ -313,12 +307,14 @@ void UnlockFromOwner(){
   // Owner unlocking means to shutoff the alarm - If Exists
   isStolen = false;
   flag_gyro = true;
-  
+  speakerState = false;
+  speakerPlayBuzzer(false);                                               //see comment above about the speaker play function
+
   // Motor movement to unlock the mechanism
   motor->run();
 
   // While does not have an LOW input
-  while(digitalRead(SENSOR_UNLOCK)); // Check sensors
+  //while(digitalRead(SENSOR_UNLOCK)); // Check sensors
   
   motor->stop();
    
@@ -464,12 +460,12 @@ int _delay = 0;
 void speakerPlayBuzzer(boolean isSpeakerOn) {
   if (isSpeakerOn == true) {
 
-    if(_delay < 20){
+    if(_delay < 5000){
       //Serial.println("BAIXO");
       tone(speakerPin,500);
         _delay++;
     }
-    else if(_delay >= 20 && _delay  < 50){
+    else if(_delay >= 5000 && _delay  < 10000){
       //Serial.println("ALTO");
       tone(speakerPin,800);
       _delay++;
@@ -480,8 +476,7 @@ void speakerPlayBuzzer(boolean isSpeakerOn) {
   }
   else //isSpeakerOn == false
   {
-    digitalWrite(13,LOW);
-    digitalWrite(speakerPin, LOW);
+    noTone(speakerPin);
   } //end if isSpeakerOn
   
 } //end speakerPlayBuzzer
