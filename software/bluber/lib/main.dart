@@ -7,6 +7,7 @@ import 'minhacarteira.dart';
 import 'adicionarcreditos.dart';
 import 'login.dart';
 import 'meubluber.dart';
+import 'Bluetooth.dart';
 
 void main() => runApp(MyApp());
 
@@ -40,7 +41,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',
       ),
-      home: LoginPage(),
+      // home: Bluetooth(),
+      home: MyHomePage(),
     );
   }
 }
