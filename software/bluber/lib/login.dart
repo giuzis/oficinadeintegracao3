@@ -1,22 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'functionsdatabase.dart';
-import 'Bluetooth.dart';
-import 'dart:async';
+import 'userdata.dart';
+import 'signinsignout.dart';
 // import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
-
 
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
-
-//Variáveis usadas no sign in + autenticação
-final GoogleSignIn googleSignIn = GoogleSignIn();
-final FirebaseAuth _auth = FirebaseAuth.instance;
 
 // Variáveis usadas para enviar dados ao DB
 final databaseReference = FirebaseDatabase.instance.reference();
@@ -24,7 +16,12 @@ final databaseReference = FirebaseDatabase.instance.reference();
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
-    Bluetooth().getBluetoothState();
+    signInWithGoogle().whenComplete(() {
+      // createRecord();
+      wallet = '2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD';
+      cadastro(name, email, wallet);
+      Navigator.of(context).pushReplacementNamed('/homepage');
+    });
 
     return Container(
       color: Colors.white,
@@ -35,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             FlutterLogo(size: 150),
             SizedBox(height: 50),
-            _signInButton()
+            //_signInButton()
           ],
           // height: 60,
           // width: 400,
@@ -116,59 +113,27 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   //Chama  a função de cadastrar
-   cadastro(String _name, String _email, String _wallet) async {
+  cadastro(String _name, String _email, String _wallet) async {
     String function = "createUser";
     // String name = "name="+ _name;
     String email = "email=" + _email;
     String wallet = "wallet_id=" + _wallet;
 
-    print("Cadastrando -  name: " + _name + "email: " + _email + "wallet" + _wallet);
+    print("Cadastrando -  name: " +
+        _name +
+        "email: " +
+        _email +
+        "wallet" +
+        _wallet);
 
-    String http = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + email + '&' + wallet;
+    String http = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        email +
+        '&' +
+        wallet;
 
     return await get(http);
-        //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
+    //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
-}
-
-//Funções da autenticação - sign in com o gmail
-Future<String> signInWithGoogle() async {
-  final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
-  final GoogleSignInAuthentication googleSignInAuthentication =
-      await googleSignInAccount.authentication;
-
-  final AuthCredential credential = GoogleAuthProvider.getCredential(
-    accessToken: googleSignInAuthentication.accessToken,
-    idToken: googleSignInAuthentication.idToken,
-  );
-
-  final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
-
-  assert(user.email != null);
-  assert(user.displayName != null);
-  assert(user.photoUrl != null);
-
-  String name = user.displayName;
-  String email = user.email;
-  String imageUrl = user.photoUrl;
-//Pega apenas o primeiro nome da pessoa
-  if (name.contains(" ")) {
-    name = name.substring(0, name.indexOf(" "));
-  }
-
-  assert(!user.isAnonymous);
-  assert(await user.getIdToken() != null);
-
-  final FirebaseUser currentUser = await _auth.currentUser();
-  assert(user.uid == currentUser.uid);
-
-  UserData(name, email, null);
-
-  return 'signInWithGoogle succeeded: $user';
-}
-
-void signOutGoogle() async {
-  await googleSignIn.signOut();
-
-  print("User Sign Out");
 }

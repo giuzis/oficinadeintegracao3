@@ -3,8 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:bluber/login.dart';
-
+import 'userdata.dart';
 
 class MinhaCarteiraPage extends StatefulWidget {
   @override
@@ -18,17 +17,14 @@ class Wallet {
   Wallet({this.saldo, this.walletID});
 
   factory Wallet.fromJson(Map<String, dynamic> json) {
-    return Wallet(
-      saldo: json['userId'],
-      walletID: json['wallet']
-    );
+    return Wallet(saldo: json['userId'], walletID: json['wallet']);
   }
 }
 
 class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
   Float saldo;
   String walletID;
-  
+
   @override
   Widget build(BuildContext context) {
     pegaCarteira(email);
@@ -62,13 +58,16 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
     );
   }
 
-//Google functions - função que retorna a carteira do usuário 
+//Google functions - função que retorna a carteira do usuário
   Future pegaCarteira(String _email) async {
     String function = "getUserWallet";
     String email = "email=" + _email;
 
     print(_email);
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+ function + '?' + email;
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        email;
 
     var response = await http.get(url);
 
@@ -81,20 +80,25 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
 
     print(saldo);
     print(walletID);
-    
   }
 
 // Função que retorna o saldo da carteira do usuário
-Future<String> saldoCarteira() async {
+  Future<String> saldoCarteira() async {
     String function = "Litecoin_Transaction";
     String ammount = "ammount=0.001";
     String walletTo = "wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD";
     String walletFrom = "wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij";
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + ammount + '&'  + walletTo + '&' + walletFrom;
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        ammount +
+        '&' +
+        walletTo +
+        '&' +
+        walletFrom;
 
-      await http.get(url);
-        //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
+    await http.get(url);
+    //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
-
 }

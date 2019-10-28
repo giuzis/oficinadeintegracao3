@@ -10,16 +10,15 @@ import 'package:location/location.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
 import 'dart:convert' show utf8;
+import 'signinsignout.dart';
 
 //Chamando Login para pegar dados
-import 'package:bluber/login.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+import 'userdata.dart';
 import 'package:http/http.dart' as http;
-
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
-import 'functionsdatabase.dart';
+// import 'functionsdatabase.dart';
 
 //Variáveis de Transição do Bluetooth
 String lock = 'L'; //Fechar a trava da Bike
@@ -51,7 +50,6 @@ class _MyHomePageState extends State<MyHomePage>
   bool isConnected = false;
   bool bluetoothStateBool = false;
 
-
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
@@ -66,10 +64,10 @@ class _MyHomePageState extends State<MyHomePage>
       drawer: Drawer(
         // o widget "column" permite colocar vários widgets um em cima do outro (ou embaixo dependendo do ponto de vista)
         child: Column(
-          // nesse caso coloquei as funções _bannerDrawer e _bannerList que retornam os widgets
+          // nesse caso coloquei as funções _drawerBanner e _drawerList que retornam os widgets
           children: <Widget>[
-            _bannerDrawer(),
-            _bannerList(),
+            _drawerBanner(),
+            _drawerList(),
             Padding(
               padding: EdgeInsets.only(top: 380),
               child: _signOutButton(),
@@ -114,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   // widget que define o banner do drawer
-  Widget _bannerDrawer() {
+  Widget _drawerBanner() {
     // container para mostrar dados do perfil do usuário
     // (container é um bloco onde vc pode colocar vários widgets dentro)
     return Container(
@@ -128,29 +126,41 @@ class _MyHomePageState extends State<MyHomePage>
           // padding ajuda a alocar os widgets no lugar que queremos
 
           // padding da imagem do user
-          // Padding(
-          //   padding: EdgeInsets.only(
-          //       top: 55.0, left: 10.0), // define as coordenadas do widget
-          //   child: CircleAvatar(
-          //     radius: 40.0,
-          //     // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
-          //     backgroundImage: NetworkImage(
-          //       imageUrl,
-          //     ),
-          //     backgroundColor: Colors.transparent,
-          //   ),
-          // ),
+          Padding(
+            padding: EdgeInsets.only(
+                top: 55.0, left: 10.0), // define as coordenadas do widget
+            child: CircleAvatar(
+              radius: 40.0,
+              // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
+              backgroundImage: NetworkImage(
+                imageUrl,
+              ),
+              backgroundColor: Colors.transparent,
+            ),
+          ),
 
           // padding do nome do user
           Padding(
             padding: EdgeInsets.only(top: 75.0, left: 110.0),
             // nome do usuário
             child: Text(
-              'Giuliana',
+              name,
               //UserData.getName(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 25.0,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 105.0, left: 110.0),
+            // nome do usuário
+            child: Text(
+              email,
+              //UserData.getName(),
+              style: TextStyle(
+                fontSize: 15.0,
                 color: Colors.white,
               ),
             ),
@@ -161,7 +171,7 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   // widget que define a lista do drawer
-  Widget _bannerList() {
+  Widget _drawerList() {
     return ListView(
       shrinkWrap: true,
       children: <Widget>[
@@ -197,10 +207,17 @@ class _MyHomePageState extends State<MyHomePage>
     String walletTo = "wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD";
     String walletFrom = "wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij";
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + ammount + '&'  + walletTo + '&' + walletFrom;
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        ammount +
+        '&' +
+        walletTo +
+        '&' +
+        walletFrom;
 
     var data = await http.get(url);
-        //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
+    //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
 
   // modificar essas duas funções para incluir o mapa
@@ -272,11 +289,6 @@ class _MyHomePageState extends State<MyHomePage>
         Navigator.of(context).pushReplacementNamed('/');
       },
     );
-  }
-
-  void signOutGoogle() async {
-    await googleSignIn.signOut();
-    print("User Sign Out");
   }
 
   //Bluetooth
