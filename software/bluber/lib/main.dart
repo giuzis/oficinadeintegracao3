@@ -45,8 +45,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',
       ),
-      home: Bluetooth(),
-      // home: MyHomePage(),
+      // home: Bluetooth(),
+      home: LoginPage(),
     );
   }
 }

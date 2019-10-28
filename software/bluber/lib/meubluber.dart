@@ -22,7 +22,7 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
         backgroundColor: Colors.grey,
         label: Text('Adicionar novo Bluber'),
         onPressed: () {
-          scan();
+          // scan();
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

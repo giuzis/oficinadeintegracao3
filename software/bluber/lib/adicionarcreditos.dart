@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 
 class AddCreditosPage extends StatefulWidget {
   @override
@@ -229,6 +231,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
             ),
             onPressed: () {
               _neverSatisfied();
+              // adicionarCredito(_pressed);
               //Navigator.of(context).pushReplacementNamed('/minhacarteira');
             },
           ),
@@ -262,4 +265,17 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
     },
   );
 }
+
+  //Google functions - Adicionar créditos na carteira
+  Future adicionarCredito() async {
+    String function = "Litecoin_Transaction";
+    String ammount = "ammount=0.001";
+    String walletTo = "wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD";
+    String walletFrom = "wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij";
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + ammount + '&'  + walletTo + '&' + walletFrom;
+
+    var data = await http.get(url);
+        //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
+  }
 }

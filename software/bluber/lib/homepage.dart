@@ -10,6 +10,9 @@ import 'package:bluber/Bluetooth.dart';
 
 //Chamando Login para pegar dados
 import 'package:bluber/login.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:http/http.dart' as http;
+
 
 //import 'package:bluber/Bluetooth.dart';
 //import 'package:qrcode_reader/qrcode_reader.dart';
@@ -27,6 +30,7 @@ class _MyHomePageState extends State<MyHomePage>
   GoogleMapController mapController;
   Location location = Location();
   String _barcode = "";
+
 
   // aqui no build que tudo acontece
   @override
@@ -62,11 +66,12 @@ class _MyHomePageState extends State<MyHomePage>
         icon: Icon(Icons.directions_bike),
         label: Text('Quero pedalar!'),
         onPressed: () {
+            transacao();
           // BluetoothRequest();
           // getBluetoothState();
           //print(_bluetoothState);
           //Navigator.of(context).pushNamed('/encerrarviagem');
-          scan();
+          // scan();
         },
       ),
 
@@ -150,6 +155,19 @@ class _MyHomePageState extends State<MyHomePage>
         )
       ],
     );
+  }
+
+  //Google functions
+  Future transacao() async {
+    String function = "Litecoin_Transaction";
+    String ammount = "ammount=0.001";
+    String walletTo = "wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD";
+    String walletFrom = "wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij";
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + ammount + '&'  + walletTo + '&' + walletFrom;
+
+    var data = await http.get(url);
+        //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
 
   // modificar essas duas funções para incluir o mapa

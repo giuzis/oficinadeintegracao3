@@ -4,6 +4,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
+// import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -85,6 +88,8 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () {
         signInWithGoogle().whenComplete(() {
           // createRecord();
+          String wallet = '2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD';
+          cadastro(name, email, wallet);
           Navigator.of(context).pushReplacementNamed('/homepage');
       // Navigator.of(context).push(
       //   MaterialPageRoute(
@@ -121,6 +126,21 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
 
+  }
+
+  //Chama  a função de cadastrar
+   cadastro(String _name, String _email, String _wallet) async {
+    String function = "createUser";
+    // String name = "name="+ _name;
+    String email = "email=" + _email;
+    String wallet = "wallet_id=" + _wallet;
+
+    print("Cadastrando -  name: " + _name + "email: " + _email + "wallet" + _wallet);
+
+    String http = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + email + '&' + wallet;
+
+    return await get(http);
+        //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
 }
 
