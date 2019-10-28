@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'functionsdatabase.dart';
+import 'Bluetooth.dart';
 import 'dart:async';
 
 class LoginPage extends StatefulWidget {
@@ -20,6 +21,8 @@ final databaseReference = FirebaseDatabase.instance.reference();
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
+    Bluetooth().getBluetoothState();
+
     return Container(
       color: Colors.white,
       child: Center(

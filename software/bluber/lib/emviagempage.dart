@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'Bluetooth.dart';
 
 //import 'package:slider/slider_button.dart';
 class EmViagemPage extends StatefulWidget {
@@ -14,6 +15,17 @@ class _EmViagemPageState extends State<EmViagemPage> {
   Location location = Location();
 
   Widget _googleMap(BuildContext context) {
+    // Bluetooth().getBluetoothState();
+
+    // if (Bluetooth().bluetoothState.toString().contains('ON')) {
+    //   while (Bluetooth().Discovered != true) {
+    //     Bluetooth().bluetoothDiscovery();
+    //   }
+    // } else {
+    //   Bluetooth().bluetoothRequest();
+    // }
+    //colocar aqui a requisição do servidos e chamar Bluletooth().serverMessage();
+
     return GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
