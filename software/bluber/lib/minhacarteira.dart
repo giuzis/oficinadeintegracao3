@@ -1,4 +1,4 @@
-import 'dart:ffi';
+// import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -97,7 +97,7 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      print('Pasei aqui');
+      print('Passei aqui');
       // se o servidor retornar um response OK, vamos fazer o parse no JSON
       return Wallet.fromJson(json.decode(response.body));
     } else {
@@ -123,6 +123,5 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
         walletFrom;
 
     await http.get(url);
-    //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
 }

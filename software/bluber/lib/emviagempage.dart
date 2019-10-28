@@ -148,6 +148,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
+
 }
 
 // class QrScan extends StatefulWidget {

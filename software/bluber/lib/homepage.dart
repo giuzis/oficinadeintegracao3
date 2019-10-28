@@ -18,9 +18,9 @@ import 'package:http/http.dart' as http;
 
 import 'package:barcode_scan/barcode_scan.dart';
 
-// import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
-// import 'functionsdatabase.dart';
+
 
 //Variáveis de Transição do Bluetooth
 String lock = 'L'; //Fechar a trava da Bike
@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage>
             _drawerBanner(),
             _drawerList(),
             Padding(
-              padding: EdgeInsets.only(top: 380),
+              padding: EdgeInsets.only(top:150),
               child: _signOutButton(),
             )
           ],
@@ -90,10 +90,12 @@ class _MyHomePageState extends State<MyHomePage>
           print('fora ' + bluetoothState.toString());
           if (bluetoothState.toString().contains('ON')) {
             // scan();
+            Navigator.of(context).pushNamed('/emviagem');
           } else {
             bluetoothRequest().then((value) {
               getBluetoothState().then((onValue) {
                 print('DENTRO ' + bluetoothState.toString());
+                Navigator.of(context).pushNamed('/emviagem');
                 if (bluetoothState.toString().contains('ON')) {
                   // scan();
                 }
@@ -255,30 +257,30 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  // Future scan() async {
-  //   try {
-  //     await BarcodeScanner.scan().then((barcode) {
-  //       setState(() {
-  //         this._barcode = barcode;
-  //       });
-  //       print(this._barcode);
-  //       Navigator.of(context).pushReplacementNamed('/emviagem');
-  //     });
-  //   } on PlatformException catch (e) {
-  //     if (e.code == BarcodeScanner.CameraAccessDenied) {
-  //       setState(() {
-  //         this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
-  //       });
-  //     } else {
-  //       setState(() => this._barcode = 'Error desconocido $e');
-  //     }
-  //   } on FormatException {
-  //     setState(() => this._barcode =
-  //         'nulo, el usuario presionó el botón de volver antes de escanear algo)');
-  //   } catch (e) {
-  //     setState(() => this._barcode = 'Error desconocido : $e');
-  //   }
-  // }
+  Future scan() async {
+    try {
+      await BarcodeScanner.scan().then((barcode) {
+        setState(() {
+          this._barcode = barcode;
+        });
+        print(this._barcode);
+        Navigator.of(context).pushReplacementNamed('/emviagem');
+      });
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
+        });
+      } else {
+        setState(() => this._barcode = 'Error desconocido $e');
+      }
+    } on FormatException {
+      setState(() => this._barcode =
+          'nulo, el usuario presionó el botón de volver antes de escanear algo)');
+    } catch (e) {
+      setState(() => this._barcode = 'Error desconocido : $e');
+    }
+  }
 
   Widget _signOutButton() {
     return ListTile(
