@@ -6,7 +6,6 @@ import 'minhacarteira.dart';
 import 'adicionarcreditos.dart';
 import 'login.dart';
 import 'meubluber.dart';
-import 'Bluetooth.dart';
 import 'historicobluber.dart';
 import 'cadastronovobluber.dart';
 import 'historicocorridas.dart';
@@ -14,6 +13,11 @@ import 'historicocorridas.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  //Dados dos usuários
+  String name;
+  String email;
+  String imageUrl;
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

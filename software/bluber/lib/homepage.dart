@@ -3,10 +3,13 @@
     _googleMap1()
     _googleMap2()
 */
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:bluber/Bluetooth.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'dart:async';
+import 'dart:convert' show utf8;
 
 //Chamando Login para pegar dados
 import 'package:bluber/login.dart';
@@ -14,10 +17,15 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:http/http.dart' as http;
 
 
-//import 'package:bluber/Bluetooth.dart';
-//import 'package:qrcode_reader/qrcode_reader.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
+import 'functionsdatabase.dart';
+
+//Variáveis de Transição do Bluetooth
+String lock = 'L'; //Fechar a trava da Bike
+String unlock = 'U'; //Abrir a trava
+String waitRent = 'R'; //Quando alguém ler o QRCode esse sinal deve ser enviado
+String endTrip = 'E'; //Encerra a viagem
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -30,6 +38,18 @@ class _MyHomePageState extends State<MyHomePage>
   GoogleMapController mapController;
   Location location = Location();
   String _barcode = "";
+  //Funções do Bluetooth
+  //Variáveis
+  BluetoothState bluetoothState = BluetoothState.UNKNOWN;
+  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
+  List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
+  bool Discovered = false;
+  String HC05Adress = '20:16:07:25:05:13';
+
+  //Variáveis de conexão
+  BluetoothConnection _connection;
+  bool isConnected = false;
+  bool bluetoothStateBool = false;
 
 
   // aqui no build que tudo acontece
@@ -66,12 +86,24 @@ class _MyHomePageState extends State<MyHomePage>
         icon: Icon(Icons.directions_bike),
         label: Text('Quero pedalar!'),
         onPressed: () {
-            transacao();
-          // BluetoothRequest();
-          // getBluetoothState();
+          getBluetoothState();
+          print('fora ' + bluetoothState.toString());
+          if (bluetoothState.toString().contains('ON')) {
+            scan();
+          } else {
+            bluetoothRequest().then((value) {
+              getBluetoothState().then((onValue) {
+                print('DENTRO ' + bluetoothState.toString());
+                if (bluetoothState.toString().contains('ON')) {
+                  scan();
+                }
+              });
+            });
+          }
+
+          // tBluetoothState();
           //print(_bluetoothState);
           //Navigator.of(context).pushNamed('/encerrarviagem');
-          // scan();
         },
       ),
 
@@ -96,25 +128,26 @@ class _MyHomePageState extends State<MyHomePage>
           // padding ajuda a alocar os widgets no lugar que queremos
 
           // padding da imagem do user
-          Padding(
-            padding: EdgeInsets.only(
-                top: 55.0, left: 10.0), // define as coordenadas do widget
-            child: CircleAvatar(
-              radius: 40.0,
-              // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
-              backgroundImage: NetworkImage(
-                imageUrl,
-              ),
-              backgroundColor: Colors.transparent,
-            ),
-          ),
+          // Padding(
+          //   padding: EdgeInsets.only(
+          //       top: 55.0, left: 10.0), // define as coordenadas do widget
+          //   child: CircleAvatar(
+          //     radius: 40.0,
+          //     // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
+          //     backgroundImage: NetworkImage(
+          //       imageUrl,
+          //     ),
+          //     backgroundColor: Colors.transparent,
+          //   ),
+          // ),
 
           // padding do nome do user
           Padding(
             padding: EdgeInsets.only(top: 75.0, left: 110.0),
             // nome do usuário
             child: Text(
-              name,
+              'Giuliana',
+              //UserData.getName(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 25.0,
@@ -245,4 +278,82 @@ class _MyHomePageState extends State<MyHomePage>
     await googleSignIn.signOut();
     print("User Sign Out");
   }
+
+  //Bluetooth
+  //Pega o status do bluetooth
+  Future getBluetoothState() async {
+    return FlutterBluetoothSerial.instance.state; //.then((state) {
+    // setState(() {
+    //   bluetoothState = state;
+    // });
+
+    // if (bluetoothState.toString().contains('ON')) {
+    //   bluetoothStateBool = true;
+    // } else {
+    //   bluetoothStateBool = false;
+    // }
+    //});
+  }
+
+  //Descobre os dispositivos de Bluetooth
+  void bluetoothDiscovery() {
+    _streamSubscription =
+        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
+      results.add(r);
+    });
+
+    print('Procurando HC-05');
+    for (int i = 0; i < results.length; i++) {
+      if (results[i].device.address == HC05Adress) {
+        bluetoothConection();
+        Discovered = true;
+      }
+    }
+  }
+
+  //Pede para ligar o bluetooth
+  Future bluetoothRequest() async {
+    // async lambda seems to not working
+    await FlutterBluetoothSerial.instance.requestEnable().then((value) {
+      getBluetoothState();
+    });
+  }
+
+  //Conecta ao dispositivo
+  Future bluetoothConection() async {
+    // Some simplest connection :F
+    try {
+      await BluetoothConnection.toAddress(HC05Adress).then((connection) {
+        print('Connected to the device');
+
+        _connection = connection;
+        isConnected = true;
+      });
+
+      // connection.input.listen((Uint8List data) {
+      // }).onDone(() {
+      //   print('Disconnected by remote request');
+      // });
+    } catch (exception) {
+      print('Cannot connect, exception occured');
+    }
+  }
+
+  //Envia mensagem
+  void _sendMessage(String text) async {
+    text = text.trim();
+
+    if (text.length > 0) {
+      try {
+        print('Enviando texto: ' + text);
+        _connection.output.add(utf8.encode(text + "\r\n"));
+        await _connection.output.allSent;
+      } catch (e) {
+        // Ignore error, but notify state
+      }
+    }
+  }
+
+  //Interpreta as mensagens do servidor e envia msg
+  void serverMessages() {}
 }

@@ -1,14 +1,14 @@
  #include<SoftwareSerial.h>
 #include "TinyGPS.h"
 
-SoftwareSerial SerialGPS(8, 9); // RX Arduino - TX Arduino
+SoftwareSerial SerialGPS(9,8); // RX Arduino - TX Arduino
 TinyGPS GPS;
 
 float lat, lon, vel;
 unsigned short sat;
 
 void setup() {
-  SerialGPS.begin(115200);
+  SerialGPS.begin(9600);
   Serial.begin(9600);
 
   Serial.println("Buscando satelites...");
