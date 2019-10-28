@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:barcode_scan/barcode_scan.dart';
+// import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 
 class MeuBluberPage extends StatefulWidget {
@@ -23,6 +23,7 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
         label: Text('Adicionar novo Bluber'),
         onPressed: () {
           // scan();
+          cadastrarBike();
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -73,27 +74,31 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
     );
   }
 
-  Future scan() async {
-    try {
-      await BarcodeScanner.scan().then((barcode) {
-        setState(() {
-          this._barcode = barcode;
-        });
-        print(this._barcode);
-      });
-    } on PlatformException catch (e) {
-      if (e.code == BarcodeScanner.CameraAccessDenied) {
-        setState(() {
-          this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
-        });
-      } else {
-        setState(() => this._barcode = 'Error desconocido $e');
-      }
-    } on FormatException {
-      setState(() => this._barcode =
-          'nulo, el usuario presionó el botón de volver antes de escanear algo)');
-    } catch (e) {
-      setState(() => this._barcode = 'Error desconocido : $e');
-    }
+  // Future scan() async {
+  //   try {
+  //     await BarcodeScanner.scan().then((barcode) {
+  //       setState(() {
+  //         this._barcode = barcode;
+  //       });
+  //       print(this._barcode);
+  //     });
+  //   } on PlatformException catch (e) {
+  //     if (e.code == BarcodeScanner.CameraAccessDenied) {
+  //       setState(() {
+  //         this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
+  //       });
+  //     } else {
+  //       setState(() => this._barcode = 'Error desconocido $e');
+  //     }
+  //   } on FormatException {
+  //     setState(() => this._barcode =
+  //         'nulo, el usuario presionó el botón de volver antes de escanear algo)');
+  //   } catch (e) {
+  //     setState(() => this._barcode = 'Error desconocido : $e');
+  //   }
+  // }
+
+  void cadastrarBike(){
+
   }
 }

@@ -17,6 +17,8 @@ import 'userdata.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:barcode_scan/barcode_scan.dart';
+
+// import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 // import 'functionsdatabase.dart';
 
@@ -87,13 +89,13 @@ class _MyHomePageState extends State<MyHomePage>
           getBluetoothState();
           print('fora ' + bluetoothState.toString());
           if (bluetoothState.toString().contains('ON')) {
-            scan();
+            // scan();
           } else {
             bluetoothRequest().then((value) {
               getBluetoothState().then((onValue) {
                 print('DENTRO ' + bluetoothState.toString());
                 if (bluetoothState.toString().contains('ON')) {
-                  scan();
+                  // scan();
                 }
               });
             });
@@ -253,30 +255,30 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  Future scan() async {
-    try {
-      await BarcodeScanner.scan().then((barcode) {
-        setState(() {
-          this._barcode = barcode;
-        });
-        print(this._barcode);
-        Navigator.of(context).pushReplacementNamed('/emviagem');
-      });
-    } on PlatformException catch (e) {
-      if (e.code == BarcodeScanner.CameraAccessDenied) {
-        setState(() {
-          this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
-        });
-      } else {
-        setState(() => this._barcode = 'Error desconocido $e');
-      }
-    } on FormatException {
-      setState(() => this._barcode =
-          'nulo, el usuario presionó el botón de volver antes de escanear algo)');
-    } catch (e) {
-      setState(() => this._barcode = 'Error desconocido : $e');
-    }
-  }
+  // Future scan() async {
+  //   try {
+  //     await BarcodeScanner.scan().then((barcode) {
+  //       setState(() {
+  //         this._barcode = barcode;
+  //       });
+  //       print(this._barcode);
+  //       Navigator.of(context).pushReplacementNamed('/emviagem');
+  //     });
+  //   } on PlatformException catch (e) {
+  //     if (e.code == BarcodeScanner.CameraAccessDenied) {
+  //       setState(() {
+  //         this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
+  //       });
+  //     } else {
+  //       setState(() => this._barcode = 'Error desconocido $e');
+  //     }
+  //   } on FormatException {
+  //     setState(() => this._barcode =
+  //         'nulo, el usuario presionó el botón de volver antes de escanear algo)');
+  //   } catch (e) {
+  //     setState(() => this._barcode = 'Error desconocido : $e');
+  //   }
+  // }
 
   Widget _signOutButton() {
     return ListTile(
