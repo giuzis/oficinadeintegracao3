@@ -11,27 +11,27 @@ class MinhaCarteiraPage extends StatefulWidget {
   _MinhaCarteiraPageState createState() => _MinhaCarteiraPageState();
 }
 
-class Wallet {
-  final Float saldo;
-  final String walletID;
+class Wallet{
+  final double credit;
+  final String wallet_id;
 
-  Wallet({this.saldo, this.walletID});
+  Wallet({this.credit, this.wallet_id});
 
-  factory Wallet.fromJson(Map<String, dynamic> json) {
+  factory Wallet.fromJson(Map<String, dynamic> json){
     return Wallet(
-      saldo: json['userId'],
-      walletID: json['wallet']
+      credit: json['credit'],
+      wallet_id: json['wallet_id']
     );
   }
 }
 
 class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
-  Float saldo;
-  String walletID;
-  
+  final Future<Wallet> wallet;
+
+  _MinhaCarteiraPageState({Key key, this.wallet});
+
   @override
   Widget build(BuildContext context) {
-    pegaCarteira(email);
     return Scaffold(
       appBar: AppBar(
         title: Text('Minha Carteira'),
@@ -43,12 +43,19 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
             child: Center(
                 child: Text('Seu saldo', style: TextStyle(fontSize: 25))),
           ),
-          Padding(
-              padding: EdgeInsetsDirectional.only(top: 20.0),
-              child: Text(saldo.toString(),
-                  style: TextStyle(
-                    fontSize: 40,
-                  ))),
+          FutureBuilder<Wallet>(
+            future: fetchWallet(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(snapshot.data.credit.toString(),style: TextStyle(fontSize: 30)),
+                );
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }else{
+                return CircularProgressIndicator();
+              }})
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -63,26 +70,38 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
   }
 
 //Google functions - função que retorna a carteira do usuário 
-  Future pegaCarteira(String _email) async {
+  Future<String> pegaCarteira(String _email) async {
     String function = "getUserWallet";
-    String email = "email=" + _email;
+    String email = "email=projectbluber@gmail.com";
 
-    print(_email);
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+ function + '?' + email;
 
     var response = await http.get(url);
-
-    Wallet wallet = Wallet.fromJson(json.decode(response.body));
-
+  
     setState(() {
-      saldo = wallet.saldo;
-      walletID = wallet.walletID;
+      var data = json.decode(response.body)['results'];
     });
-
-    print(saldo);
-    print(walletID);
     
   }
+
+Future<Wallet> fetchWallet() async {
+  String function = "getUserWallet";
+  String email = "email=projectbluber@gmail.com";
+
+  var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+ function + '?' + email;
+  // var url = 'https://us-central1-bluberstg.cloudfunctions.net/getUserWallet?email=projectbluber@gmail.com';
+
+  final response = await http.get(url);
+  
+  if (response.statusCode == 200) {
+    print('Pasei aqui');
+    // se o servidor retornar um response OK, vamos fazer o parse no JSON
+    return Wallet.fromJson(json.decode(response.body));
+  } else {
+    // se a responsta não for OK , lançamos um erro
+    throw Exception('Failed to load post');
+  }
+}
 
 // Função que retorna o saldo da carteira do usuário
 Future<String> saldoCarteira() async {
@@ -96,5 +115,4 @@ Future<String> saldoCarteira() async {
       await http.get(url);
         //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
-
 }

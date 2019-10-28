@@ -21,6 +21,11 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 // Variáveis usadas para enviar dados ao DB
 final databaseReference = FirebaseDatabase.instance.reference();
 
+//Variáveis
+String name;
+String email;
+String imageUrl;
+
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
