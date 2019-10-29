@@ -2,11 +2,11 @@
 
 //class UserData {
 // final databaseReference = Firestore.instance;
-String name;
-String email;
-String wallet;
-String bike;
-String imageUrl;
+String name = null;
+String email = null;
+String wallet = null;
+String bike = null;
+String imageUrl = null;
 
 //   UserData(this.name, this.email, this.bike) {
 //     _createDocument('user', this.email, {name: this.name});

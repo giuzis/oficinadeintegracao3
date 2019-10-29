@@ -9,6 +9,4 @@ String _name = "...";
 Timer _discoverableTimeoutTimer;
 int _discoverableTimeoutSecondsLeft = 0;
 
-BackgroundCollectingTask _collectingTask;
-
 bool _autoAcceptPairingRequests = false;

@@ -13,19 +13,20 @@ class LoginPage extends StatefulWidget {
 // Variáveis usadas para enviar dados ao DB
 final databaseReference = FirebaseDatabase.instance.reference();
 
-//Variáveis
-String name;
-String email;
-String imageUrl;
-
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     signInWithGoogle().whenComplete(() {
       // createRecord();
       wallet = '2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD';
+      print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAQUI');
+
+      print(name);
+      print(email);
+      print(wallet);
+
       cadastro(name, email, wallet);
-      Navigator.of(context).pushReplacementNamed('/homepage');
+      Navigator.of(context).pushReplacementNamed('/cadastrowallet');
     });
 
     return Container(
@@ -85,10 +86,10 @@ class _LoginPageState extends State<LoginPage> {
       splashColor: Colors.grey,
       onPressed: () {
         signInWithGoogle().whenComplete(() {
-          // createRecord();
+          // verificar se a pessoa já tem uma wallet cadastrada em seu nome
           String wallet = '2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD';
           cadastro(name, email, wallet);
-          Navigator.of(context).pushReplacementNamed('/homepage');
+          Navigator.of(context).pushReplacementNamed('/cadastrowallet');
         });
       },
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
@@ -126,9 +127,9 @@ class _LoginPageState extends State<LoginPage> {
 
     print("Cadastrando -  name: " +
         _name +
-        "email: " +
+        ", email: " +
         _email +
-        "wallet" +
+        ", wallet: " +
         _wallet);
 
     String http = 'https://us-central1-bluberstg.cloudfunctions.net/' +

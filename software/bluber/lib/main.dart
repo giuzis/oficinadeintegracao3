@@ -9,6 +9,7 @@ import 'meubluber.dart';
 import 'historicobluber.dart';
 import 'cadastronovobluber.dart';
 import 'historicocorridas.dart';
+import 'cadastrowallet.dart';
 
 void main() => runApp(MyApp());
 
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         '/addcreditos': (BuildContext context) => AddCreditosPage(),
         '/meubluber': (BuildContext context) => MeuBluberPage(),
         '/corridas': (BuildContext context) => HistoricoCorridasPage(),
+        '/cadastrowallet': (BuildContext context) => CadastroWallet(),
       },
       theme: ThemeData(
         // This is the theme of your application.

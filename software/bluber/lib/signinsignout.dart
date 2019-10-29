@@ -1,5 +1,6 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:path/path.dart';
 import 'userdata.dart';
 import 'dart:async';
 
@@ -46,6 +47,9 @@ Future<String> signInWithGoogle() async {
 
 void signOutGoogle() async {
   await googleSignIn.signOut();
-
+  bike = null;
+  wallet = null;
+  name = null;
+  email = null;
   print("User Sign Out");
 }

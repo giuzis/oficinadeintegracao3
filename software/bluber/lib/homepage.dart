@@ -41,16 +41,58 @@ class _MyHomePageState extends State<MyHomePage>
   String _barcode = "";
   //Funções do Bluetooth
   //Variáveis
-  BluetoothState bluetoothState = BluetoothState.UNKNOWN;
+  // FlutterBluetoothSerial bluetooth = FlutterBluetoothSerial.instance;
+  // BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
   StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
   List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
   bool Discovered = false;
   String HC05Adress = '20:16:07:25:05:13';
 
+  BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
+
+  String _address = "...";
+  String _name = "...";
+
+  Timer _discoverableTimeoutTimer;
+
   //Variáveis de conexão
   BluetoothConnection _connection;
   bool isConnected = false;
   bool bluetoothStateBool = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Get current state
+    FlutterBluetoothSerial.instance.state.then((state) {
+      setState(() {
+        _bluetoothState = state;
+      });
+    });
+
+    FlutterBluetoothSerial.instance.name.then((name) {
+      setState(() {
+        _name = name;
+      });
+    });
+
+    // Listen for futher state changes
+    FlutterBluetoothSerial.instance
+        .onStateChanged()
+        .listen((BluetoothState state) {
+      setState(() {
+        _bluetoothState = state;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    FlutterBluetoothSerial.instance.setPairingRequestHandler(null);
+    _discoverableTimeoutTimer?.cancel();
+    super.dispose();
+  }
 
   // aqui no build que tudo acontece
   @override
@@ -86,24 +128,33 @@ class _MyHomePageState extends State<MyHomePage>
         icon: Icon(Icons.directions_bike),
         label: Text('Quero pedalar!'),
         onPressed: () {
-          getBluetoothState();
-          print('fora ' + bluetoothState.toString());
-          if (bluetoothState.toString().contains('ON')) {
-            // scan();
+          // future() async {
+          //   if (_bluetoothState.toString().contains('BluetoothState.UNKNOWN'))
+          //     await FlutterBluetoothSerial.instance.requestEnable();
+          //   else
+          //     scan();
+          // }
+          // future().then((_) {
+          //   setState(() {});
+          // });
+
+          print('fora ' + _bluetoothState.toString());
+          if (_bluetoothState.toString().contains('ON')) {
+            bluetoothConection().then((onValue) {
+              //_sendMessage('U');
+              scan();
+            });
           } else {
             bluetoothRequest().then((value) {
-              getBluetoothState().then((onValue) {
-                print('DENTRO ' + bluetoothState.toString());
-                if (bluetoothState.toString().contains('ON')) {
-                  // scan();
-                }
-              });
+              print('DENTRO ' + _bluetoothState.toString());
+              if (_bluetoothState.toString().contains('ON')) {
+                bluetoothConection().then((onValue) {
+                  //_sendMessage('U');
+                  scan();
+                });
+              }
             });
           }
-
-          // tBluetoothState();
-          //print(_bluetoothState);
-          //Navigator.of(context).pushNamed('/encerrarviagem');
         },
       ),
 
@@ -255,30 +306,30 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  // Future scan() async {
-  //   try {
-  //     await BarcodeScanner.scan().then((barcode) {
-  //       setState(() {
-  //         this._barcode = barcode;
-  //       });
-  //       print(this._barcode);
-  //       Navigator.of(context).pushReplacementNamed('/emviagem');
-  //     });
-  //   } on PlatformException catch (e) {
-  //     if (e.code == BarcodeScanner.CameraAccessDenied) {
-  //       setState(() {
-  //         this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
-  //       });
-  //     } else {
-  //       setState(() => this._barcode = 'Error desconocido $e');
-  //     }
-  //   } on FormatException {
-  //     setState(() => this._barcode =
-  //         'nulo, el usuario presionó el botón de volver antes de escanear algo)');
-  //   } catch (e) {
-  //     setState(() => this._barcode = 'Error desconocido : $e');
-  //   }
-  // }
+  Future scan() async {
+    try {
+      await BarcodeScanner.scan().then((barcode) {
+        setState(() {
+          this._barcode = barcode;
+        });
+        print(this._barcode);
+        Navigator.of(context).pushReplacementNamed('/emviagem');
+      });
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
+        });
+      } else {
+        setState(() => this._barcode = 'Error desconocido $e');
+      }
+    } on FormatException {
+      setState(() => this._barcode =
+          'nulo, el usuario presionó el botón de volver antes de escanear algo)');
+    } catch (e) {
+      setState(() => this._barcode = 'Error desconocido : $e');
+    }
+  }
 
   Widget _signOutButton() {
     return ListTile(

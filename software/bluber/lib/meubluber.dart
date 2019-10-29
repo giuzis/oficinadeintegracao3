@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'package:barcode_scan/barcode_scan.dart';
+import 'userdata.dart';
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 
 class MeuBluberPage extends StatefulWidget {
@@ -14,21 +15,35 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Meu Bluber'),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.grey,
-        label: Text('Adicionar novo Bluber'),
-        onPressed: () {
-          // scan();
-          cadastrarBike();
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: _preferenciasList(),
-    );
+    if (bike != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Meu Bluber'),
+        ),
+        body: _preferenciasList(),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Meu Bluber'),
+        ),
+        body: Center(
+          child: Text(
+            'Adicione seu Bluber clicando no botão abaixo.',
+            style: TextStyle(fontSize: 20),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          backgroundColor: Colors.grey,
+          label: Text('Adicionar novo Bluber'),
+          onPressed: () {
+            scan();
+            cadastrarBike();
+          },
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      );
+    }
   }
 
   Widget _preferenciasList() {
@@ -74,31 +89,30 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
     );
   }
 
-  // Future scan() async {
-  //   try {
-  //     await BarcodeScanner.scan().then((barcode) {
-  //       setState(() {
-  //         this._barcode = barcode;
-  //       });
-  //       print(this._barcode);
-  //     });
-  //   } on PlatformException catch (e) {
-  //     if (e.code == BarcodeScanner.CameraAccessDenied) {
-  //       setState(() {
-  //         this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
-  //       });
-  //     } else {
-  //       setState(() => this._barcode = 'Error desconocido $e');
-  //     }
-  //   } on FormatException {
-  //     setState(() => this._barcode =
-  //         'nulo, el usuario presionó el botón de volver antes de escanear algo)');
-  //   } catch (e) {
-  //     setState(() => this._barcode = 'Error desconocido : $e');
-  //   }
-  // }
-
-  void cadastrarBike(){
-
+  Future scan() async {
+    try {
+      await BarcodeScanner.scan().then((barcode) {
+        setState(() {
+          this._barcode = barcode;
+        });
+        print(this._barcode);
+        bike = _barcode;
+      });
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          this._barcode = 'El usuario no dio permiso para el uso de la cámara!';
+        });
+      } else {
+        setState(() => this._barcode = 'Error desconocido $e');
+      }
+    } on FormatException {
+      setState(() => this._barcode =
+          'nulo, el usuario presionó el botón de volver antes de escanear algo)');
+    } catch (e) {
+      setState(() => this._barcode = 'Error desconocido : $e');
+    }
   }
+
+  void cadastrarBike() {}
 }
