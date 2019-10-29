@@ -9,6 +9,7 @@ import 'meubluber.dart';
 import 'historicobluber.dart';
 import 'cadastronovobluber.dart';
 import 'historicocorridas.dart';
+import 'retirarcreditos.dart';
 
 void main() => runApp(MyApp());
 
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         '/minhacarteira': (BuildContext context) => MinhaCarteiraPage(),
         '/homepage': (BuildContext context) => MyHomePage(),
         '/addcreditos': (BuildContext context) => AddCreditosPage(),
+        '/retcreditos': (BuildContext context) => RetCreditosPage(),
         '/meubluber': (BuildContext context) => MeuBluberPage(),
         '/corridas': (BuildContext context) => HistoricoCorridasPage(),
       },

@@ -13,34 +13,25 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-class ExistWallet {
-  final bool exists;
-
-  ExistWallet({this.exists});
-
-  factory ExistWallet.fromJson(Map<String, dynamic> json) {
-    return ExistWallet(exists: json['exists']);
-  }
-}
-
 // Variáveis usadas para enviar dados ao DB
 final databaseReference = FirebaseDatabase.instance.reference();
 
 class _LoginPageState extends State<LoginPage> {
- 
-  final Future<ExistWallet> existWallet;
-  _LoginPageState({Key key, this.existWallet});
 
    @override
    Widget build(BuildContext context) {
      signInWithGoogle().whenComplete(() {
-       // createRecord();
-       wallet = '2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD';
-       print(name + " " + email + " " + wallet);
-       cadastro(name, email, wallet);
-      var existWallet = fetchExistWallet(email); 
+       final exist = existWallet(email);
+       if(exist == true){
+          wallet = '2NCuqAQyEtYb3oEpzZvF1KpE2rGLbCHMsnG';
+          print(name + " " + email + " " + wallet);
+          cadastro(name, email, wallet);
+       }
+       else{
+         print("Não preciso fazer cadastro");
+       }
+       
 
-      print(existWallet);
 
        Navigator.of(context).pushReplacementNamed('/homepage');
      });
@@ -98,44 +89,39 @@ class _LoginPageState extends State<LoginPage> {
      );
    }
  
-   Widget _signInButton() {
-     return OutlineButton(
-       splashColor: Colors.grey,
-       onPressed: () {
-         signInWithGoogle().whenComplete(() {
-           // createRecord();
-           print("estou aqui");
-           String wallet = '2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD';
-           // print(name + " " + email + " " + wallet);
-           // cadastro(name, email, wallet);
-           Navigator.of(context).pushReplacementNamed('/homepage');
-         });
-       },
-       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-       highlightElevation: 0,
-       borderSide: BorderSide(color: Colors.grey),
-       child: Padding(
-         padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-         child: Row(
-           mainAxisSize: MainAxisSize.min,
-           mainAxisAlignment: MainAxisAlignment.center,
-           children: <Widget>[
-             Image(image: AssetImage("images/google_logo.png"), height: 35.0),
-             Padding(
-               padding: const EdgeInsets.only(left: 10),
-               child: Text(
-                 'Sign in with Google',
-                 style: TextStyle(
-                   fontSize: 20,
-                   color: Colors.grey,
-                 ),
-               ),
-             )
-           ],
-         ),
-       ),
-     );
-   }
+  //  Widget _signInButton() {
+  //    return OutlineButton(
+  //      splashColor: Colors.grey,
+  //      onPressed: () {
+  //        signInWithGoogle().whenComplete(() {
+  //          Navigator.of(context).pushReplacementNamed('/homepage');
+  //        });
+  //      },
+  //      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+  //      highlightElevation: 0,
+  //      borderSide: BorderSide(color: Colors.grey),
+  //      child: Padding(
+  //        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+  //        child: Row(
+  //          mainAxisSize: MainAxisSize.min,
+  //          mainAxisAlignment: MainAxisAlignment.center,
+  //          children: <Widget>[
+  //            Image(image: AssetImage("images/google_logo.png"), height: 35.0),
+  //            Padding(
+  //              padding: const EdgeInsets.only(left: 10),
+  //              child: Text(
+  //                'Sign in with Google',
+  //                style: TextStyle(
+  //                  fontSize: 20,
+  //                  color: Colors.grey,
+  //                ),
+  //              ),
+  //            )
+  //          ],
+  //        ),
+  //      ),
+  //    );
+  //  }
  
    //Chama  a função de cadastrar
    cadastro(String _name, String _email, String _wallet) async {
@@ -162,8 +148,8 @@ class _LoginPageState extends State<LoginPage> {
    }
  
    
-     //Chama  a função de cadastrar
-  Future<bool> fetchExistWallet(String _email) async {
+  //Chama  a função de cadastrar
+  Future<bool> existWallet(String _email) async {
      String function = "userWalletExists";
      String email = "email=" + _email;
 
@@ -178,16 +164,21 @@ class _LoginPageState extends State<LoginPage> {
      
      print(url);
      var response = await get(url);
-    print(response.toString());
-     return true;
 
      if (response.statusCode == 200) {
       // se o servidor retornar um response OK, vamos fazer o parse no JSON
-      var data = ExistWallet.fromJson(json.decode(response.body));
-      var status = data.exists;
+      // print("Response 200");
+      Map<String, dynamic> exist = jsonDecode(response.body);
+      bool walletExists = exist['exists'];
+      // var data = ExistWallet.fromJson(json.decode(response.body));
+      // var status = data.exists;
+      print(walletExists);
+      return walletExists;
     } else {
+      print("Response not 200");
       // se a responsta não for OK , lançamos um erro
-      throw Exception('Failed to load post');
+      // throw Exception('Failed to load post');
+      return false;
     }
    }
  }
