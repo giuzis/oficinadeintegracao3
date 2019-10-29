@@ -17,20 +17,18 @@ class _EmViagemPageState extends State<EmViagemPage> {
   var _time;
 
   void startTimer() {
-    _timenow = new DateTime.now();
-    _time = _timenow;
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
-      oneSec,
-      (Timer timer) => setState(
+    _timer = new Timer.periodic(Duration(hours: 5), (_timer) {
+      print(_time);
+      setState(
         () {
           _time = _timenow.subtract(new Duration(
-              seconds: DateTime.now().second,
-              minutes: DateTime.now().minute,
-              hours: DateTime.now().hour));
+            seconds: DateTime.now().second,
+            minutes: DateTime.now().minute,
+            hours: DateTime.now().hour,
+          ));
         },
-      ),
-    );
+      );
+    });
   }
 
   @override
@@ -70,6 +68,8 @@ class _EmViagemPageState extends State<EmViagemPage> {
   }
 
   Widget build(BuildContext context) {
+    _timenow = new DateTime.now();
+    _time = new DateTime(0, 0, 0, 0, 0, 0, 0, 0);
     startTimer();
     return Scaffold(
       appBar: AppBar(
@@ -172,7 +172,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Encerrar viagem!'),
         onPressed: () {
-          _timer.cancel();
+          //_timer.cancel();
           Navigator.of(context).pushReplacementNamed('/encerrarviagem');
         },
       ),
