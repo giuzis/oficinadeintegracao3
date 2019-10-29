@@ -17,7 +17,7 @@ class Wallet {
   Wallet({this.credit, this.wallet_id});
 
   factory Wallet.fromJson(Map<String, dynamic> json) {
-    return Wallet(credit: json['credit'], wallet_id: json['wallet_id']);
+    return Wallet(credit: json['credit'] as double, wallet_id: json['wallet_id'] as String );
   }
 }
 
@@ -40,7 +40,7 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
                 child: Text('Seu saldo', style: TextStyle(fontSize: 25))),
           ),
           FutureBuilder<Wallet>(
-              future: fetchWallet(),
+              future: fetchWallet(email),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return Padding(
@@ -53,18 +53,26 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
                 } else {
                   return CircularProgressIndicator();
                 }
-              })
+              }),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: new RaisedButton(
+                  child: new Text("Adicionar créditos"),
+                  color:  Colors.blueAccent[600],
+                  onPressed: (){
+                    Navigator.of(context).pushNamed('/addcreditos');
+                  }),
+              ),
+              new RaisedButton(
+                child: new Text("Retirar créditos"),
+                color:  Colors.blueAccent[600],
+                onPressed: (){
+                  Navigator.of(context).pushNamed('/retcreditos');
+                }),
+
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.blueGrey,
-        label: Text('Adicionar mais créditos'),
-        onPressed: () {
-          Navigator.of(context).pushNamed('/addcreditos');
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
+      );
   }
 
 //Google functions - função que retorna a carteira do usuário
@@ -84,20 +92,20 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
     });
   }
 
-  Future<Wallet> fetchWallet() async {
+  Future<Wallet> fetchWallet(String _email) async {
     String function = "getUserWallet";
-    String email = "email=projectbluber@gmail.com";
+    String email = "email="+_email;
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
         function +
         '?' +
         email;
-    // var url = 'https://us-central1-bluberstg.cloudfunctions.net/getUserWallet?email=projectbluber@gmail.com';
 
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      print('Passei aqui');
+      print('pegaCarteira - 200 OK');
+      pegaDadosCarteira(response);
       // se o servidor retornar um response OK, vamos fazer o parse no JSON
       return Wallet.fromJson(json.decode(response.body));
     } else {
@@ -106,22 +114,58 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
     }
   }
 
-// Função que retorna o saldo da carteira do usuário
-  Future<String> saldoCarteira() async {
-    String function = "Litecoin_Transaction";
-    String ammount = "ammount=0.001";
-    String walletTo = "wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD";
-    String walletFrom = "wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij";
+  void pegaDadosCarteira(http.Response response){
+      print("Estou preenchendo os dados");
+      Map<String, dynamic> walletJson = jsonDecode(response.body);
+      String id_wallet = walletJson['wallet_id'] as String;
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
-        function +
-        '?' +
-        ammount +
-        '&' +
-        walletTo +
-        '&' +
-        walletFrom;
-
-    await http.get(url);
   }
+
+  // void pegaWallet() async {
+  //   String function = "getUserWallet";
+  //   String email = "email=projectbluber@gmail.com";
+
+  //   var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+  //       function +
+  //       '?' +
+  //       email;
+  //   // var url = 'https://us-central1-bluberstg.cloudfunctions.net/getUserWallet?email=projectbluber@gmail.com';
+
+  //   final response = await http.get(url);
+
+  //   if (response.statusCode == 200) {
+  //     print('Passei aqui');
+  //     // se o servidor retornar um response OK, vamos fazer o parse no JSON
+  //     //return Wallet.fromJson(json.decode(response.body));
+
+  //     Map<String, dynamic> wallet = jsonDecode(response.body);
+  //     var walletID = wallet['wallet_id'];
+  //     var credit = wallet['credit'];
+
+  //     print ('walletID: ' + walletID + 'credit' + credit.toString());
+  //   } else {
+  //     // se a responsta não for OK , lançamos um erro
+  //     throw Exception('Failed to load post');
+  //   }
+  // }
+
+
+// // Função que retorna o saldo da carteira do usuário
+//   Future<String> saldoCarteira() async {
+//     String function = "Litecoin_Transaction";
+//     String ammount = "ammount=0.001";
+//     String walletTo = "wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD";
+//     String walletFrom = "wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij";
+
+//     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+//         function +
+//         '?' +
+//         ammount +
+//         '&' +
+//         walletTo +
+//         '&' +
+//         walletFrom;
+
+//     await http.get(url);
+//   }
 }

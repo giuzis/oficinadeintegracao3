@@ -3,20 +3,19 @@ import 'package:http/http.dart' as http;
 import 'userdata.dart';
 
 
-class AddCreditosPage extends StatefulWidget {
+class RetCreditosPage extends StatefulWidget {
   @override
-  _AddCreditosPageState createState() => _AddCreditosPageState();
+  _RetCreditosPageState createState() => _RetCreditosPageState();
 }
 
-class _AddCreditosPageState extends State<AddCreditosPage> {
+class _RetCreditosPageState extends State<RetCreditosPage> {
   int _pressed = 0;
-  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Adicionar créditos"),
+        title: Text("Retirar créditos"),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -228,12 +227,12 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
       floatingActionButton: FloatingActionButton.extended(
             backgroundColor: Colors.grey,
             label: Text(
-              "Adicionar bitcoins",
+              "Retirar bitcoins",
             ),
             onPressed: () {
               // _neverSatisfied();
-              adicionarCredito(email, _pressed.toDouble()/10000);
-              // adicionarCredito(_pressed);
+              retirarCreditos(email, _pressed.toDouble()/10000);
+              // retirarCreditos(email, 0.00001);
               //Navigator.of(context).pushReplacementNamed('/minhacarteira');
             },
           ),
@@ -251,7 +250,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
         content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
-              Text('Créditos adicionados!'),
+              Text('Créditos retirados!'),
             ],
           ),
         ),
@@ -266,9 +265,9 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
       );
     },
   );
-  }
+}
 
-  Future<void> msgErro() async {
+Future<void> msgErro() async {
   return showDialog<void>(
     context: context,
     barrierDismissible: false, // user must tap button!
@@ -296,13 +295,13 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
 }
 
   //Google functions - Adicionar créditos na carteira
-  Future adicionarCredito(String _email, double _amount) async {
-    String function = "buyBluberCredit";
+  Future retirarCreditos(String _email, double _amount) async {
+    String function = "recoverBluberCredit";
     String email = "email="+ _email;
     String amount = "amount=" + _amount.toString();
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + amount + '&'  + email;
-    print("adicionando bitcoinds");
+    print("retirando bitcoinds");
     var response = await http.get(url);
      
     if(response.statusCode == 200){
@@ -312,5 +311,4 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
     }
 
   }
-
 }
