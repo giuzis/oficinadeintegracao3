@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'userdata.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
+import 'package:bluber/userdata.dart';
+import 'package:http/http.dart';
 
 class MeuBluberPage extends StatefulWidget {
   @override
@@ -9,7 +11,7 @@ class MeuBluberPage extends StatefulWidget {
 }
 
 class _MeuBluberPageState extends State<MeuBluberPage> {
-  String _barcode = "";
+  String _barcode = ""; //Este barcode se refere ao ID da bike
   bool _disponivel = false;
   bool _trava_aberta = false;
 
@@ -37,8 +39,9 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
           backgroundColor: Colors.grey,
           label: Text('Adicionar novo Bluber'),
           onPressed: () {
-            scan();
-            cadastrarBike();
+            scan().then((value) {
+              cadastroBike(email, _barcode);
+            });
           },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -114,5 +117,21 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
     }
   }
 
-  void cadastrarBike() {}
+  //Chama  a função de cadastrar
+  cadastroBike(String _email, String _bike) async {
+    String function = "cadBike";
+    String email = "email=" + _email;
+    String bike_id = "bike_id=" + _bike;
+
+    print("Cadastro bike");
+    String url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        email +
+        '&' +
+        bike_id;
+
+    print(url);
+    return await get(url);
+  }
 }

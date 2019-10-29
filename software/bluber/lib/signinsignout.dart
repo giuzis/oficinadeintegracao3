@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart';
 import 'userdata.dart';
 import 'dart:async';
+import 'package:http/http.dart';
+
 
 //Variáveis usadas no sign in + autenticação
 final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -41,6 +43,7 @@ Future<String> signInWithGoogle() async {
   assert(user.uid == currentUser.uid);
 
   // UserData(name, email, null);
+  // cadastro(name, email, wallet);
 
   return 'signInWithGoogle succeeded: $user';
 }
@@ -53,3 +56,27 @@ void signOutGoogle() async {
   email = null;
   print("User Sign Out");
 }
+
+  //Chama  a função de cadastrar
+  // cadastro(String _name, String _email, String _wallet) async {
+  //   String function = "createUser";
+  //   // String name = "name="+ _name;
+  //   String email = "email=" + _email;
+  //   String wallet = "wallet_id=" + _wallet;
+
+  //   print("Cadastrando -  name: " +
+  //       _name +
+  //       "email: " +
+  //       _email +
+  //       "wallet" +
+  //       _wallet);
+
+  //   String url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+  //       function +
+  //       '?' +
+  //       email +
+  //       '&' +
+  //       wallet;
+  //   print(url);
+  //   return await get(url);
+  // }

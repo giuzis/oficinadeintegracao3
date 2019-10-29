@@ -14,11 +14,6 @@ import 'cadastrowallet.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  //Dados dos usuários
-  String name;
-  String email;
-  String imageUrl;
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

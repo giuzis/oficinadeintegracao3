@@ -15,12 +15,8 @@ import 'signinsignout.dart';
 //Chamando Login para pegar dados
 import 'userdata.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:barcode_scan/barcode_scan.dart';
-
-// import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
-// import 'functionsdatabase.dart';
 
 //Variáveis de Transição do Bluetooth
 String lock = 'L'; //Fechar a trava da Bike
@@ -40,13 +36,10 @@ class _MyHomePageState extends State<MyHomePage>
   Location location = Location();
   String _barcode = "";
   //Funções do Bluetooth
-  //Variáveis
-  // FlutterBluetoothSerial bluetooth = FlutterBluetoothSerial.instance;
-  // BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
   StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
   List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
-  bool Discovered = false;
-  String HC05Adress = '20:16:07:25:05:13';
+  bool discovered = false;
+  String _hc05Adress = '20:16:07:25:05:13';
 
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
 
@@ -113,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage>
             _drawerBanner(),
             _drawerList(),
             Padding(
-              padding: EdgeInsets.only(top: 380),
+              padding: EdgeInsets.only(top: 150),
               child: _signOutButton(),
             )
           ],
@@ -128,39 +121,43 @@ class _MyHomePageState extends State<MyHomePage>
         icon: Icon(Icons.directions_bike),
         label: Text('Quero pedalar!'),
         onPressed: () {
-          // future() async {
-          //   if (_bluetoothState.toString().contains('BluetoothState.UNKNOWN'))
-          //     await FlutterBluetoothSerial.instance.requestEnable();
-          //   else
-          //     scan();
-          // }
-          // future().then((_) {
-          //   setState(() {});
-          // });
-
           print('fora ' + _bluetoothState.toString());
-          if (_bluetoothState.toString().contains('ON')) {
-            bluetoothConection().then((onValue) {
-              //_sendMessage('U');
-              scan();
-            });
+          if (_bluetoothState.toString().contains('STATE_ON')) {
+            bluetoothDiscovery();
           } else {
             bluetoothRequest().then((value) {
               print('DENTRO ' + _bluetoothState.toString());
-              if (_bluetoothState.toString().contains('ON')) {
-                bluetoothConection().then((onValue) {
-                  //_sendMessage('U');
-                  scan();
-                });
+              if (_bluetoothState.toString().contains('STATE_ON')) {
+                bluetoothDiscovery();
+              } else {
+                showAlertDialog(context, 'Bluetooth desligado!',
+                    'Ligue o bluetooth para começar a pedalar');
               }
             });
           }
+          scan();
         },
       ),
 
       // com tabview definimos o que será mostrado em cada tab
       // é o botão que leva a outra página (nesse caso)
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  showAlertDialog(BuildContext context, String title, String content) {
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(content),
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 
@@ -369,10 +366,17 @@ class _MyHomePageState extends State<MyHomePage>
 
     print('Procurando HC-05');
     for (int i = 0; i < results.length; i++) {
-      if (results[i].device.address == HC05Adress) {
-        bluetoothConection();
-        Discovered = true;
+      if (results[i].device.address == _hc05Adress) {
+        discovered = true;
       }
+    }
+
+    if (discovered) {
+      bluetoothConection();
+    } else {
+      isConnected = false;
+      showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+          'Tente novamente mais tarde.');
     }
   }
 
@@ -388,11 +392,16 @@ class _MyHomePageState extends State<MyHomePage>
   Future bluetoothConection() async {
     // Some simplest connection :F
     try {
-      await BluetoothConnection.toAddress(HC05Adress).then((connection) {
+      await BluetoothConnection.toAddress(_hc05Adress).then((connection) {
         print('Connected to the device');
 
         _connection = connection;
         isConnected = true;
+        scan();
+      }).catchError((onError) {
+        isConnected = false;
+        // showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+        //     'Tente novamente mais tarde.');
       });
 
       // connection.input.listen((Uint8List data) {
@@ -400,6 +409,9 @@ class _MyHomePageState extends State<MyHomePage>
       //   print('Disconnected by remote request');
       // });
     } catch (exception) {
+      isConnected = false;
+      showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+          'Tente novamente mais tarde.');
       print('Cannot connect, exception occured');
     }
   }
