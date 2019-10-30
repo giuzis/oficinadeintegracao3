@@ -1,7 +1,8 @@
 //Carrega a biblioteca SoftwareSerial
 #include <SoftwareSerial.h>
  
-SoftwareSerial BTSerial(4,5);
+//SoftwareSerial BTSerial(18,19);
+#define BTSerial Serial2
  
 int pushButton = 2;// digital pin 10 will read the state of a pushbutton
 int led =13;
@@ -30,7 +31,7 @@ void loop()
 
 void verificaComandoCelular()
 {
-    BTSerial.print(BTSerial.available());
+    Serial.println(BTSerial.available());
 
   //BTSerial.print("Teste\n");
   int watchDogCounter=0;

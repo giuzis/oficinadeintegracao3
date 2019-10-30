@@ -1,7 +1,8 @@
 #include <SoftwareSerial.h>
 
 //Create software serial object to communicate with SIM800L
-SoftwareSerial mySerial(6, 7); //SIM800L Tx & Rx is connected to Arduino #3 & #2
+//SoftwareSerial mySerial(6, 7); //SIM800L Tx & Rx is connected to Arduino #3 & #2
+#define mySerial Serial1
 
 int gsmcheck;
 char atRxBuffer[100];
@@ -20,8 +21,8 @@ void setup()
   Serial.println("Initializing...");
   delay(1000);
 
-//  mySerial.println("AT"); //Once the handshake test is successful, it will back to OK
-//  updateSerial();
+  mySerial.println("AT"); //Once the handshake test is successful, it will back to OK
+  updateSerial();
 //  mySerial.println("AT+SAPBR=3,1,\"APN\",\"tim\""); //Signal quality test, value range is 0-31 , 31 is the best
 //  updateSerial();
 //  mySerial.println("AT+SAPBR=1,1"); //Read SIM information to confirm whether the SIM is plugged
@@ -60,7 +61,7 @@ void loop()
 
 void updateSerial()
 {
-  delay(500);
+  //delay(500);
   while (Serial.available()) 
   {
     mySerial.write(Serial.read());//Forward what Serial received to Software Serial Port
