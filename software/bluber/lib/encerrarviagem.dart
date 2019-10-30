@@ -3,7 +3,6 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
 // import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart';
 import 'dart:io';
 
 // QR Code page
@@ -18,36 +17,34 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
 
   //Image Picker
   Future getImage(context) async {
-    await (ImagePicker.pickImage(source: ImageSource.camera)).then((image){
-   
+    await (ImagePicker.pickImage(source: ImageSource.camera)).then((image) {
       setState(() {
-          _image = image;
-        });
-        
-        uploadFile();
+        _image = image;
+      });
+
+      uploadFile();
     });
 
     Navigator.of(context).pushReplacementNamed('/homepage');
-  
   }
-  
-  Future uploadFile() async {   
 
-   final String fileName = "test";
- 
-   StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName);    
-   StorageUploadTask uploadTask = storageReference.putFile(_image);
+  Future uploadFile() async {
+    final String fileName = "test";
 
-   await uploadTask.onComplete;    
-   print('File Uploaded');    
-   storageReference.getDownloadURL().then((fileURL) {    
-     setState(() {    
-       _uploadedFileURL = fileURL;    
-     });    
-   });    
+    StorageReference storageReference =
+        FirebaseStorage.instance.ref().child(fileName);
+    StorageUploadTask uploadTask = storageReference.putFile(_image);
 
-   print(_uploadedFileURL);
- }  
+    await uploadTask.onComplete;
+    print('File Uploaded');
+    storageReference.getDownloadURL().then((fileURL) {
+      setState(() {
+        _uploadedFileURL = fileURL;
+      });
+    });
+
+    print(_uploadedFileURL);
+  }
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,5 +139,4 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
-
 }

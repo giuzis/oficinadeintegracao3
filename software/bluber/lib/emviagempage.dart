@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'dart:async';
 
 //import 'package:slider/slider_button.dart';
 class EmViagemPage extends StatefulWidget {
@@ -13,7 +13,47 @@ class _EmViagemPageState extends State<EmViagemPage> {
   GoogleMapController mapController;
   Location location = Location();
 
+  bool reset = false;
+  bool start = true;
+  String timetext = '00:00:00';
+  var stopwatch = Stopwatch();
+  final duration = Duration(seconds: 1);
+
+  void startTimer() {
+    Timer(duration, keepRunning);
+  }
+
+  keepRunning() {
+    if (stopwatch.isRunning) {
+      startTimer();
+    }
+    setState(() {
+      timetext = stopwatch.elapsed.inHours.toString().padLeft(2, '0') +
+          ':' +
+          (stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, '0') +
+          ':' +
+          (stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0');
+    });
+  }
+
+  @override
+  void dispose() {
+    stopwatch.reset();
+    super.dispose();
+  }
+
   Widget _googleMap(BuildContext context) {
+    // Bluetooth().getBluetoothState();
+
+    // if (Bluetooth().bluetoothState.toString().contains('ON')) {
+    //   while (Bluetooth().Discovered != true) {
+    //     Bluetooth().bluetoothDiscovery();
+    //   }
+    // } else {
+    //   Bluetooth().bluetoothRequest();
+    // }
+    //colocar aqui a requisição do servidos e chamar Bluletooth().serverMessage();
+
     return GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
@@ -33,6 +73,8 @@ class _EmViagemPageState extends State<EmViagemPage> {
   }
 
   Widget build(BuildContext context) {
+    stopwatch.start();
+    startTimer();
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text("Em viagem...")),
@@ -56,7 +98,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
                       size: 30,
                     ),
                     Text(
-                      '00:00',
+                      timetext,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 40.0,
@@ -130,6 +172,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Encerrar viagem!'),
         onPressed: () {
+          stopwatch.stop();
           Navigator.of(context).pushReplacementNamed('/encerrarviagem');
         },
       ),

@@ -3,18 +3,26 @@
     _googleMap1()
     _googleMap2()
 */
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:bluber/Bluetooth.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'dart:async';
+import 'dart:convert' show utf8;
+import 'signinsignout.dart';
 
 //Chamando Login para pegar dados
-import 'package:bluber/login.dart';
-
-//import 'package:bluber/Bluetooth.dart';
-//import 'package:qrcode_reader/qrcode_reader.dart';
+import 'userdata.dart';
+import 'package:http/http.dart' as http;
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
+
+//Variáveis de Transição do Bluetooth
+String lock = 'L'; //Fechar a trava da Bike
+String unlock = 'U'; //Abrir a trava
+String waitRent = 'R'; //Quando alguém ler o QRCode esse sinal deve ser enviado
+String endTrip = 'E'; //Encerra a viagem
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -27,6 +35,57 @@ class _MyHomePageState extends State<MyHomePage>
   GoogleMapController mapController;
   Location location = Location();
   String _barcode = "";
+  //Funções do Bluetooth
+  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
+  List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
+  bool discovered = false;
+  String _hc05Adress = '20:16:07:25:05:13';
+
+  BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
+
+  String _address = "...";
+  String _name = "...";
+
+  Timer _discoverableTimeoutTimer;
+
+  //Variáveis de conexão
+  BluetoothConnection _connection;
+  bool isConnected = false;
+  bool bluetoothStateBool = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Get current state
+    FlutterBluetoothSerial.instance.state.then((state) {
+      setState(() {
+        _bluetoothState = state;
+      });
+    });
+
+    FlutterBluetoothSerial.instance.name.then((name) {
+      setState(() {
+        _name = name;
+      });
+    });
+
+    // Listen for futher state changes
+    FlutterBluetoothSerial.instance
+        .onStateChanged()
+        .listen((BluetoothState state) {
+      setState(() {
+        _bluetoothState = state;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    FlutterBluetoothSerial.instance.setPairingRequestHandler(null);
+    _discoverableTimeoutTimer?.cancel();
+    super.dispose();
+  }
 
   // aqui no build que tudo acontece
   @override
@@ -42,12 +101,12 @@ class _MyHomePageState extends State<MyHomePage>
       drawer: Drawer(
         // o widget "column" permite colocar vários widgets um em cima do outro (ou embaixo dependendo do ponto de vista)
         child: Column(
-          // nesse caso coloquei as funções _bannerDrawer e _bannerList que retornam os widgets
+          // nesse caso coloquei as funções _drawerBanner e _drawerList que retornam os widgets
           children: <Widget>[
-            _bannerDrawer(),
-            _bannerList(),
+            _drawerBanner(),
+            _drawerList(),
             Padding(
-              padding: EdgeInsets.only(top: 380),
+              padding: EdgeInsets.only(top: 150),
               child: _signOutButton(),
             )
           ],
@@ -62,10 +121,20 @@ class _MyHomePageState extends State<MyHomePage>
         icon: Icon(Icons.directions_bike),
         label: Text('Quero pedalar!'),
         onPressed: () {
-          // BluetoothRequest();
-          // getBluetoothState();
-          //print(_bluetoothState);
-          //Navigator.of(context).pushNamed('/encerrarviagem');
+          print('fora ' + _bluetoothState.toString());
+          if (_bluetoothState.toString().contains('STATE_ON')) {
+            bluetoothDiscovery();
+          } else {
+            bluetoothRequest().then((value) {
+              print('DENTRO ' + _bluetoothState.toString());
+              if (_bluetoothState.toString().contains('STATE_ON')) {
+                bluetoothDiscovery();
+              } else {
+                showAlertDialog(context, 'Bluetooth desligado!',
+                    'Ligue o bluetooth para começar a pedalar');
+              }
+            });
+          }
           scan();
         },
       ),
@@ -76,8 +145,24 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
+  showAlertDialog(BuildContext context, String title, String content) {
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(content),
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   // widget que define o banner do drawer
-  Widget _bannerDrawer() {
+  Widget _drawerBanner() {
     // container para mostrar dados do perfil do usuário
     // (container é um bloco onde vc pode colocar vários widgets dentro)
     return Container(
@@ -110,9 +195,22 @@ class _MyHomePageState extends State<MyHomePage>
             // nome do usuário
             child: Text(
               name,
+              //UserData.getName(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 25.0,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 105.0, left: 110.0),
+            // nome do usuário
+            child: Text(
+              email,
+              //UserData.getName(),
+              style: TextStyle(
+                fontSize: 15.0,
                 color: Colors.white,
               ),
             ),
@@ -123,7 +221,7 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   // widget que define a lista do drawer
-  Widget _bannerList() {
+  Widget _drawerList() {
     return ListView(
       shrinkWrap: true,
       children: <Widget>[
@@ -150,6 +248,26 @@ class _MyHomePageState extends State<MyHomePage>
         )
       ],
     );
+  }
+
+  //Google functions
+  Future transacao() async {
+    String function = "Litecoin_Transaction";
+    String ammount = "ammount=0.001";
+    String walletTo = "wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD";
+    String walletFrom = "wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij";
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        ammount +
+        '&' +
+        walletTo +
+        '&' +
+        walletFrom;
+
+    var data = await http.get(url);
+    //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
 
   // modificar essas duas funções para incluir o mapa
@@ -223,8 +341,96 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  void signOutGoogle() async {
-    await googleSignIn.signOut();
-    print("User Sign Out");
+  //Bluetooth
+  //Pega o status do bluetooth
+  Future getBluetoothState() async {
+    return FlutterBluetoothSerial.instance.state; //.then((state) {
+    // setState(() {
+    //   bluetoothState = state;
+    // });
+
+    // if (bluetoothState.toString().contains('ON')) {
+    //   bluetoothStateBool = true;
+    // } else {
+    //   bluetoothStateBool = false;
+    // }
+    //});
   }
+
+  //Descobre os dispositivos de Bluetooth
+  void bluetoothDiscovery() {
+    _streamSubscription =
+        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
+      results.add(r);
+    });
+
+    print('Procurando HC-05');
+    for (int i = 0; i < results.length; i++) {
+      if (results[i].device.address == _hc05Adress) {
+        discovered = true;
+      }
+    }
+
+    if (discovered) {
+      bluetoothConection();
+    } else {
+      isConnected = false;
+      showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+          'Tente novamente mais tarde.');
+    }
+  }
+
+  //Pede para ligar o bluetooth
+  Future bluetoothRequest() async {
+    // async lambda seems to not working
+    await FlutterBluetoothSerial.instance.requestEnable().then((value) {
+      getBluetoothState();
+    });
+  }
+
+  //Conecta ao dispositivo
+  Future bluetoothConection() async {
+    // Some simplest connection :F
+    try {
+      await BluetoothConnection.toAddress(_hc05Adress).then((connection) {
+        print('Connected to the device');
+
+        _connection = connection;
+        isConnected = true;
+        scan();
+      }).catchError((onError) {
+        isConnected = false;
+        // showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+        //     'Tente novamente mais tarde.');
+      });
+
+      // connection.input.listen((Uint8List data) {
+      // }).onDone(() {
+      //   print('Disconnected by remote request');
+      // });
+    } catch (exception) {
+      isConnected = false;
+      showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+          'Tente novamente mais tarde.');
+      print('Cannot connect, exception occured');
+    }
+  }
+
+  //Envia mensagem
+  void _sendMessage(String text) async {
+    text = text.trim();
+
+    if (text.length > 0) {
+      try {
+        print('Enviando texto: ' + text);
+        _connection.output.add(utf8.encode(text + "\r\n"));
+        await _connection.output.allSent;
+      } catch (e) {
+        // Ignore error, but notify state
+      }
+    }
+  }
+
+  //Interpreta as mensagens do servidor e envia msg
+  void serverMessages() {}
 }

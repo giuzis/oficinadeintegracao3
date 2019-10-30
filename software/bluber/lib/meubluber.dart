@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'userdata.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
+import 'package:bluber/userdata.dart';
+import 'package:http/http.dart';
 
 class MeuBluberPage extends StatefulWidget {
   @override
@@ -8,26 +11,42 @@ class MeuBluberPage extends StatefulWidget {
 }
 
 class _MeuBluberPageState extends State<MeuBluberPage> {
-  String _barcode = "";
+  String _barcode = ""; //Este barcode se refere ao ID da bike
   bool _disponivel = false;
   bool _trava_aberta = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Meu Bluber'),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.grey,
-        label: Text('Adicionar novo Bluber'),
-        onPressed: () {
-          scan();
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: _preferenciasList(),
-    );
+    if (bike != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Meu Bluber'),
+        ),
+        body: _preferenciasList(),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Meu Bluber'),
+        ),
+        body: Center(
+          child: Text(
+            'Adicione seu Bluber clicando no botão abaixo.',
+            style: TextStyle(fontSize: 20),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          backgroundColor: Colors.grey,
+          label: Text('Adicionar novo Bluber'),
+          onPressed: () {
+            scan().then((value) {
+              cadastroBike(email, _barcode);
+            });
+          },
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      );
+    }
   }
 
   Widget _preferenciasList() {
@@ -80,6 +99,7 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
           this._barcode = barcode;
         });
         print(this._barcode);
+        bike = _barcode;
       });
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
@@ -95,5 +115,23 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
     } catch (e) {
       setState(() => this._barcode = 'Error desconocido : $e');
     }
+  }
+
+  //Chama  a função de cadastrar
+  cadastroBike(String _email, String _bike) async {
+    String function = "cadBike";
+    String email = "email=" + _email;
+    String bike_id = "bike_id=" + _bike;
+
+    print("Cadastro bike");
+    String url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        email +
+        '&' +
+        bike_id;
+
+    print(url);
+    return await get(url);
   }
 }

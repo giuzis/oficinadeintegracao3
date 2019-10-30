@@ -6,10 +6,11 @@ import 'minhacarteira.dart';
 import 'adicionarcreditos.dart';
 import 'login.dart';
 import 'meubluber.dart';
-import 'Bluetooth.dart';
 import 'historicobluber.dart';
 import 'cadastronovobluber.dart';
 import 'historicocorridas.dart';
+import 'cadastrowallet.dart';
+import 'retirarcreditos.dart';
 
 void main() => runApp(MyApp());
 
@@ -29,8 +30,10 @@ class MyApp extends StatelessWidget {
         '/minhacarteira': (BuildContext context) => MinhaCarteiraPage(),
         '/homepage': (BuildContext context) => MyHomePage(),
         '/addcreditos': (BuildContext context) => AddCreditosPage(),
+        '/retcreditos': (BuildContext context) => RetCreditosPage(),
         '/meubluber': (BuildContext context) => MeuBluberPage(),
         '/corridas': (BuildContext context) => HistoricoCorridasPage(),
+        '/cadastrowallet': (BuildContext context) => CadastroWallet(),
       },
       theme: ThemeData(
         // This is the theme of your application.
@@ -45,8 +48,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',
       ),
-      home: Bluetooth(),
-      // home: MyHomePage(),
+      // home: Bluetooth(),
+      home: LoginPage(),
     );
   }
 }
