@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'signinsignout.dart';
 import 'userdata.dart';
+import 'package:http/http.dart';
+
 
 class CadastroWallet extends StatefulWidget {
   @override
@@ -34,8 +36,10 @@ class _CadastroWalletState extends State<CadastroWallet> {
               ),
               style: TextStyle(fontSize: 20),
               onFieldSubmitted: (value) {
-                //wallet = value;
+                wallet = value;
                 //inserir aqui função para enviar wallet id para o banco de dados
+                print(name + " " + email + " " + wallet);
+                cadastro(name, email, wallet);
                 Navigator.of(context).pushReplacementNamed('/homepage');
               },
             ),
@@ -57,5 +61,29 @@ class _CadastroWalletState extends State<CadastroWallet> {
         ),
       ),
     );
+  }
+
+    //Chama  a função de cadastrar
+  cadastro(String _name, String _email, String _wallet) async {
+    String function = "createUser";
+    // String name = "name="+ _name;
+    String email = "email=" + _email;
+    String wallet = "wallet_id=" + _wallet;
+
+    print("Cadastrando -  name: " +
+        _name +
+        "email: " +
+        _email +
+        "wallet" +
+        _wallet);
+
+    String url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        email +
+        '&' +
+        wallet;
+    print(url);
+    return await get(url);
   }
 }

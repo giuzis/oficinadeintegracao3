@@ -9,7 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
-import 'dart:convert' show utf8;
+import 'dart:convert' show jsonDecode, utf8;
 import 'signinsignout.dart';
 
 //Chamando Login para pegar dados
@@ -310,7 +310,10 @@ class _MyHomePageState extends State<MyHomePage>
           this._barcode = barcode;
         });
         print(this._barcode);
-        Navigator.of(context).pushReplacementNamed('/emviagem');
+        iniciaCorrida(email, _barcode).then((value){
+            print("Corrida iniciada");
+        });
+        // Navigator.of(context).pushReplacementNamed('/emviagem');
       });
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
@@ -431,6 +434,55 @@ class _MyHomePageState extends State<MyHomePage>
     }
   }
 
-  //Interpreta as mensagens do servidor e envia msg
-  void serverMessages() {}
+  //Transações com o Banco
+   //Google functions - Adicionar créditos na carteira
+  Future iniciaCorrida(String _email, String _bike) async {
+    String function = "iniciaCorrida";
+    String email = "email="+ _email;
+    String bike_id = "bike_id=" + _bike;
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + bike_id + '&'  + email;
+    print("Iniciando Corrida");
+    var response = await http.get(url);
+     
+    if(response.statusCode == 200){
+      Map<String, dynamic> hist = jsonDecode(response.body);
+      String _photoName = hist['name'] as String;
+      debugPrint("$hist['name']");
+      print(_photoName);
+
+      photoName = _photoName;
+      
+    }else{
+      msgErro();
+    }
+}
+
+Future<void> msgErro() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: Text('Rewind and remember'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Erro ao iniciar corrida!'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

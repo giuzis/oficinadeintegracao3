@@ -24,19 +24,30 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool retornoDaWallet;
+  
   @override
   Widget build(BuildContext context) {
     signInWithGoogle().whenComplete(() {
-      final exist = existWallet(email);
-      if (exist == true) {
-        wallet = '2NCuqAQyEtYb3oEpzZvF1KpE2rGLbCHMsnG';
-        print(name + " " + email + " " + wallet);
-        cadastro(name, email, wallet);
-      } else {
-        print("Não preciso fazer cadastro");
-      }
+      print("Antes da chamada");
 
-      Navigator.of(context).pushReplacementNamed('/homepage');
+      existWallet(email).then((value){
+          print(retornoDaWallet);
+
+          if (retornoDaWallet) {
+            print("Não preciso fazer cadastro");
+            Navigator.of(context).pushReplacementNamed('/homepage');
+
+          } else {
+            print("Cadastrando");
+            Navigator.of(context).pushReplacementNamed('/cadastrowallet');
+            // wallet = '2NCuqAQyEtYb3oEpzZvF1KpE2rGLbCHMsnG';
+            // print(name + " " + email + " " + wallet);
+            // cadastro(name, email, wallet);
+          }
+      });
+      print("Depois da chamada");
+
     });
 
     return Container(
@@ -127,60 +138,38 @@ class _LoginPageState extends State<LoginPage> {
   //  }
 
   //Chama  a função de cadastrar
-  cadastro(String _name, String _email, String _wallet) async {
-    String function = "createUser";
-    // String name = "name="+ _name;
-    String email = "email=" + _email;
-    String wallet = "wallet_id=" + _wallet;
-
-    print("Cadastrando -  name: " +
-        _name +
-        "email: " +
-        _email +
-        "wallet" +
-        _wallet);
-
-    String url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
-        function +
-        '?' +
-        email +
-        '&' +
-        wallet;
-    print(url);
-    return await get(url);
-  }
-
-  //Chama  a função de cadastrar
-  Future<bool> existWallet(String _email) async {
+  Future existWallet(String _email) async {
     String function = "userWalletExists";
     String email = "email=" + _email;
 
-    print("Exist wallet?");
-
     String url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
         function +
         '?' +
-        email +
-        '&' +
-        wallet;
+        email;
 
-    print(url);
-    var response = await get(url);
+    print("Exist wallet?");
 
-    if (response.statusCode == 200) {
-      // se o servidor retornar um response OK, vamos fazer o parse no JSON
-      // print("Response 200");
-      Map<String, dynamic> exist = jsonDecode(response.body);
-      bool walletExists = exist['exists'];
-      // var data = ExistWallet.fromJson(json.decode(response.body));
-      // var status = data.exists;
-      print(walletExists);
-      return walletExists;
-    } else {
-      print("Response not 200");
-      // se a responsta não for OK , lançamos um erro
-      // throw Exception('Failed to load post');
-      return false;
-    }
+    await get(url).then((response){
+        if (response.statusCode == 200) {
+            // se o servidor retornar um response OK, vamos fazer o parse no JSON
+            print("Response 200");
+            Map<String, dynamic> exist = jsonDecode(response.body);
+            bool walletExists = exist['exists'];
+            // var data = ExistWallet.fromJson(json.decode(response.body));
+            // var status = data.exists;
+            print(walletExists.toString());
+            if(walletExists.toString() == "true"){
+              retornoDaWallet = true;
+            }else{
+              retornoDaWallet = false;
+            }
+
+        } else {
+          print("Response not 200");
+          // se a responsta não for OK , lançamos um erro
+          // throw Exception('Failed to load post');
+          print("Erro");
+        }
+    });
   }
 }

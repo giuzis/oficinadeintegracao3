@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 // import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
+import 'userdata.dart';
 
 // QR Code page
 class ViagemEncerradaPage extends StatefulWidget {
@@ -29,10 +30,10 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
   }
 
   Future uploadFile() async {
-    final String fileName = "test";
+    // final String fileName = "test";
 
     StorageReference storageReference =
-        FirebaseStorage.instance.ref().child(fileName);
+        FirebaseStorage.instance.ref().child(photoName);
     StorageUploadTask uploadTask = storageReference.putFile(_image);
 
     await uploadTask.onComplete;
@@ -41,6 +42,9 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
       setState(() {
         _uploadedFileURL = fileURL;
       });
+
+      photoName = "";
+      
     });
 
     print(_uploadedFileURL);
