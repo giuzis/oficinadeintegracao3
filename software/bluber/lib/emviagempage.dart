@@ -12,28 +12,33 @@ class EmViagemPage extends StatefulWidget {
 class _EmViagemPageState extends State<EmViagemPage> {
   GoogleMapController mapController;
   Location location = Location();
-  Timer _timer;
-  var _timenow = new DateTime.now();
-  var _time;
+
+  bool reset = false;
+  bool start = true;
+  String timetext = '00:00:00';
+  var stopwatch = Stopwatch();
+  final duration = Duration(seconds: 1);
 
   void startTimer() {
-    _timer = new Timer.periodic(Duration(hours: 5), (_timer) {
-      print(_time);
-      setState(
-        () {
-          _time = _timenow.subtract(new Duration(
-            seconds: DateTime.now().second,
-            minutes: DateTime.now().minute,
-            hours: DateTime.now().hour,
-          ));
-        },
-      );
+    Timer(duration, keepRunning);
+  }
+
+  keepRunning() {
+    if (stopwatch.isRunning) {
+      startTimer();
+    }
+    setState(() {
+      timetext = stopwatch.elapsed.inHours.toString().padLeft(2, '0') +
+          ':' +
+          (stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, '0') +
+          ':' +
+          (stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0');
     });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    stopwatch.reset();
     super.dispose();
   }
 
@@ -68,8 +73,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
   }
 
   Widget build(BuildContext context) {
-    _timenow = new DateTime.now();
-    _time = new DateTime(0, 0, 0, 0, 0, 0, 0, 0);
+    stopwatch.start();
     startTimer();
     return Scaffold(
       appBar: AppBar(
@@ -94,11 +98,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
                       size: 30,
                     ),
                     Text(
-                      _time.hour.toString() +
-                          ':' +
-                          _time.minute.toString() +
-                          ':' +
-                          _time.second.toString(),
+                      timetext,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 40.0,
@@ -172,7 +172,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Encerrar viagem!'),
         onPressed: () {
-          //_timer.cancel();
+          stopwatch.stop();
           Navigator.of(context).pushReplacementNamed('/encerrarviagem');
         },
       ),
