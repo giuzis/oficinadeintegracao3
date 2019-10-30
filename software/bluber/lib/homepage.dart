@@ -178,9 +178,9 @@ class _MyHomePageState extends State<MyHomePage>
           // padding da imagem do user
           Padding(
             padding: EdgeInsets.only(
-                top: 55.0, left: 10.0), // define as coordenadas do widget
+                top: 70.0, left: 10.0), // define as coordenadas do widget
             child: CircleAvatar(
-              radius: 40.0,
+              radius: 30.0,
               // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
               backgroundImage: NetworkImage(
                 imageUrl,
@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage>
 
           // padding do nome do user
           Padding(
-            padding: EdgeInsets.only(top: 75.0, left: 110.0),
+            padding: EdgeInsets.only(top: 75.0, left: 85.0),
             // nome do usuário
             child: Text(
               name,
@@ -204,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage>
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(top: 105.0, left: 110.0),
+            padding: EdgeInsets.only(top: 105.0, left: 85.0),
             // nome do usuário
             child: Text(
               email,
@@ -267,7 +267,6 @@ class _MyHomePageState extends State<MyHomePage>
         walletFrom;
 
     var data = await http.get(url);
-    //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
 
   // modificar essas duas funções para incluir o mapa
@@ -308,6 +307,7 @@ class _MyHomePageState extends State<MyHomePage>
       await BarcodeScanner.scan().then((barcode) {
         setState(() {
           this._barcode = barcode;
+          bikeAlugada = barcode;
         });
         print(this._barcode);
         iniciaCorrida(email, _barcode).then((value){
