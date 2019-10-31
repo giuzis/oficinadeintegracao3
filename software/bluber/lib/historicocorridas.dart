@@ -1,4 +1,3 @@
-import 'package:bluber/userdata.dart';
 import 'package:flutter/material.dart';
 import 'displayimage.dart';
 
@@ -8,6 +7,7 @@ class HistoricoCorridasPage extends StatefulWidget {
 }
 
 class _HistoricoCorridasPageState extends State<HistoricoCorridasPage> {
+  //final ref = FirebaseStorage.instance.ref().child('testimage');
   List<List<String>> lista_historico = [
     [
       '00:00:00',
@@ -55,73 +55,5 @@ class _HistoricoCorridasPageState extends State<HistoricoCorridasPage> {
             })
         //_corridasList(),
         );
-  }
-
-  Widget corrida(String data, String preco, String imagem_url) {
-    return Card(
-      child: ListTile(
-        leading: Icon(Icons.directions_bike),
-        title: Text('00/00/00'),
-        subtitle: Text('0,00 BTC'),
-        trailing: Icon(Icons.arrow_right),
-        onTap: () {},
-      ),
-    );
-  }
-
-  Widget _corridasList() {
-    return ListView(
-      shrinkWrap: true,
-      children: const <Widget>[
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.directions_bike),
-            title: Text('00/00/00'),
-            subtitle: Text('0,00 BTC'),
-            trailing: Icon(Icons.arrow_right),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.directions_bike),
-            title: Text('00/00/00'),
-            subtitle: Text('0,00 BTC'),
-            trailing: Icon(Icons.arrow_right),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.directions_bike),
-            title: Text('00/00/00'),
-            subtitle: Text('0,00 BTC'),
-            trailing: Icon(Icons.arrow_right),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.directions_bike),
-            title: Text('00/00/00'),
-            subtitle: Text('0,00 BTC'),
-            trailing: Icon(Icons.arrow_right),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.directions_bike),
-            title: Text('00/00/00'),
-            subtitle: Text('0,00 BTC'),
-            trailing: Icon(Icons.arrow_right),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.directions_bike),
-            title: Text('00/00/00'),
-            subtitle: Text('0,00 BTC'),
-            trailing: Icon(Icons.arrow_right),
-          ),
-        ),
-      ],
-    );
   }
 }

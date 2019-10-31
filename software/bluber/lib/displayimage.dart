@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class DisplayImage extends StatelessWidget {
   final String imageUrl;
@@ -7,9 +8,7 @@ class DisplayImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Expanded(
-        child: Image.network(imageUrl),
-      ),
+      body: Image.network(imageUrl),
     );
   }
 }

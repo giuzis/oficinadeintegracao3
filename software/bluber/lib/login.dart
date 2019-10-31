@@ -155,6 +155,7 @@ class _LoginPageState extends State<LoginPage> {
             print("Response 200");
             Map<String, dynamic> exist = jsonDecode(response.body);
             bool walletExists = exist['exists'];
+            // debugPrint("$exist");
             // var data = ExistWallet.fromJson(json.decode(response.body));
             // var status = data.exists;
             print(walletExists.toString());

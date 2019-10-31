@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'homepage.dart';
 import 'emviagempage.dart';
-import 'encerrarviagem.dart';
 import 'minhacarteira.dart';
 import 'adicionarcreditos.dart';
 import 'login.dart';
@@ -26,7 +25,6 @@ class MyApp extends StatelessWidget {
         '/login': (BuildContext context) => LoginPage(),
         '/novobluber': (BuildContext context) => NovoBluberPage(),
         '/historicobluber': (BuildContext context) => HistoricoBluberPage(),
-        '/encerrarviagem': (BuildContext context) => ViagemEncerradaPage(),
         '/minhacarteira': (BuildContext context) => MinhaCarteiraPage(),
         '/homepage': (BuildContext context) => MyHomePage(),
         '/addcreditos': (BuildContext context) => AddCreditosPage(),
