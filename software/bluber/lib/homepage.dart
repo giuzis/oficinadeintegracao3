@@ -9,7 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
-import 'dart:convert' show utf8;
+import 'dart:convert' show jsonDecode, utf8;
 import 'signinsignout.dart';
 
 //Chamando Login para pegar dados
@@ -178,9 +178,9 @@ class _MyHomePageState extends State<MyHomePage>
           // padding da imagem do user
           Padding(
             padding: EdgeInsets.only(
-                top: 55.0, left: 10.0), // define as coordenadas do widget
+                top: 70.0, left: 10.0), // define as coordenadas do widget
             child: CircleAvatar(
-              radius: 40.0,
+              radius: 30.0,
               // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
               backgroundImage: NetworkImage(
                 imageUrl,
@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage>
 
           // padding do nome do user
           Padding(
-            padding: EdgeInsets.only(top: 75.0, left: 110.0),
+            padding: EdgeInsets.only(top: 75.0, left: 85.0),
             // nome do usuário
             child: Text(
               name,
@@ -204,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage>
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(top: 105.0, left: 110.0),
+            padding: EdgeInsets.only(top: 105.0, left: 85.0),
             // nome do usuário
             child: Text(
               email,
@@ -267,7 +267,6 @@ class _MyHomePageState extends State<MyHomePage>
         walletFrom;
 
     var data = await http.get(url);
-    //'https://us-central1-bluberstg.cloudfunctions.net/Litecoin_Transaction?ammount=0.001&wallet_to=2NEUV4DsSKPYemN6GmXsFPviBZv8aKceHKD&wallet_from=2N5mHpm29QqFouGiJ4eLMhMFwyNrYLyPhij');
   }
 
   // modificar essas duas funções para incluir o mapa
@@ -308,9 +307,13 @@ class _MyHomePageState extends State<MyHomePage>
       await BarcodeScanner.scan().then((barcode) {
         setState(() {
           this._barcode = barcode;
+          bikeAlugada = barcode;
         });
         print(this._barcode);
-        Navigator.of(context).pushReplacementNamed('/emviagem');
+        iniciaCorrida(email, _barcode).then((value){
+            print("Corrida iniciada");
+        });
+        // Navigator.of(context).pushReplacementNamed('/emviagem');
       });
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
@@ -431,6 +434,55 @@ class _MyHomePageState extends State<MyHomePage>
     }
   }
 
-  //Interpreta as mensagens do servidor e envia msg
-  void serverMessages() {}
+  //Transações com o Banco
+   //Google functions - Adicionar créditos na carteira
+  Future iniciaCorrida(String _email, String _bike) async {
+    String function = "iniciaCorrida";
+    String email = "email="+ _email;
+    String bike_id = "bike_id=" + _bike;
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + bike_id + '&'  + email;
+    print("Iniciando Corrida");
+    var response = await http.get(url);
+     
+    if(response.statusCode == 200){
+      Map<String, dynamic> hist = jsonDecode(response.body);
+      String _photoName = hist['name'] as String;
+      debugPrint("$hist['name']");
+      print(_photoName);
+
+      photoName = _photoName;
+      
+    }else{
+      msgErro();
+    }
+}
+
+Future<void> msgErro() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: Text('Rewind and remember'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Erro ao iniciar corrida!'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

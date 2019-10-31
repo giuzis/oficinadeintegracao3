@@ -4,6 +4,10 @@ import 'package:image_picker/image_picker.dart';
 // import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
+import 'userdata.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' show jsonDecode, utf8;
+
 
 // QR Code page
 class ViagemEncerradaPage extends StatefulWidget {
@@ -14,6 +18,8 @@ class ViagemEncerradaPage extends StatefulWidget {
 class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
   String _uploadedFileURL;
   File _image;
+
+  double valorCorrida; //Colocar aqui o resultado da corrida
 
   //Image Picker
   Future getImage(context) async {
@@ -29,10 +35,10 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
   }
 
   Future uploadFile() async {
-    final String fileName = "test";
+    // final String fileName = "test";
 
     StorageReference storageReference =
-        FirebaseStorage.instance.ref().child(fileName);
+        FirebaseStorage.instance.ref().child(photoName);
     StorageUploadTask uploadTask = storageReference.putFile(_image);
 
     await uploadTask.onComplete;
@@ -41,6 +47,9 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
       setState(() {
         _uploadedFileURL = fileURL;
       });
+
+      photoName = "";
+      
     });
 
     print(_uploadedFileURL);
@@ -133,10 +142,68 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
         label: Text('Finalizar avaliação'),
         onPressed: () {
           getImage(context);
+          encerrarCorrida(email, bikeAlugada, valorCorrida.toString());
           // Navigator.of(context).pushReplacementNamed('/homepage');
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
+
+  //Transações com o Banco
+   //Google functions - Adicionar créditos na carteira
+  Future encerrarCorrida(String _email, String _bike, String _valor) async {
+    String function = "encerrarCorrida";
+    String email = "email="+ _email;
+    String bike_id = "bike_id=" + _bike;
+    String valor = "valor=" + _valor;
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + bike_id + '&'  + email + '&'  + valor;
+    print("Encerrando Corrida");
+    var response = await http.get(url);
+     
+    if(response.statusCode == 200){
+      print("Resposta ok");
+      print("zerando o valor da bike");
+      bikeAlugada = null;
+
+      // Map<String, dynamic> hist = jsonDecode(response.body);
+      // String _photoName = hist['name'] as String;
+      // debugPrint("$hist['name']");
+      // print(_photoName);
+
+      // photoName = _photoName;
+      
+    }else{
+      msgErro();
+    }
+}
+
+Future<void> msgErro() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: Text('Rewind and remember'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Erro ao iniciar corrida!'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }
