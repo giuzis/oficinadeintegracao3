@@ -18,7 +18,6 @@ import 'package:http/http.dart' as http;
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 
-
 //Bibliotecas usadas para notificar
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -380,8 +379,8 @@ class _MyHomePageState extends State<MyHomePage>
           bikeAlugada = barcode;
         });
         print(this._barcode);
-        iniciaCorrida(email, _barcode).then((value){
-            print("Corrida iniciada");
+        iniciaCorrida(email, _barcode).then((value) {
+          print("Corrida iniciada");
         });
         Navigator.of(context).pushReplacementNamed('/emviagem');
       });
@@ -505,34 +504,37 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   //Transações com o Banco
-   //Google functions - Adicionar créditos na carteira
+  //Google functions - Adicionar créditos na carteira
   Future iniciaCorrida(String _email, String _bike) async {
     String function = "iniciaCorrida";
-    String email = "email="+ _email;
+    String email = "email=" + _email;
     String bike_id = "bike_id=" + _bike;
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + bike_id + '&'  + email;
-    
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        bike_id +
+        '&' +
+        email;
+
     print(url.toString());
     print("Iniciando Corrida");
-    
-    await http.get(url).then((response){
-          if(response.statusCode == 200){
-            Map<String, dynamic> hist = jsonDecode(response.body);
-            String _photoName = hist['codigo_da_viagem'] as String;
-            // debugPrint("$hist");
-            print(_photoName);
 
-            photoName = _photoName;
-            
-          }else{
-            msgErro();
-          }
+    await http.get(url).then((response) {
+      if (response.statusCode == 200) {
+        Map<String, dynamic> hist = jsonDecode(response.body);
+        String _photoName = hist['codigo_da_viagem'] as String;
+        // debugPrint("$hist");
+        print(_photoName);
+
+        photoName = _photoName;
+      } else {
+        msgErro();
+      }
     });
-    
-}
+  }
 
-Future<void> msgErro() async {
+  Future<void> msgErro() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -558,5 +560,4 @@ Future<void> msgErro() async {
       },
     );
   }
-
 }

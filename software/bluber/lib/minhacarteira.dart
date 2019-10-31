@@ -17,7 +17,9 @@ class Wallet {
   Wallet({this.credit, this.wallet_id});
 
   factory Wallet.fromJson(Map<String, dynamic> json) {
-    return Wallet(credit: json['credit'] as double, wallet_id: json['wallet_id'] as String );
+    return Wallet(
+        credit: json['credit'] as double,
+        wallet_id: json['wallet_id'] as String);
   }
 }
 
@@ -34,11 +36,10 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
       ),
       body: Column(
         children: <Widget>[
-          Padding(
-            padding: EdgeInsetsDirectional.only(top: 270.0, start: 0.0),
-            child: Center(
-                child: Text('Seu saldo', style: TextStyle(fontSize: 25))),
+          Container(
+            height: 300,
           ),
+          Center(child: Text('Seu saldo', style: TextStyle(fontSize: 25))),
           FutureBuilder<Wallet>(
               future: fetchWallet(email),
               builder: (context, snapshot) {
@@ -54,25 +55,39 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
                   return CircularProgressIndicator();
                 }
               }),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: new RaisedButton(
-                  child: new Text("Adicionar créditos"),
-                  color:  Colors.blueAccent[600],
-                  onPressed: (){
-                    Navigator.of(context).pushNamed('/addcreditos');
-                  }),
-              ),
-              new RaisedButton(
-                child: new Text("Retirar créditos"),
-                color:  Colors.blueAccent[600],
-                onPressed: (){
-                  Navigator.of(context).pushNamed('/retcreditos');
-                }),
-
+          Container(
+            height: 200,
+          ),
+          Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: new Text(
+                      "Adicionar créditos",
+                      style: TextStyle(color: Colors.white, fontSize: 15),
+                    ),
+                    color: Colors.blue,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/addcreditos');
+                    }),
+                FlatButton(
+                    color: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
+                    child: new Text(
+                      "Retirar créditos",
+                      style: TextStyle(color: Colors.white, fontSize: 15),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/retcreditos');
+                    }),
+              ]),
         ],
       ),
-      );
+    );
   }
 
 //Google functions - função que retorna a carteira do usuário
@@ -94,7 +109,7 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
 
   Future<Wallet> fetchWallet(String _email) async {
     String function = "getUserWallet";
-    String email = "email="+_email;
+    String email = "email=" + _email;
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
         function +
@@ -114,11 +129,10 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
     }
   }
 
-  void pegaDadosCarteira(http.Response response){
-      print("Estou preenchendo os dados");
-      Map<String, dynamic> walletJson = jsonDecode(response.body);
-      String id_wallet = walletJson['wallet_id'] as String;
-
+  void pegaDadosCarteira(http.Response response) {
+    print("Estou preenchendo os dados");
+    Map<String, dynamic> walletJson = jsonDecode(response.body);
+    String id_wallet = walletJson['wallet_id'] as String;
   }
 
   // void pegaWallet() async {
@@ -148,7 +162,6 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
   //     throw Exception('Failed to load post');
   //   }
   // }
-
 
 // // Função que retorna o saldo da carteira do usuário
 //   Future<String> saldoCarteira() async {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:async';
+import 'encerrarviagem.dart';
 
 //import 'package:slider/slider_button.dart';
 class EmViagemPage extends StatefulWidget {
@@ -13,9 +14,10 @@ class _EmViagemPageState extends State<EmViagemPage> {
   GoogleMapController mapController;
   Location location = Location();
 
-  bool reset = false;
-  bool start = true;
+  bool isRunning = true;
   String timetext = '00:00:00';
+  String pricetext = '0,00002';
+  double price = 0.00002;
   var stopwatch = Stopwatch();
   final duration = Duration(seconds: 1);
 
@@ -24,21 +26,25 @@ class _EmViagemPageState extends State<EmViagemPage> {
   }
 
   keepRunning() {
-    if (stopwatch.isRunning) {
+    if (isRunning) {
       startTimer();
+
+      setState(() {
+        timetext = stopwatch.elapsed.inHours.toString().padLeft(2, '0') +
+            ':' +
+            (stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, '0') +
+            ':' +
+            (stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0');
+        price = (stopwatch.elapsed.inMinutes * 0.00001) + 0.00002;
+        pricetext = price.toStringAsFixed(5);
+      });
     }
-    setState(() {
-      timetext = stopwatch.elapsed.inHours.toString().padLeft(2, '0') +
-          ':' +
-          (stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, '0') +
-          ':' +
-          (stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0');
-    });
   }
 
   @override
   void dispose() {
     stopwatch.reset();
+    isRunning = false;
     super.dispose();
   }
 
@@ -111,7 +117,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Text(
-                      '0,00 BTC',
+                      pricetext + ' BTC',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 25.0,
@@ -119,7 +125,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
                       ),
                     ),
                     Text(
-                      '0,00 BTC/min',
+                      '0,00001 BTC/min',
                       style: TextStyle(
                         fontSize: 20.0,
                         color: Colors.white,
@@ -173,7 +179,14 @@ class _EmViagemPageState extends State<EmViagemPage> {
         label: Text('Encerrar viagem!'),
         onPressed: () {
           stopwatch.stop();
-          Navigator.of(context).pushReplacementNamed('/encerrarviagem');
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ViagemEncerradaPage(
+                  valorCorrida: price,
+                  tempoCorrida: timetext,
+                ),
+              ));
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

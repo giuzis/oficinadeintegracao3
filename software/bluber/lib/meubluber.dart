@@ -100,6 +100,8 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
         });
         print(this._barcode);
         bike = _barcode;
+      }).catchError((onError) {
+        print('Error.');
       });
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
