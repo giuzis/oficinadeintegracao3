@@ -13,9 +13,9 @@ class _EmViagemPageState extends State<EmViagemPage> {
   GoogleMapController mapController;
   Location location = Location();
 
-  bool reset = false;
-  bool start = true;
+  bool isRunning = true;
   String timetext = '00:00:00';
+  String pricetext = '0,00002';
   var stopwatch = Stopwatch();
   final duration = Duration(seconds: 1);
 
@@ -24,21 +24,25 @@ class _EmViagemPageState extends State<EmViagemPage> {
   }
 
   keepRunning() {
-    if (stopwatch.isRunning) {
+    if (isRunning) {
       startTimer();
+
+      setState(() {
+        timetext = stopwatch.elapsed.inHours.toString().padLeft(2, '0') +
+            ':' +
+            (stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, '0') +
+            ':' +
+            (stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0');
+        pricetext = ((stopwatch.elapsed.inMinutes * 0.00001) + 0.00002)
+            .toStringAsFixed(5);
+      });
     }
-    setState(() {
-      timetext = stopwatch.elapsed.inHours.toString().padLeft(2, '0') +
-          ':' +
-          (stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, '0') +
-          ':' +
-          (stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0');
-    });
   }
 
   @override
   void dispose() {
     stopwatch.reset();
+    isRunning = false;
     super.dispose();
   }
 
@@ -111,7 +115,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Text(
-                      '0,00 BTC',
+                      pricetext + ' BTC',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 25.0,
@@ -119,7 +123,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
                       ),
                     ),
                     Text(
-                      '0,00 BTC/min',
+                      '0,00001 BTC/min',
                       style: TextStyle(
                         fontSize: 20.0,
                         color: Colors.white,
