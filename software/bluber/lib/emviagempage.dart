@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:async';
+import 'encerrarviagem.dart';
 
 //import 'package:slider/slider_button.dart';
 class EmViagemPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
   bool isRunning = true;
   String timetext = '00:00:00';
   String pricetext = '0,00002';
+  double price = 0.00002;
   var stopwatch = Stopwatch();
   final duration = Duration(seconds: 1);
 
@@ -33,8 +35,8 @@ class _EmViagemPageState extends State<EmViagemPage> {
             (stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, '0') +
             ':' +
             (stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0');
-        pricetext = ((stopwatch.elapsed.inMinutes * 0.00001) + 0.00002)
-            .toStringAsFixed(5);
+        price = (stopwatch.elapsed.inMinutes * 0.00001) + 0.00002;
+        pricetext = price.toStringAsFixed(5);
       });
     }
   }
@@ -177,7 +179,14 @@ class _EmViagemPageState extends State<EmViagemPage> {
         label: Text('Encerrar viagem!'),
         onPressed: () {
           stopwatch.stop();
-          Navigator.of(context).pushReplacementNamed('/encerrarviagem');
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ViagemEncerradaPage(
+                  valorCorrida: price,
+                  tempoCorrida: timetext,
+                ),
+              ));
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

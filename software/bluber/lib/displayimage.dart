@@ -6,7 +6,10 @@ class DisplayImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Image.network(imageUrl),
+      appBar: AppBar(),
+      body: Expanded(
+        child: Image.network(imageUrl),
+      ),
     );
   }
 }

@@ -8,9 +8,13 @@ import 'userdata.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show jsonDecode, utf8;
 
-
 // QR Code page
 class ViagemEncerradaPage extends StatefulWidget {
+  final double valorCorrida;
+  final String tempoCorrida;
+  ViagemEncerradaPage(
+      {Key key, @required this.valorCorrida, @required this.tempoCorrida})
+      : super(key: key);
   @override
   _ViagemEncerradaPageState createState() => _ViagemEncerradaPageState();
 }
@@ -19,7 +23,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
   String _uploadedFileURL;
   File _image;
 
-  double valorCorrida; //Colocar aqui o resultado da corrida
+  double rating;
 
   //Image Picker
   Future getImage(context) async {
@@ -49,7 +53,6 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
       });
 
       photoName = "";
-      
     });
 
     print(_uploadedFileURL);
@@ -78,7 +81,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
                       size: 30,
                     ),
                     Text(
-                      '00:00',
+                      widget.time,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 40.0,
@@ -91,7 +94,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Text(
-                      '0,00 BTC',
+                      widget.price.toString() + ' BTC',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 25.0,
@@ -99,7 +102,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
                       ),
                     ),
                     Text(
-                      '0,00 BTC/min',
+                      '0,00001 BTC/min',
                       style: TextStyle(
                         fontSize: 20.0,
                         color: Colors.white,
@@ -130,7 +133,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
                 color: Colors.amber,
               ),
               onRatingUpdate: (rating) {
-                print(rating);
+                rating = rating;
               },
             ),
           ),
@@ -151,18 +154,25 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
   }
 
   //Transações com o Banco
-   //Google functions - Adicionar créditos na carteira
+  //Google functions - Adicionar créditos na carteira
   Future encerrarCorrida(String _email, String _bike, String _valor) async {
     String function = "encerrarCorrida";
-    String email = "email="+ _email;
+    String email = "email=" + _email;
     String bike_id = "bike_id=" + _bike;
     String valor = "valor=" + _valor;
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + bike_id + '&'  + email + '&'  + valor;
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        bike_id +
+        '&' +
+        email +
+        '&' +
+        valor;
     print("Encerrando Corrida");
     var response = await http.get(url);
-     
-    if(response.statusCode == 200){
+
+    if (response.statusCode == 200) {
       print("Resposta ok");
       print("zerando o valor da bike");
       bikeAlugada = null;
@@ -173,13 +183,13 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
       // print(_photoName);
 
       // photoName = _photoName;
-      
-    }else{
+
+    } else {
       msgErro();
     }
-}
+  }
 
-Future<void> msgErro() async {
+  Future<void> msgErro() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -205,5 +215,4 @@ Future<void> msgErro() async {
       },
     );
   }
-
 }
