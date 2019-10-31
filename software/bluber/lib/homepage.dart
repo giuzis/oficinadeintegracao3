@@ -18,6 +18,12 @@ import 'package:http/http.dart' as http;
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 
+
+//Bibliotecas usadas para notificar
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:firebase_database/firebase_database.dart';
+
 //Variáveis de Transição do Bluetooth
 String lock = 'L'; //Fechar a trava da Bike
 String unlock = 'U'; //Abrir a trava
@@ -53,6 +59,12 @@ class _MyHomePageState extends State<MyHomePage>
   bool isConnected = false;
   bool bluetoothStateBool = false;
 
+//Variáveis usadas para notificar
+  String textValue = 'Hello World !';
+  FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      new FlutterLocalNotificationsPlugin();
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +90,54 @@ class _MyHomePageState extends State<MyHomePage>
         _bluetoothState = state;
       });
     });
+
+    //Setup das configurações
+    var android = new AndroidInitializationSettings('mipmap/ic_launcher');
+    var ios = new IOSInitializationSettings();
+    var platform = new InitializationSettings(android, ios);
+    flutterLocalNotificationsPlugin.initialize(platform);
+
+    firebaseMessaging.configure(
+      onLaunch: (Map<String, dynamic> msg) {
+        print(" onLaunch called ${(msg)}");
+      },
+      onResume: (Map<String, dynamic> msg) {
+        print(" onResume called ${(msg)}");
+      },
+      onMessage: (Map<String, dynamic> msg) {
+        showNotification(msg);
+        print(" onMessage called ${(msg)}");
+      },
+    );
+    firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, alert: true, badge: true));
+    firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings setting) {
+      print('IOS Setting Registed');
+    });
+    firebaseMessaging.getToken().then((token) {
+      update(token);
+    });
+  }
+
+  showNotification(Map<String, dynamic> msg) async {
+    var android = new AndroidNotificationDetails(
+      'sdffds dsffds',
+      "CHANNLE NAME",
+      "channelDescription",
+    );
+    var iOS = new IOSNotificationDetails();
+    var platform = new NotificationDetails(android, iOS);
+    // await flutterLocalNotificationsPlugin.show(
+    //     0, "Bluber", "this is demo", platform);
+  }
+
+  update(String token) {
+    print(token);
+    DatabaseReference databaseReference = new FirebaseDatabase().reference();
+    databaseReference.child('fcm-token/${token}').set({"token": token});
+    textValue = token;
+    setState(() {});
   }
 
   @override
@@ -442,20 +502,24 @@ class _MyHomePageState extends State<MyHomePage>
     String bike_id = "bike_id=" + _bike;
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + bike_id + '&'  + email;
+    
+    print(url.toString());
     print("Iniciando Corrida");
-    var response = await http.get(url);
-     
-    if(response.statusCode == 200){
-      Map<String, dynamic> hist = jsonDecode(response.body);
-      String _photoName = hist['name'] as String;
-      debugPrint("$hist['name']");
-      print(_photoName);
+    
+    await http.get(url).then((response){
+          if(response.statusCode == 200){
+            Map<String, dynamic> hist = jsonDecode(response.body);
+            String _photoName = hist['codigo_da_viagem'] as String;
+            // debugPrint("$hist");
+            print(_photoName);
 
-      photoName = _photoName;
-      
-    }else{
-      msgErro();
-    }
+            photoName = _photoName;
+            
+          }else{
+            msgErro();
+          }
+    });
+    
 }
 
 Future<void> msgErro() async {

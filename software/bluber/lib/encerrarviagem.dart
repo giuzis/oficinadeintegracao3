@@ -20,6 +20,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
   File _image;
 
   double valorCorrida; //Colocar aqui o resultado da corrida
+  double rating;
 
   //Image Picker
   Future getImage(context) async {
@@ -130,6 +131,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
                 color: Colors.amber,
               ),
               onRatingUpdate: (rating) {
+                rating = rating;
                 print(rating);
               },
             ),
@@ -142,7 +144,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
         label: Text('Finalizar avaliação'),
         onPressed: () {
           getImage(context);
-          encerrarCorrida(email, bikeAlugada, valorCorrida.toString());
+          encerrarCorrida(photoName, rating.toString(), valorCorrida.toString());
           // Navigator.of(context).pushReplacementNamed('/homepage');
         },
       ),
@@ -152,13 +154,13 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
 
   //Transações com o Banco
    //Google functions - Adicionar créditos na carteira
-  Future encerrarCorrida(String _email, String _bike, String _valor) async {
+  Future encerrarCorrida(String _photoName, String _rating, String _valor) async {
     String function = "encerrarCorrida";
-    String email = "email="+ _email;
-    String bike_id = "bike_id=" + _bike;
+    String photoName = "email="+ _photoName;
+    String rating = "bike_id=" + _rating;
     String valor = "valor=" + _valor;
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + bike_id + '&'  + email + '&'  + valor;
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + photoName + '&'  + rating + '&'  + valor;
     print("Encerrando Corrida");
     var response = await http.get(url);
      
@@ -167,12 +169,12 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
       print("zerando o valor da bike");
       bikeAlugada = null;
 
-      // Map<String, dynamic> hist = jsonDecode(response.body);
-      // String _photoName = hist['name'] as String;
-      // debugPrint("$hist['name']");
-      // print(_photoName);
+      Map<String, dynamic> rate = jsonDecode(response.body);
+      String _rating = rate['rate'] as String;
+      debugPrint("$rate");
+      print(_rating);
 
-      // photoName = _photoName;
+      userRate = _rating;
       
     }else{
       msgErro();
