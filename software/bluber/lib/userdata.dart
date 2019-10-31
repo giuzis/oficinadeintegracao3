@@ -9,7 +9,7 @@ String bike = null;
 String imageUrl = null;
 String photoName = null;
 String bikeAlugada = null;
-String userRate = null;
+String userRate = "5";
 
 //   UserData(this.name, this.email, this.bike) {
 //     _createDocument('user', this.email, {name: this.name});

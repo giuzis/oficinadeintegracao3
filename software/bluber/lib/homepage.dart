@@ -255,7 +255,6 @@ class _MyHomePageState extends State<MyHomePage>
             // nome do usuário
             child: Text(
               name,
-              //UserData.getName(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 25.0,
@@ -268,13 +267,24 @@ class _MyHomePageState extends State<MyHomePage>
             // nome do usuário
             child: Text(
               email,
-              //UserData.getName(),
               style: TextStyle(
                 fontSize: 15.0,
                 color: Colors.white,
               ),
             ),
           ),
+          // Padding(
+          //   padding: EdgeInsets.only(top: 135.0, left: 85.0),
+          //   // nome do usuário
+          //   child: Text(
+          //     userRate,
+          //     //UserData.getName(),
+          //     style: TextStyle(
+          //       fontSize: 15.0,
+          //       color: Colors.white,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -373,7 +383,7 @@ class _MyHomePageState extends State<MyHomePage>
         iniciaCorrida(email, _barcode).then((value){
             print("Corrida iniciada");
         });
-        // Navigator.of(context).pushReplacementNamed('/emviagem');
+        Navigator.of(context).pushReplacementNamed('/emviagem');
       });
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {

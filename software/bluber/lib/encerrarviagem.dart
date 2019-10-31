@@ -155,10 +155,10 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
   //Transações com o Banco
    //Google functions - Adicionar créditos na carteira
   Future encerrarCorrida(String _photoName, String _rating, String _valor) async {
-    String function = "encerrarCorrida";
-    String photoName = "email="+ _photoName;
-    String rating = "bike_id=" + _rating;
-    String valor = "valor=" + _valor;
+    String function = "finalizaCorrida";
+    String photoName = "history="+ _photoName;
+    String rating = "rating=" + _rating;
+    String valor = "amount=" + _valor;
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + photoName + '&'  + rating + '&'  + valor;
     print("Encerrando Corrida");
@@ -172,7 +172,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
       Map<String, dynamic> rate = jsonDecode(response.body);
       String _rating = rate['rate'] as String;
       debugPrint("$rate");
-      print(_rating);
+      // print(_rating);
 
       userRate = _rating;
       
@@ -191,7 +191,7 @@ Future<void> msgErro() async {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Erro ao iniciar corrida!'),
+                Text('Erro ao encerrar corrida!'),
               ],
             ),
           ),
