@@ -1,9 +1,3 @@
-/*********** Página home page ***************/
-/* Para adicionar os mapas, modifique as duas últimas funções:
-    _googleMap1()
-    _googleMap2()
-*/
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -41,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage>
   Location location = Location();
   String _barcode = "";
   //Funções do Bluetooth
-  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
+  var bts = FlutterBluetoothSerial.instance;
   List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
   bool discovered = false;
   String _hc05Adress = '20:16:07:25:05:13';
@@ -54,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage>
   Timer _discoverableTimeoutTimer;
 
   //Variáveis de conexão
+  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
   BluetoothConnection _connection;
   bool isConnected = false;
   bool bluetoothStateBool = false;
@@ -69,22 +64,20 @@ class _MyHomePageState extends State<MyHomePage>
     super.initState();
 
     // Get current state
-    FlutterBluetoothSerial.instance.state.then((state) {
+    bts.state.then((state) {
       setState(() {
         _bluetoothState = state;
       });
     });
 
-    FlutterBluetoothSerial.instance.name.then((name) {
+    bts.name.then((name) {
       setState(() {
         _name = name;
       });
     });
 
     // Listen for futher state changes
-    FlutterBluetoothSerial.instance
-        .onStateChanged()
-        .listen((BluetoothState state) {
+    bts.onStateChanged().listen((BluetoothState state) {
       setState(() {
         _bluetoothState = state;
       });
@@ -141,8 +134,9 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   void dispose() {
-    FlutterBluetoothSerial.instance.setPairingRequestHandler(null);
+    bts.setPairingRequestHandler(null);
     _discoverableTimeoutTimer?.cancel();
+    _streamSubscription?.cancel();
     super.dispose();
   }
 
@@ -373,7 +367,7 @@ class _MyHomePageState extends State<MyHomePage>
           print("Corrida iniciada");
         });
         Navigator.of(context).pushReplacementNamed('/emviagem');
-      });
+      }).catchError((onError) {});
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {
@@ -406,7 +400,7 @@ class _MyHomePageState extends State<MyHomePage>
   //Bluetooth
   //Pega o status do bluetooth
   Future getBluetoothState() async {
-    return FlutterBluetoothSerial.instance.state; //.then((state) {
+    return bts.state; //.then((state) {
     // setState(() {
     //   bluetoothState = state;
     // });
@@ -421,8 +415,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   //Descobre os dispositivos de Bluetooth
   void bluetoothDiscovery() {
-    _streamSubscription =
-        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
+    _streamSubscription = bts.startDiscovery().listen((r) {
       results.add(r);
     });
 
@@ -445,7 +438,7 @@ class _MyHomePageState extends State<MyHomePage>
   //Pede para ligar o bluetooth
   Future bluetoothRequest() async {
     // async lambda seems to not working
-    await FlutterBluetoothSerial.instance.requestEnable().then((value) {
+    await bts.requestEnable().then((value) {
       getBluetoothState();
     });
   }
@@ -484,8 +477,8 @@ class _MyHomePageState extends State<MyHomePage>
 
     if (text.length > 0) {
       try {
-        print('Enviando texto: ' + text);
         _connection.output.add(utf8.encode(text + "\r\n"));
+        print('Enviando texto: ' + text);
         await _connection.output.allSent;
       } catch (e) {
         // Ignore error, but notify state
@@ -519,35 +512,9 @@ class _MyHomePageState extends State<MyHomePage>
 
         photoName = _photoName;
       } else {
-        msgErro();
+        showAlertDialog(
+            context, 'Erro ao iniciar corrida', 'Tente novamente mais tarde');
       }
     });
-  }
-
-  Future<void> msgErro() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          //title: Text('Rewind and remember'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Erro ao iniciar corrida!'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('Ok'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }

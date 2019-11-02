@@ -3,6 +3,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:async';
 import 'encerrarviagem.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'dart:convert' show jsonDecode, utf8;
+
+//Variáveis de Transição do Bluetooth
+String lock = 'L'; //Fechar a trava da Bike
+String unlock = 'U'; //Abrir a trava
+String waitRent = 'R'; //Quando alguém ler o QRCode esse sinal deve ser enviado
+String endTrip = 'E'; //Encerra a viagem
 
 //import 'package:slider/slider_button.dart';
 class EmViagemPage extends StatefulWidget {
@@ -20,6 +28,63 @@ class _EmViagemPageState extends State<EmViagemPage> {
   double price = 0.00002;
   var stopwatch = Stopwatch();
   final duration = Duration(seconds: 1);
+
+  //Funções do Bluetooth
+  var bts = FlutterBluetoothSerial.instance;
+  List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
+  bool discovered = false;
+  String _hc05Adress = '20:16:07:25:05:13';
+
+  BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
+
+  String _address = "...";
+  String _name = "...";
+
+  Timer _discoverableTimeoutTimer;
+
+  //Variáveis de conexão
+  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
+  BluetoothConnection _connection;
+  bool isConnected = false;
+  bool bluetoothStateBool = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    stopwatch.start();
+    startTimer();
+
+    // Get current state
+    bts.state.then((state) {
+      setState(() {
+        _bluetoothState = state;
+      });
+    });
+
+    bts.name.then((name) {
+      setState(() {
+        _name = name;
+      });
+    });
+
+    // Listen for futher state changes
+    bts.onStateChanged().listen((BluetoothState state) {
+      setState(() {
+        _bluetoothState = state;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    bts.setPairingRequestHandler(null);
+    _discoverableTimeoutTimer?.cancel();
+    _streamSubscription?.cancel();
+    stopwatch.reset();
+    isRunning = false;
+    super.dispose();
+  }
 
   void startTimer() {
     Timer(duration, keepRunning);
@@ -41,25 +106,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
     }
   }
 
-  @override
-  void dispose() {
-    stopwatch.reset();
-    isRunning = false;
-    super.dispose();
-  }
-
   Widget _googleMap(BuildContext context) {
-    // Bluetooth().getBluetoothState();
-
-    // if (Bluetooth().bluetoothState.toString().contains('ON')) {
-    //   while (Bluetooth().Discovered != true) {
-    //     Bluetooth().bluetoothDiscovery();
-    //   }
-    // } else {
-    //   Bluetooth().bluetoothRequest();
-    // }
-    //colocar aqui a requisição do servidos e chamar Bluletooth().serverMessage();
-
     return GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
@@ -79,8 +126,6 @@ class _EmViagemPageState extends State<EmViagemPage> {
   }
 
   Widget build(BuildContext context) {
-    stopwatch.start();
-    startTimer();
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text("Em viagem...")),
@@ -178,6 +223,19 @@ class _EmViagemPageState extends State<EmViagemPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Encerrar viagem!'),
         onPressed: () {
+          if (_bluetoothState.toString().contains('STATE_ON')) {
+            bluetoothDiscovery();
+          } else {
+            bluetoothRequest().then((value) {
+              if (_bluetoothState.toString().contains('STATE_ON')) {
+                bluetoothDiscovery();
+              } else {
+                showAlertDialog(context, 'Bluetooth desligado!',
+                    'Ligue o bluetooth para terminar');
+              }
+            });
+          }
+
           stopwatch.stop();
           Navigator.push(
               context,
@@ -191,6 +249,96 @@ class _EmViagemPageState extends State<EmViagemPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+//Pede para ligar o bluetooth
+  Future bluetoothRequest() async {
+    // async lambda seems to not working
+    await bts.requestEnable();
+  }
+
+  void bluetoothDiscovery() {
+    _streamSubscription = bts.startDiscovery().listen((r) {
+      results.add(r);
+    });
+
+    print('Procurando HC-05');
+    for (int i = 0; i < results.length; i++) {
+      if (results[i].device.address == _hc05Adress) {
+        discovered = true;
+      }
+    }
+
+    if (discovered) {
+      bluetoothConection();
+    } else {
+      isConnected = false;
+      showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+          'Tente novamente mais tarde.');
+    }
+  }
+
+  //Conecta ao dispositivo
+  Future bluetoothConection() async {
+    // Some simplest connection :F
+    try {
+      await BluetoothConnection.toAddress(_hc05Adress).then((connection) {
+        print('Connected to the device');
+
+        _connection = connection;
+        isConnected = true;
+        //
+        //mandar mensagem de lock bike e end trip
+        //sendMessage(lock);
+        //sendMessage(endTrip);
+        //
+      }).catchError((onError) {
+        isConnected = false;
+        showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+            'Tente novamente mais tarde.');
+      });
+
+      // connection.input.listen((Uint8List data) {
+      // }).onDone(() {
+      //   print('Disconnected by remote request');
+      // });
+    } catch (exception) {
+      isConnected = false;
+      showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+          'Tente novamente mais tarde.');
+      print('Cannot connect, exception occured');
+    }
+  }
+
+  showAlertDialog(BuildContext context, String title, String content) {
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(content),
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  //Envia mensagem
+  void _sendMessage(String text) async {
+    text = text.trim();
+
+    if (text.length > 0) {
+      try {
+        _connection.output.add(utf8.encode(text + "\r\n"));
+        print('Enviando texto: ' + text);
+        await _connection.output.allSent;
+      } catch (e) {
+        // Ignore error, but notify state
+      }
+    }
   }
 }
 

@@ -7,6 +7,7 @@ import 'dart:io';
 import 'userdata.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show jsonDecode, utf8;
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 // QR Code page
 class ViagemEncerradaPage extends StatefulWidget {
