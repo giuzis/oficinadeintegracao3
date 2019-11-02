@@ -1,16 +1,17 @@
 import 'dart:ffi';
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/android.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
 import 'dart:convert' show jsonDecode, utf8;
 import 'signinsignout.dart';
-import 'dart:math';
+// import 'dart:math';
 
 //Chamando Login para pegar dados
 import 'userdata.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 
@@ -34,11 +35,14 @@ class _MyHomePageState extends State<MyHomePage>
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   MarkerId selectedMarker;
   Location location = Location();
-  int _markerIdCounter = 1;
+  // int _markerIdCounter = 1;
   static final LatLng center = const LatLng(-25.438376, -49.263781);
+  BitmapDescriptor myIcon;
+  bool bikesUpdated = false;
 
   //Variável que pega a leitura do QRCode
   String _barcode = "";
+  bool getInformationFlag = false;
 
   //Funções do Bluetooth
   var bts = FlutterBluetoothSerial.instance;
@@ -69,6 +73,11 @@ class _MyHomePageState extends State<MyHomePage>
   void initState() {
     super.initState();
 
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(48, 48)), 'images/iconBubble.png')
+        .then((onValue) {
+      myIcon = onValue;
+    });
     // Get current state
     bts.state.then((state) {
       setState(() {
@@ -135,7 +144,6 @@ class _MyHomePageState extends State<MyHomePage>
     DatabaseReference databaseReference = new FirebaseDatabase().reference();
     databaseReference.child('fcm-token/${token}').set({"token": token});
     textValue = token;
-    setState(() {});
   }
 
   @override
@@ -150,11 +158,15 @@ class _MyHomePageState extends State<MyHomePage>
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
-    //Esta função pega a rating e o bike ID
-    getInformation(email);
+    if (!getInformationFlag) {
+      //Esta função pega a rating e o bike ID
+      getInformation(email);
+    }
 
-    //Pega as bicicletas ativas
-    adicicionaBikes();
+    if (!bikesUpdated) {
+      //Pega as bicicletas ativas
+      adicicionaBikes();
+    }
 
     // nossa página inicial será um definida por um controle de abas
     return Scaffold(
@@ -344,7 +356,7 @@ class _MyHomePageState extends State<MyHomePage>
         '&' +
         walletFrom;
 
-    await get(url);
+    await http.get(url);
   }
 
   // modificar essas duas funções para incluir o mapa
@@ -358,8 +370,12 @@ class _MyHomePageState extends State<MyHomePage>
       ),
       onMapCreated: _onMapCreated,
       myLocationEnabled: true,
+      onCameraMove: (position) {
+        // adicicionaBikes();
+      },
+      // trackCameraPosition: true,
+      // myLocationEnabled: true,
       compassEnabled: true,
-      // markers: Set<Marker>.of(markers.values),
       // markers: { marcelle },
       markers: Set<Marker>.of(markers.values),
     );
@@ -401,30 +417,30 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  void adicicionaBikes() async {
+  void adicicionaBikes() {
     String function = "retornaBikes";
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' + function;
 
-    await get(url).then((response) {
+    http.get(url).then((response) {
+      Map<String, dynamic> bikes = jsonDecode(response.body);
       if (response.statusCode == 200) {
         print("Resposta ok");
-
-        Map<String, dynamic> bikes = jsonDecode(response.body);
 
         String len = bikes.keys.toString();
         len = len.replaceAll("(", "");
         len = len.replaceAll(")", "");
-        List<String> name = len.split(",");
+        List<String> name = len.split(", ");
 
         debugPrint("$bikes");
-        // debugPrint("Testes: " + name.length.toString());
-        // print(bikes['BluberBike']["lat"]);
+        bikesUpdated = true;
+        // debugPrint("Testes: " + bikes[name[0]]['lat']);
+
         final int markerCount = name.length;
         print(markerCount);
 
-        for (int i = 0; i < markerCount - 1; i++) {
-          print("Estou aqui i = " + i.toString());
+        for (int i = 0; i < markerCount; i++) {
+          // print("Estou aqui i = " + i.toString());
           final String markerIdVal = name[i].toString();
           print("markerIdVal = " + markerIdVal);
 
@@ -432,18 +448,24 @@ class _MyHomePageState extends State<MyHomePage>
 
           double latitude = double.parse(bikes[name[i]]['lat']);
           print("lat " + latitude.toString());
-          double longitude = double.parse(bikes[name[i]]["lon"]);
+          double longitude = double.parse(bikes[name[i]]['lon']);
           print("lon" + longitude.toString());
 
           final LatLng localizacao = LatLng(latitude, longitude);
 
-          final Marker marker = Marker(
-              markerId: markerId,
-              position: LatLng(localizacao.latitude, localizacao.longitude),
-              infoWindow: InfoWindow(title: markerIdVal, snippet: '*'),
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                BitmapDescriptor.hueOrange,
-              ));
+          Marker marker = Marker(
+            markerId: markerId,
+            position: LatLng(localizacao.latitude, localizacao.longitude),
+            infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
+            // icon: BitmapDescriptor.fromAssetImage(
+            //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
+            //     .then((onValue) {
+            //           myIcon = onValue;
+            // });
+            icon: myIcon,
+          );
+
+          debugPrint("Marker: $marker");
 
           setState(() {
             markers[markerId] = marker;
@@ -635,7 +657,7 @@ class _MyHomePageState extends State<MyHomePage>
     print(url.toString());
     print("Iniciando Corrida");
 
-    await get(url).then((response) {
+    await http.get(url).then((response) {
       if (response.statusCode == 200) {
         Map<String, dynamic> hist = jsonDecode(response.body);
         String _photoName = hist['codigo_da_viagem'] as String;
@@ -649,10 +671,36 @@ class _MyHomePageState extends State<MyHomePage>
         // });
       } else {
         _sendMessage(canceled);
-        showAlertDialog(
-            context, 'Erro ao iniciar corrida', 'Tente novamente mais tarde');
+        msgErro();
       }
     });
+  }
+
+  Future<void> msgErro() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: Text('Rewind and remember'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Erro ao iniciar corrida!'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   //Get Rate e BikeID
@@ -665,7 +713,7 @@ class _MyHomePageState extends State<MyHomePage>
         '?' +
         email;
 
-    await get(url).then((response) {
+    await http.get(url).then((response) {
       if (response.statusCode == 200) {
         print("Resposta ok");
 
@@ -678,11 +726,45 @@ class _MyHomePageState extends State<MyHomePage>
 
         userRate = _rating;
         bike = _bikeID;
+        getInformationFlag = true;
       } else {
         // msgErro();
         userRate = "5";
         bike = null;
+        showAlertDialog(
+            context, 'Erro ao iniciar corrida', 'Tente novamente mais tarde');
       }
     });
   }
+
+  // //Get Rate e BikeID
+  // Future getInformation(String _email) async {
+  //   String function = "retornaBikeRating";
+  //   String email = "email=" + _email;
+
+  //   var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+  //       function +
+  //       '?' +
+  //       email;
+
+  //   await http.get(url).then((response) {
+  //     if (response.statusCode == 200) {
+  //       print("Resposta ok");
+
+  //       Map<String, dynamic> information = jsonDecode(response.body);
+  //       String _rating = information['rating'] as String;
+  //       String _bikeID = information['bike_id'] as String;
+
+  //       debugPrint("$information");
+  //       // print(_rating);
+
+  //       userRate = _rating;
+  //       bike = _bikeID;
+  //     } else {
+  //       // msgErro();
+  //       userRate = "5";
+  //       bike = null;
+  //     }
+  //   });
+  // }
 }
