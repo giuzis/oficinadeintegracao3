@@ -7,13 +7,14 @@ import 'dart:ffi';
 */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/android.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
 import 'dart:convert' show jsonDecode, utf8;
 import 'signinsignout.dart';
-import 'dart:math';
+// import 'dart:math';
 
 //Chamando Login para pegar dados
 import 'userdata.dart';
@@ -40,14 +41,17 @@ class _MyHomePageState extends State<MyHomePage>
 
   //Variáveis usadas para o Google maps
   GoogleMapController mapController;
-  Map<MarkerId, Marker>   markers = <MarkerId, Marker>{};
+  Map<MarkerId, Marker>  markers = <MarkerId, Marker>{};
   MarkerId selectedMarker;
   Location location = Location();
-  int _markerIdCounter = 1;
+  // int _markerIdCounter = 1;
   static final LatLng center = const LatLng(-25.438376, -49.263781);
+  BitmapDescriptor myIcon;
+  bool bikesUpdated = false;
   
   //Variável que pega a leitura do QRCode
   String _barcode = "";
+  bool getInformationFlag = false;
   
   //Funções do Bluetooth
   StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
@@ -76,7 +80,12 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
-
+    
+    BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(48, 48)), 'images/iconBubble.png')
+        .then((onValue) {
+      myIcon = onValue;
+    });
     // Get current state
     FlutterBluetoothSerial.instance.state.then((state) {
       setState(() {
@@ -145,7 +154,6 @@ class _MyHomePageState extends State<MyHomePage>
     DatabaseReference databaseReference = new FirebaseDatabase().reference();
     databaseReference.child('fcm-token/${token}').set({"token": token});
     textValue = token;
-    setState(() {});
   }
 
   @override
@@ -159,12 +167,16 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
 
-    //Esta função pega a rating e o bike ID
-    getInformation(email);
+    if(!getInformationFlag){
+      //Esta função pega a rating e o bike ID
+      getInformation(email);
+    }
 
-    //Pega as bicicletas ativas
-    adicicionaBikes();
-
+    if(!bikesUpdated){
+        //Pega as bicicletas ativas
+        adicicionaBikes();
+    }
+    
     // nossa página inicial será um definida por um controle de abas
     return Scaffold(
       // característica do scaffold é a appbar já pronta (parte de cima da aplicação)
@@ -367,8 +379,12 @@ class _MyHomePageState extends State<MyHomePage>
       ),
       onMapCreated: _onMapCreated,
       myLocationEnabled: true,
+      onCameraMove: (position) {
+        // adicicionaBikes();
+      },
+      // trackCameraPosition: true,
+      // myLocationEnabled: true,
       compassEnabled: true,
-      // markers: Set<Marker>.of(markers.values),
       // markers: { marcelle },
       markers: Set<Marker>.of(markers.values),
     );
@@ -410,14 +426,14 @@ Future<void> msgErroBikes() async {
     );
   }
 
-  void adicicionaBikes() async {
+  void adicicionaBikes() {
 
     String function = "retornaBikes";
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
         function;
 
-    await http.get(url).then((response){
+    http.get(url).then((response){
         if (response.statusCode == 200) {
           print("Resposta ok");
 
@@ -426,16 +442,17 @@ Future<void> msgErroBikes() async {
           String len = bikes.keys.toString();
           len = len.replaceAll("(", "");
           len = len.replaceAll(")", "");
-          List<String> name = len.split(",");
+          List<String> name = len.split(", ");
           
           debugPrint("$bikes");
-          // debugPrint("Testes: " + name.length.toString());
-          // print(bikes['BluberBike']["lat"]);
+          bikesUpdated = true;
+          // debugPrint("Testes: " + bikes[name[0]]['lat']);
+          
           final int markerCount = name.length;
           print(markerCount);
 
-          for(int i=0;i<markerCount-1;i++){
-            print("Estou aqui i = " + i.toString());
+          for(int i=0;i<markerCount;i++){
+            // print("Estou aqui i = " + i.toString());
             final String markerIdVal = name[i].toString();
             print("markerIdVal = " + markerIdVal);
 
@@ -443,21 +460,27 @@ Future<void> msgErroBikes() async {
 
             double latitude = double.parse(bikes[name[i]]['lat']);
             print("lat " + latitude.toString());
-            double longitude = double.parse(bikes[name[i]]["lon"]);
+            double longitude = double.parse(bikes[name[i]]['lon']);
             print("lon" + longitude.toString());
 
             final LatLng localizacao = LatLng(latitude, longitude);
 
-            final Marker marker = Marker(
+            Marker marker = Marker(
               markerId: markerId,
               position: LatLng(
                 localizacao.latitude,
                 localizacao.longitude
               ),
-              infoWindow: InfoWindow(title: markerIdVal, snippet: '*'),
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueOrange,)
+              infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
+              // icon: BitmapDescriptor.fromAssetImage(
+              //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
+              //     .then((onValue) {
+              //           myIcon = onValue;
+              // });
+              icon: myIcon,
             );
+
+            debugPrint("Marker: $marker");
 
             setState(() {
               markers[markerId] = marker;
@@ -706,6 +729,7 @@ Future<void> msgErroBikes() async {
 
           userRate = _rating;
           bike = _bikeID;
+          getInformationFlag = true;
 
         } else {
           // msgErro();

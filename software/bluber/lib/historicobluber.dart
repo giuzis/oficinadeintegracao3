@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'displayimage.dart';
+import 'package:http/http.dart';
+import 'userdata.dart';
+import 'dart:convert' show jsonDecode;
+
 
 class HistoricoBluberPage extends StatefulWidget {
   @override
@@ -27,6 +31,9 @@ class _HistoricoBluberPageState extends State<HistoricoBluberPage> {
 
   @override
   Widget build(BuildContext context) {
+    
+    adicicionaBikes(email, "viagens_comsuabike");
+    
     return Scaffold(
         appBar: AppBar(
           title: Text('Histórico'),
@@ -109,4 +116,72 @@ class _HistoricoBluberPageState extends State<HistoricoBluberPage> {
       ],
     );
   }
+
+  Future<void> msgErro() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: Text('Rewind and remember'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Erro ao receber o Histório de Corridas!'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+void adicicionaBikes(String _email, String _pref) {
+
+    String function = "retornaHistorico";
+    String email = "email="+_email;
+    String pref = "historico="+_pref;
+
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function + '?' + email + '&' + pref;
+
+    get(url).then((response){
+        if (response.statusCode == 200) {
+          print("Resposta ok");
+
+          Map<String, dynamic> corridas = jsonDecode(response.body);
+
+          String len = corridas.keys.toString();
+          len = len.replaceAll("(", "");
+          len = len.replaceAll(")", "");
+          List<String> _corrida = len.split(", ");
+          
+          debugPrint("$corridas");
+          
+          final int numCorridas = _corrida.length;
+          // print(numCorridas);
+
+          for(int i=0;i<numCorridas;i++){
+            
+            // setState(() {
+            //   markers[markerId] = marker;
+            // });
+          }
+
+        } else {
+          msgErro();
+      }
+    });
+  }
+
 }
