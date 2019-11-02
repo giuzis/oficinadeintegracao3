@@ -7,6 +7,7 @@ import 'dart:io';
 import 'userdata.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show jsonDecode, utf8;
+import 'package:bluber/homepage.dart';
 
 // QR Code page
 class ViagemEncerradaPage extends StatefulWidget {
@@ -23,8 +24,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
   String _uploadedFileURL;
   File _image;
 
-  double valorCorrida; //Colocar aqui o resultado da corrida
-  double rating;
+  double rating = 3;
 
   //Image Picker
   Future getImage(context) async {
@@ -124,7 +124,7 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
           Padding(
             padding: EdgeInsetsDirectional.only(top: 20.0, start: 00.0),
             child: RatingBar(
-              initialRating: 3,
+              initialRating: rating,
               direction: Axis.horizontal,
               allowHalfRating: true,
               itemCount: 5,
@@ -133,8 +133,8 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
                 Icons.star,
                 color: Colors.amber,
               ),
-              onRatingUpdate: (rating) {
-                rating = rating;
+              onRatingUpdate: (_rating) {
+                rating = _rating;
               },
             ),
           ),
@@ -145,9 +145,13 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Finalizar avaliação'),
         onPressed: () {
-          getImage(context);
-          //   encerrarCorrida(photoName, rating.toString(), valorCorrida.toString());
-          // Navigator.of(context).pushReplacementNamed('/homepage');
+          getImage(context).then((value){
+              print(rating.toString());
+              print(widget.valorCorrida.toString());
+              encerrarCorrida(photoName, rating.toString(), widget.valorCorrida.toString()).then((value) {
+                Navigator.of(context).pushReplacementNamed('/homepage');
+              });
+          });
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -170,24 +174,45 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
         rating +
         '&' +
         valor;
+
+    print(url.toString());
+
     print("Encerrando Corrida");
-    var response = await http.get(url);
+    await http.get(url).then((response){
+        if (response.statusCode == 200) {
+          print("Resposta ok");
+          print("zerando o valor da bike");
+          bikeAlugada = null;
 
-    if (response.statusCode == 200) {
-      print("Resposta ok");
-      print("zerando o valor da bike");
-      bikeAlugada = null;
+          Map<String, dynamic> rate = jsonDecode(response.body);
+          String _rating = rate['rating'] as String;
+          debugPrint("$rate");
+          // print(_rating);
 
-      Map<String, dynamic> rate = jsonDecode(response.body);
-      String _rating = rate['rate'] as String;
-      debugPrint("$rate");
-      // print(_rating);
+          userRate = _rating;
+          // _sendMessage(endTrip);
 
-      userRate = _rating;
-    } else {
-      msgErro();
-    }
+        } else {
+          msgErro();
+        }
+    });
+
   }
+
+  //   //Envia mensagem
+  // void _sendMessage(String text) async {
+  //   text = text.trim();
+
+  //   if (text.length > 0) {
+  //     try {
+  //       print('Enviando texto: ' + text);
+  //       _connection.output.add(utf8.encode(text + "\r\n"));
+  //       await _connection.output.allSent;
+  //     } catch (e) {
+  //       // Ignore error, but notify state
+  //     }
+  //   }
+  // }
 
   Future<void> msgErro() async {
     return showDialog<void>(

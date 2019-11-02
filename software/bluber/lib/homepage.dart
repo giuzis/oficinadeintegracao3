@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 /*********** Página home page ***************/
 /* Para adicionar os mapas, modifique as duas últimas funções:
     _googleMap1()
@@ -23,11 +25,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-//Variáveis de Transição do Bluetooth
-String lock = 'L'; //Fechar a trava da Bike
-String unlock = 'U'; //Abrir a trava
-String waitRent = 'R'; //Quando alguém ler o QRCode esse sinal deve ser enviado
-String endTrip = 'E'; //Encerra a viagem
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -62,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage>
   String textValue = 'Hello World !';
   FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      new FlutterLocalNotificationsPlugin();
+      new FlutterLocalNotificationsPlugin();  
 
   @override
   void initState() {
@@ -149,6 +146,10 @@ class _MyHomePageState extends State<MyHomePage>
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
+
+    //Esta função pega a rating e o bike ID
+    getInformation(email);
+
     // nossa página inicial será um definida por um controle de abas
     return Scaffold(
       // característica do scaffold é a appbar já pronta (parte de cima da aplicação)
@@ -183,18 +184,20 @@ class _MyHomePageState extends State<MyHomePage>
           print('fora ' + _bluetoothState.toString());
           if (_bluetoothState.toString().contains('STATE_ON')) {
             bluetoothDiscovery();
+            
           } else {
             bluetoothRequest().then((value) {
               print('DENTRO ' + _bluetoothState.toString());
               if (_bluetoothState.toString().contains('STATE_ON')) {
                 bluetoothDiscovery();
+                
               } else {
                 showAlertDialog(context, 'Bluetooth desligado!',
                     'Ligue o bluetooth para começar a pedalar');
               }
             });
           }
-          scan();
+          // scan();
         },
       ),
 
@@ -379,6 +382,7 @@ class _MyHomePageState extends State<MyHomePage>
           bikeAlugada = barcode;
         });
         print(this._barcode);
+        _sendMessage(waitRent);
         iniciaCorrida(email, _barcode).then((value) {
           print("Corrida iniciada");
         });
@@ -469,6 +473,7 @@ class _MyHomePageState extends State<MyHomePage>
 
         _connection = connection;
         isConnected = true;
+        discovered = false;
         scan();
       }).catchError((onError) {
         isConnected = false;
@@ -528,7 +533,9 @@ class _MyHomePageState extends State<MyHomePage>
         print(_photoName);
 
         photoName = _photoName;
+        _sendMessage(unlock);
       } else {
+        _sendMessage(canceled);
         msgErro();
       }
     });
@@ -560,4 +567,38 @@ class _MyHomePageState extends State<MyHomePage>
       },
     );
   }
+
+  //Get Rate e BikeID
+  Future getInformation(String _email) async {
+    String function = "retornaBikeRating";
+    String email = "email="+ _email;
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        email;
+
+    await http.get(url).then((response){
+        if (response.statusCode == 200) {
+          print("Resposta ok");
+
+          Map<String, dynamic> information = jsonDecode(response.body);
+          String _rating = information['rating'] as String;
+          String _bikeID = information['bike_id'] as String;
+
+          debugPrint("$information");
+          // print(_rating);
+
+          userRate = _rating;
+          bike = _bikeID;
+
+        } else {
+          // msgErro();
+          userRate = "5";
+          bike = null;
+      }
+    });
+  }
+
+
 }

@@ -11,6 +11,15 @@ String photoName = null;
 String bikeAlugada = null;
 String userRate = "5";
 
+
+
+//Variáveis de Transição do Bluetooth
+String lock = 'L'; //Fechar a trava da Bike
+String unlock = 'U'; //Abrir a trava
+String waitRent = 'R'; //Quando alguém ler o QRCode esse sinal deve ser enviado
+String endTrip = 'E'; //Encerra a viagem
+String canceled = 'C'; //Quando a viagem é recusada
+
 //   UserData(this.name, this.email, this.bike) {
 //     _createDocument('user', this.email, {name: this.name});
 //   }
