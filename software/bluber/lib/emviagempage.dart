@@ -6,12 +6,6 @@ import 'encerrarviagem.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:convert' show jsonDecode, utf8;
 
-//Variáveis de Transição do Bluetooth
-String lock = 'L'; //Fechar a trava da Bike
-String unlock = 'U'; //Abrir a trava
-String waitRent = 'R'; //Quando alguém ler o QRCode esse sinal deve ser enviado
-String endTrip = 'E'; //Encerra a viagem
-
 //import 'package:slider/slider_button.dart';
 class EmViagemPage extends StatefulWidget {
   @override

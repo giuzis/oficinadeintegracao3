@@ -63,6 +63,7 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
                 _trava_aberta = false;
               }
               print(_disponivel);
+              ativaBike(email, _disponivel);
             });
           },
           secondary: Icon(Icons.directions_bike),
@@ -135,5 +136,61 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
 
     print(url);
     return await get(url);
+  }
+
+  //Get Rate e BikeID
+  Future ativaBike(String _email, bool _status) async {
+    String function = "ativaOuNaoBike";
+    String email = "email="+ _email;
+    String status = "liga="+ _status.toString();
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        email +
+        '&' +
+        status ;
+
+    print("ativa/Desativa Bike");
+    print(url.toString());
+    await get(url).then((response){
+        if (response.statusCode == 200) {
+          print("Resposta ok");
+
+          // Map<String, dynamic> information = jsonDecode(response.body);
+          // String _rating = information['rating'] as String;
+          // String _bikeID = information['bike_id']  as String;
+
+        } else {
+          msgErro();
+      }
+    });
+  }
+
+  Future<void> msgErro() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: Text('Rewind and remember'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Erro ao ativar a sua bike!'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

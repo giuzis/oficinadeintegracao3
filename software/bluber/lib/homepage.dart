@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -16,12 +17,6 @@ import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_database/firebase_database.dart';
-
-//Variáveis de Transição do Bluetooth
-String lock = 'L'; //Fechar a trava da Bike
-String unlock = 'U'; //Abrir a trava
-String waitRent = 'R'; //Quando alguém ler o QRCode esse sinal deve ser enviado
-String endTrip = 'E'; //Encerra a viagem
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -143,6 +138,9 @@ class _MyHomePageState extends State<MyHomePage>
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
+    //Esta função pega a rating e o bike ID
+    getInformation(email);
+
     // nossa página inicial será um definida por um controle de abas
     return Scaffold(
       // característica do scaffold é a appbar já pronta (parte de cima da aplicação)
@@ -188,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage>
               }
             });
           }
-          scan();
+          // scan();
         },
       ),
 
@@ -248,7 +246,6 @@ class _MyHomePageState extends State<MyHomePage>
             // nome do usuário
             child: Text(
               name,
-              //UserData.getName(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 25.0,
@@ -261,13 +258,24 @@ class _MyHomePageState extends State<MyHomePage>
             // nome do usuário
             child: Text(
               email,
-              //UserData.getName(),
               style: TextStyle(
                 fontSize: 15.0,
                 color: Colors.white,
               ),
             ),
           ),
+          // Padding(
+          //   padding: EdgeInsets.only(top: 135.0, left: 85.0),
+          //   // nome do usuário
+          //   child: Text(
+          //     userRate,
+          //     //UserData.getName(),
+          //     style: TextStyle(
+          //       fontSize: 15.0,
+          //       color: Colors.white,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -363,6 +371,7 @@ class _MyHomePageState extends State<MyHomePage>
           bikeAlugada = barcode;
         });
         print(this._barcode);
+        _sendMessage(waitRent);
         iniciaCorrida(email, _barcode).then((value) {
           print("Corrida iniciada");
         });
@@ -452,6 +461,7 @@ class _MyHomePageState extends State<MyHomePage>
 
         _connection = connection;
         isConnected = true;
+        discovered = false;
         scan();
       }).catchError((onError) {
         isConnected = false;
@@ -511,7 +521,9 @@ class _MyHomePageState extends State<MyHomePage>
         print(_photoName);
 
         photoName = _photoName;
+        _sendMessage(unlock);
       } else {
+        _sendMessage(canceled);
         showAlertDialog(
             context, 'Erro ao iniciar corrida', 'Tente novamente mais tarde');
       }
