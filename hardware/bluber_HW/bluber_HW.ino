@@ -1,8 +1,8 @@
 #include "bluber_modules.h"
 
 /* Global vars */
-uint8_t stateflag = 0;              // variavel
-bool enable_con = true;
+uint8_t stateflag = 2;             // variavel
+bool enable_con = false;
 float lat, lon, old_lat, old_lon;
 int32_t  old_lat_t, old_lon_t;
 
@@ -41,7 +41,7 @@ unsigned long previousSerialMillis;                      //for debugging or prin
 
 // --ACCELEROMETER--
 const int AcSensitivity = 1400;            //high enough so that little bumps dont trigger it, but movement does.  Will need to experiment.
-const int maxMovementTime = 1000;          //number of milliseconds of movement allowed before the alarm goes off.  5000 = 5 seconds.
+const int maxMovementTime = 5000;          //number of milliseconds of movement allowed before the alarm goes off.  5000 = 5 seconds.
 const int maxStillnessThreshold = 20;      // % threshold of stillness above which the thing is moving
 const int readMPUinterval = 250;           //number of milliseconds between checks of the accelerometer
 const int upfrontSettleTime = 1000;       //number of milliseconds before starts checking accelermeter
@@ -50,7 +50,7 @@ const int movedRecordLength = maxMovementTimeArrayDifference  * 2;              
 boolean movedRecord[movedRecordLength];
 
 /* Buzzer Module */
-const int speakerPin = 13;                                  //suggest PWM pin, depending on your speaker/alarm
+const int speakerPin = 8;                                  //suggest PWM pin, depending on your speaker/alarm
 //bool enable_buzzer = false;
 
 
@@ -65,7 +65,6 @@ void BluetoothInterrupt() {
       Serial.println("Connectado");
       break;
   }
-
 };
 void setup() {
 
@@ -79,12 +78,10 @@ void setup() {
 
   /* DC Motor Module */
   motor = new Motor();
-  digitalWrite(12, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(10, LOW);
-  motor->setPins(12, 11, 10); // step, enable, reset
+  digitalWrite(51,HIGH);
+  motor->setPins(49, 51, 53); // step, enable, reset
   motor->stop();
-  motor->setSpeed(50);
+  motor->setSpeed(150);
 
   /* Gyroscope Module */
   Wire.begin();                 //Start I2C
@@ -99,8 +96,8 @@ void setup() {
   /* Bluetooth Module */
   BTSerial.begin(9600);
 
-  BluetoothInterrupt();// sends a menu to the remote
-  attachInterrupt(digitalPinToInterrupt(2), BluetoothInterrupt, CHANGE);
+  //BluetoothInterrupt();// sends a menu to the remote
+  //attachInterrupt(digitalPinToInterrupt(2), BluetoothInterrupt, CHANGE);
 
   /* GPS Module */
   GPSSerial.begin(9600);
@@ -119,13 +116,14 @@ void setup() {
 /* General System Functions */
 void Unavailable() {
 
+//  Serial.println(buf);
+
   // While Bluetooth doesn't receive a connection
-  while (!enable_con);
+  //while (!enable_con);
 
   // Read BT Data
   verifyCharFromApp();
 
-  //Serial.println(buf);
 
   //Serial.println(buf);
   //Serial.println(stateflag);
@@ -136,13 +134,15 @@ void Unavailable() {
 void LockFromUnavailable() {
 
   Serial.println("Fechando!");
+  Serial.println(digitalRead(SENSOR_LOCK));
+
   // Motor movement to lock the mechanism
   // motor->toggleDirection();
 
   motor->run();
 
   // While does not have an LOW input
-  // while(digitalRead(SENSOR_LOCK)); // Check sensors
+  while(digitalRead(SENSOR_LOCK)); // Check sensors
 
   motor->stop();
 
@@ -173,7 +173,7 @@ void BikeStop() {
       if (old_lat_t != lat_t || old_lon_t != lon_t) {
         old_lat_t = lat_t;
         old_lon_t = lon_t;
-        //send2server = true;
+        send2server = true;
       }
     }
   }
@@ -196,14 +196,14 @@ void BikeStop() {
     if (((currentMillis - previousMPUmillis) > readMPUinterval) && (isStolen == false) && (currentMillis > (endOfSetupMillis + upfrontSettleTime))) {
       // read the MPU and process the data
       checkPositionChangeAndShiftRecord();
-      printMovedRecord();
+      //printMovedRecord();
       isStolen = checkIfStolen();
       previousMPUmillis = currentMillis;     //reset timer
     }
 
     // Send Alarm notification
     if (isStolen == true) {
-      Serial.println("ROBARO");
+      //Serial.println("ROBARO");
       // PrepareGSM
       PrepareGSM();
       // SendGSM
@@ -216,6 +216,8 @@ void BikeStop() {
   // Enable Buzzer
   // take action if stolen
   if (isStolen == true) {
+    //Serial.println(isStolen);
+
     speakerState = true;
     flag_gyro = false;
     speakerPlayBuzzer(speakerState);                                               //see comment above about the speaker play function
@@ -243,13 +245,13 @@ void UnlockFromOwner() {
   flag_gyro = true;
   speakerState = false;
   speakerPlayBuzzer(false);                                               //see comment above about the speaker play function
-  boolean movedRecord[movedRecordLength];
+  initializeMovedRecord();
   
   // Motor movement to unlock the mechanism
   motor->run();
 
   // While does not have an LOW input
-  // while(digitalRead(SENSOR_UNLOCK)); // Check sensors
+  while(digitalRead(SENSOR_UNLOCK)); // Check sensors
 
   motor->stop();
 
@@ -277,12 +279,12 @@ void UnlockFromRent() {
   motor->run();
 
   // While does not have an LOW input
-  //while(digitalRead(SENSOR_UNLOCK)); // Check sensors
+  while(digitalRead(SENSOR_UNLOCK)); // Check sensors
 
   motor->stop();
 
   // Changing flag state
-  stateflag = 6; //Unavailable
+  stateflag = 6; //
 
   motor->toggleDirection();
 }
@@ -305,7 +307,7 @@ void BikeRented() {
       if (old_lat_t != lat_t || old_lon_t != lon_t) {
         old_lat_t = lat_t;
         old_lon_t = lon_t;
-        //send2server = true;
+        send2server = true;
       }
     }
   }
@@ -369,7 +371,7 @@ void LockFromEndTrip() {
   motor->run();
 
   // While does not have an HIGH input
-  //while (digitalRead(SENSOR_LOCK)); // Check sensors
+  while (digitalRead(SENSOR_LOCK)); // Check sensors
 
   motor->stop();
 
@@ -444,13 +446,13 @@ int _delay = 0;
 void speakerPlayBuzzer(boolean isSpeakerOn) {
   if (isSpeakerOn == true) {
 
-    if (_delay < 5000) {
-      //Serial.println("BAIXO");
+    if (_delay < 50) {
+      Serial.println("BAIXO");
       tone(speakerPin, 500);
       _delay++;
     }
-    else if (_delay >= 5000 && _delay  < 10000) {
-      //Serial.println("ALTO");
+    else if (_delay >= 50 && _delay  < 100) {
+      Serial.println("ALTO");
       tone(speakerPin, 800);
       _delay++;
     }
