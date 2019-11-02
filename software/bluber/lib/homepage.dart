@@ -1,11 +1,4 @@
 import 'dart:ffi';
-
-/*********** Página home page ***************/
-/* Para adicionar os mapas, modifique as duas últimas funções:
-    _googleMap1()
-    _googleMap2()
-*/
-
 import 'package:flutter/material.dart';
 import 'package:flutter_launcher_icons/android.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -26,7 +19,6 @@ import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_database/firebase_database.dart';
-
 
 // essa classe nunca é modificada
 class MyHomePage extends StatefulWidget {
@@ -54,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage>
   bool getInformationFlag = false;
   
   //Funções do Bluetooth
-  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
+  var bts = FlutterBluetoothSerial.instance;
   List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
   bool discovered = false;
   String _hc05Adress = '20:16:07:25:05:13';
@@ -67,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage>
   Timer _discoverableTimeoutTimer;
 
   //Variáveis de conexão
+  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
   BluetoothConnection _connection;
   bool isConnected = false;
   bool bluetoothStateBool = false;
@@ -75,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage>
   String textValue = 'Hello World !';
   FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      new FlutterLocalNotificationsPlugin();  
+      new FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -87,22 +80,20 @@ class _MyHomePageState extends State<MyHomePage>
       myIcon = onValue;
     });
     // Get current state
-    FlutterBluetoothSerial.instance.state.then((state) {
+    bts.state.then((state) {
       setState(() {
         _bluetoothState = state;
       });
     });
 
-    FlutterBluetoothSerial.instance.name.then((name) {
+    bts.name.then((name) {
       setState(() {
         _name = name;
       });
     });
 
     // Listen for futher state changes
-    FlutterBluetoothSerial.instance
-        .onStateChanged()
-        .listen((BluetoothState state) {
+    bts.onStateChanged().listen((BluetoothState state) {
       setState(() {
         _bluetoothState = state;
       });
@@ -158,8 +149,9 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   void dispose() {
-    FlutterBluetoothSerial.instance.setPairingRequestHandler(null);
+    bts.setPairingRequestHandler(null);
     _discoverableTimeoutTimer?.cancel();
+    _streamSubscription?.cancel();
     super.dispose();
   }
 
@@ -211,13 +203,11 @@ class _MyHomePageState extends State<MyHomePage>
           print('fora ' + _bluetoothState.toString());
           if (_bluetoothState.toString().contains('STATE_ON')) {
             bluetoothDiscovery();
-            
           } else {
             bluetoothRequest().then((value) {
               print('DENTRO ' + _bluetoothState.toString());
               if (_bluetoothState.toString().contains('STATE_ON')) {
                 bluetoothDiscovery();
-                
               } else {
                 showAlertDialog(context, 'Bluetooth desligado!',
                     'Ligue o bluetooth para começar a pedalar');
@@ -525,7 +515,7 @@ Future<void> msgErroBikes() async {
           print("Corrida iniciada");
         });
         Navigator.of(context).pushReplacementNamed('/emviagem');
-      });
+      }).catchError((onError) {});
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {
@@ -558,7 +548,7 @@ Future<void> msgErroBikes() async {
   //Bluetooth
   //Pega o status do bluetooth
   Future getBluetoothState() async {
-    return FlutterBluetoothSerial.instance.state; //.then((state) {
+    return bts.state; //.then((state) {
     // setState(() {
     //   bluetoothState = state;
     // });
@@ -573,8 +563,7 @@ Future<void> msgErroBikes() async {
 
   //Descobre os dispositivos de Bluetooth
   void bluetoothDiscovery() {
-    _streamSubscription =
-        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
+    _streamSubscription = bts.startDiscovery().listen((r) {
       results.add(r);
     });
 
@@ -597,7 +586,7 @@ Future<void> msgErroBikes() async {
   //Pede para ligar o bluetooth
   Future bluetoothRequest() async {
     // async lambda seems to not working
-    await FlutterBluetoothSerial.instance.requestEnable().then((value) {
+    await bts.requestEnable().then((value) {
       getBluetoothState();
     });
   }
@@ -637,8 +626,8 @@ Future<void> msgErroBikes() async {
 
     if (text.length > 0) {
       try {
-        print('Enviando texto: ' + text);
         _connection.output.add(utf8.encode(text + "\r\n"));
+        print('Enviando texto: ' + text);
         await _connection.output.allSent;
       } catch (e) {
         // Ignore error, but notify state
@@ -735,9 +724,9 @@ Future<void> msgErroBikes() async {
           // msgErro();
           userRate = "5";
           bike = null;
+        showAlertDialog(
+            context, 'Erro ao iniciar corrida', 'Tente novamente mais tarde');
       }
     });
   }
-
-
 }

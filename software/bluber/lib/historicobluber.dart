@@ -52,7 +52,7 @@ class _HistoricoBluberPageState extends State<HistoricoBluberPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => DisplayImage(
-                            imageUrl: lista_historico[index][2],
+                            imageName: lista_historico[index][2],
                           ),
                         ));
                   },

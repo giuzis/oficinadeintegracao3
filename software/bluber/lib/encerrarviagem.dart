@@ -7,7 +7,6 @@ import 'dart:io';
 import 'userdata.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show jsonDecode, utf8;
-import 'package:bluber/homepage.dart';
 
 // QR Code page
 class ViagemEncerradaPage extends StatefulWidget {
@@ -145,12 +144,14 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Finalizar avaliação'),
         onPressed: () {
-          getImage(context).then((value){
-              print(rating.toString());
-              print(widget.valorCorrida.toString());
-              encerrarCorrida(photoName, rating.toString(), widget.valorCorrida.toString()).then((value) {
-                Navigator.of(context).pushReplacementNamed('/homepage');
-              });
+          getImage(context).then((value) {
+            print(rating.toString());
+            print(widget.valorCorrida.toString());
+            encerrarCorrida(photoName, rating.toString(),
+                    widget.valorCorrida.toString())
+                .then((value) {
+              Navigator.of(context).pushReplacementNamed('/homepage');
+            });
           });
         },
       ),
@@ -159,10 +160,11 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
   }
 
   //Transações com o Banco
-   //Google functions - Adicionar créditos na carteira
-  Future encerrarCorrida(String _photoName, String _rating, String _valor) async {
+  //Google functions - Adicionar créditos na carteira
+  Future encerrarCorrida(
+      String _photoName, String _rating, String _valor) async {
     String function = "finalizaCorrida";
-    String photoName = "history="+ _photoName;
+    String photoName = "history=" + _photoName;
     String rating = "rating=" + _rating;
     String valor = "amount=" + _valor;
 
@@ -178,25 +180,24 @@ class _ViagemEncerradaPageState extends State<ViagemEncerradaPage> {
     print(url.toString());
 
     print("Encerrando Corrida");
-    await http.get(url).then((response){
-        if (response.statusCode == 200) {
-          print("Resposta ok");
-          print("zerando o valor da bike");
-          bikeAlugada = null;
+    await http.get(url).then((response) {
+      if (response.statusCode == 200) {
+        print("Resposta ok");
+        print("zerando o valor da bike");
+        bikeAlugada = null;
 
-          Map<String, dynamic> rate = jsonDecode(response.body);
-          String _rating = rate['rating'] as String;
-          debugPrint("$rate");
-          // print(_rating);
+        Map<String, dynamic> rate = jsonDecode(response.body);
+        String _rating = rate['rating'] as String;
+        debugPrint("$rate");
+        // print(_rating);
 
-          userRate = _rating;
-          // _sendMessage(endTrip);
+        userRate = _rating;
+        // _sendMessage(endTrip);
 
-        } else {
-          msgErro();
-        }
+      } else {
+        msgErro();
+      }
     });
-
   }
 
   //   //Envia mensagem
