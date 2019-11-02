@@ -13,6 +13,7 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
 import 'dart:convert' show jsonDecode, utf8;
 import 'signinsignout.dart';
+import 'dart:math';
 
 //Chamando Login para pegar dados
 import 'userdata.dart';
@@ -32,11 +33,22 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+typedef Marker MarkerUpdateAction(Marker marker);
+
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
+
+  //Variáveis usadas para o Google maps
   GoogleMapController mapController;
+  Map<MarkerId, Marker>   markers = <MarkerId, Marker>{};
+  MarkerId selectedMarker;
   Location location = Location();
+  int _markerIdCounter = 1;
+  static final LatLng center = const LatLng(-25.438376, -49.263781);
+  
+  //Variável que pega a leitura do QRCode
   String _barcode = "";
+  
   //Funções do Bluetooth
   StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
   List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
@@ -149,6 +161,9 @@ class _MyHomePageState extends State<MyHomePage>
 
     //Esta função pega a rating e o bike ID
     getInformation(email);
+
+    //Pega as bicicletas ativas
+    adicicionaBikes();
 
     // nossa página inicial será um definida por um controle de abas
     return Scaffold(
@@ -338,7 +353,7 @@ class _MyHomePageState extends State<MyHomePage>
         '&' +
         walletFrom;
 
-    var data = await http.get(url);
+    await http.get(url);
   }
 
   // modificar essas duas funções para incluir o mapa
@@ -347,18 +362,118 @@ class _MyHomePageState extends State<MyHomePage>
     return GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
-        target: LatLng(37.42796133580664, -122.085749655962),
+        target: LatLng(-25.438376, -49.263781),
         zoom: 15,
       ),
       onMapCreated: _onMapCreated,
       myLocationEnabled: true,
       compassEnabled: true,
+      // markers: Set<Marker>.of(markers.values),
+      // markers: { marcelle },
+      markers: Set<Marker>.of(markers.values),
     );
+  }
+
+  Marker marcelle=Marker(
+    markerId: MarkerId('marcelle'),
+    position: LatLng(-25.439175, -49.265753),
+    infoWindow: InfoWindow(title: 'Minha casa'),
+    icon: BitmapDescriptor.defaultMarkerWithHue(
+      BitmapDescriptor.hueViolet,
+    ),
+  );
+
+Future<void> msgErroBikes() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: Text('Rewind and remember'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Erro ao pegar as Bicicletas!'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void adicicionaBikes() async {
+
+    String function = "retornaBikes";
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function;
+
+    await http.get(url).then((response){
+        if (response.statusCode == 200) {
+          print("Resposta ok");
+
+          Map<String, dynamic> bikes = jsonDecode(response.body);
+
+          String len = bikes.keys.toString();
+          len = len.replaceAll("(", "");
+          len = len.replaceAll(")", "");
+          List<String> name = len.split(",");
+          
+          debugPrint("$bikes");
+          // debugPrint("Testes: " + name.length.toString());
+          // print(bikes['BluberBike']["lat"]);
+          final int markerCount = name.length;
+          print(markerCount);
+
+          for(int i=0;i<markerCount-1;i++){
+            print("Estou aqui i = " + i.toString());
+            final String markerIdVal = name[i].toString();
+            print("markerIdVal = " + markerIdVal);
+
+            final MarkerId markerId = MarkerId(markerIdVal);
+
+            double latitude = double.parse(bikes[name[i]]['lat']);
+            print("lat " + latitude.toString());
+            double longitude = double.parse(bikes[name[i]]["lon"]);
+            print("lon" + longitude.toString());
+
+            final LatLng localizacao = LatLng(latitude, longitude);
+
+            final Marker marker = Marker(
+              markerId: markerId,
+              position: LatLng(
+                localizacao.latitude,
+                localizacao.longitude
+              ),
+              infoWindow: InfoWindow(title: markerIdVal, snippet: '*'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueOrange,)
+            );
+
+            setState(() {
+              markers[markerId] = marker;
+            });
+          }
+
+        } else {
+          msgErroBikes();
+      }
+    });
+
   }
 
   _onMapCreated(GoogleMapController controller) {
     setState(() {
-      mapController = controller;
+      mapController =controller;
     });
   }
 
