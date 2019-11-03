@@ -41,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage>
   // int _markerIdCounter = 1;
   static final LatLng center = const LatLng(-25.438376, -49.263781);
   BitmapDescriptor myIcon;
+  BitmapDescriptor myBikeIcon;
   bool bikesUpdated = false;
   bool pegouHistorico = false;
 
@@ -78,9 +79,15 @@ class _MyHomePageState extends State<MyHomePage>
     super.initState();
 
     BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(48, 48)), 'images/iconBubble.png')
+            ImageConfiguration(size: Size(48, 48)), 'images/iconBike.jpg')
         .then((onValue) {
       myIcon = onValue;
+    });
+
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(48, 48)), 'images/MybikeIcon.png')
+        .then((onValue) {
+      myBikeIcon = onValue;
     });
     // Get current state
     bts.state.then((state) {
@@ -167,10 +174,10 @@ class _MyHomePageState extends State<MyHomePage>
       getInformation(email);
     }
 
-    if (!bikesUpdated) {
-      //Pega as bicicletas ativas
-      adicicionaBikes();
-    }
+    // if (!bikesUpdated) {
+    //Pega as bicicletas ativas
+    adicicionaBikes();
+    //   }
 
     // clearList().then((value){
     pegaHistoPessoais(email);
@@ -435,47 +442,71 @@ class _MyHomePageState extends State<MyHomePage>
         len = len.replaceAll(")", "");
         List<String> name = len.split(", ");
 
+        markers.clear();
+
         debugPrint("$bikes");
         bikesUpdated = true;
         // debugPrint("Testes: " + bikes[name[0]]['lat']);
 
         final int markerCount = name.length;
         print(markerCount);
+        // print("|" + name[0] + "|");
 
-        for (int i = 0; i < markerCount; i++) {
-          // print("Estou aqui i = " + i.toString());
-          final String markerIdVal = name[i].toString();
-          print("markerIdVal = " + markerIdVal);
+        //Se a resposta é maior que zero ele coloca as bikes, se não, não entra
+        if (name[0] != "") {
+          for (int i = 0; i < markerCount; i++) {
+            // print("Estou aqui i = " + i.toString());
+            final String markerIdVal = name[i].toString();
+            print("markerIdVal = " + markerIdVal);
 
-          final MarkerId markerId = MarkerId(markerIdVal);
+            final MarkerId markerId = MarkerId(markerIdVal);
 
-          double latitude = double.parse(bikes[name[i]]['lat']);
-          print("lat " + latitude.toString());
-          double longitude = double.parse(bikes[name[i]]['lon']);
-          print("lon" + longitude.toString());
+            double latitude = double.parse(bikes[name[i]]['lat']);
+            print("lat " + latitude.toString());
+            double longitude = double.parse(bikes[name[i]]['lon']);
+            print("lon" + longitude.toString());
 
-          final LatLng localizacao = LatLng(latitude, longitude);
+            final LatLng localizacao = LatLng(latitude, longitude);
 
-          Marker marker = Marker(
-            markerId: markerId,
-            position: LatLng(localizacao.latitude, localizacao.longitude),
-            infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
-            // icon: BitmapDescriptor.fromAssetImage(
-            //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
-            //     .then((onValue) {
-            //           myIcon = onValue;
-            // });
-            icon: myIcon,
-          );
+            if (name[i] == bike) {
+              Marker marker = Marker(
+                markerId: markerId,
+                position: LatLng(localizacao.latitude, localizacao.longitude),
+                infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
+                // icon: BitmapDescriptor.fromAssetImage(
+                //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
+                //     .then((onValue) {
+                //           myIcon = onValue;
+                // });
+                icon: myBikeIcon,
+              );
 
-          debugPrint("Marker: $marker");
+              setState(() {
+                markers[markerId] = marker;
+              });
+            } else {
+              Marker marker = Marker(
+                markerId: markerId,
+                position: LatLng(localizacao.latitude, localizacao.longitude),
+                infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
+                // icon: BitmapDescriptor.fromAssetImage(
+                //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
+                //     .then((onValue) {
+                //           myIcon = onValue;
+                // });
+                icon: myIcon,
+              );
 
-          setState(() {
-            markers[markerId] = marker;
-          });
+              setState(() {
+                markers[markerId] = marker;
+              });
+            }
+
+            // debugPrint("Marker: $marker");
+          }
+        } else {
+          msgErroBikes();
         }
-      } else {
-        msgErroBikes();
       }
     });
   }
@@ -723,19 +754,23 @@ class _MyHomePageState extends State<MyHomePage>
         Map<String, dynamic> information = jsonDecode(response.body);
         String _rating = information['rating'] as String;
         String _bikeID = information['bike_id'] as String;
+        String _ativada = information['ativada'] as String;
 
         debugPrint("$information");
         // print(_rating);
 
         userRate = _rating;
         bike = _bikeID;
+        ativada = _ativada;
+
         getInformationFlag = true;
       } else {
         // msgErro();
         userRate = "5";
         bike = null;
-        showAlertDialog(
-            context, 'Erro ao iniciar corrida', 'Tente novamente mais tarde');
+        ativada = null;
+        //   showAlertDialog(
+        //       context, 'Erro ao pegar as informações', 'Tentaremos novamente mais');
       }
     });
   }
@@ -820,7 +855,11 @@ class _MyHomePageState extends State<MyHomePage>
 
         print(lista_historico_corridas.length.toString());
       } else {
-        msgErroViagem();
+        if (response.statusCode == 201) {
+          // print("Histórico vazio");
+        } else {
+          // msgErroViagem();
+        }
       }
     });
   }
@@ -880,7 +919,9 @@ class _MyHomePageState extends State<MyHomePage>
         print(lista_historico_meu_bluber.length.toString());
       } else {
         if (response.statusCode == 201) {
-          print("Histórico vazio");
+          // print("Histórico vazio");
+        } else {
+          // msgErroViagem();
         }
         msgErroViagem();
       }

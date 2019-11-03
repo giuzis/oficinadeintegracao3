@@ -107,17 +107,21 @@ class _CadastroWalletState extends State<CadastroWallet> {
         Map<String, dynamic> information = jsonDecode(response.body);
         String _rating = information['rating'] as String;
         String _bikeID = information['bike_id'] as String;
+        String _ativada = information['ativada'] as String;
 
         debugPrint("$information");
         // print(_rating);
 
         userRate = _rating;
         bike = _bikeID;
+        ativada = _ativada;
+
         // getInformationFlag = true;
       } else {
         // msgErro();
         userRate = "5,0";
         bike = null;
+        ativada = null;
       //   showAlertDialog(
       //       context, 'Erro ao pegar as informações', 'Tentaremos novamente mais');
       }

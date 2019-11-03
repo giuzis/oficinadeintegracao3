@@ -70,6 +70,8 @@ flutter:
     - images/google_logo.png
     - images/blubermarker.jpg
     - images/login.png
+    - images/iconBike.png
+    - images/MybikeIcon.png
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
