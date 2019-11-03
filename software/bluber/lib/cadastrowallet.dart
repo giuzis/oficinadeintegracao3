@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'signinsignout.dart';
 import 'userdata.dart';
 import 'package:http/http.dart';
+import 'dart:convert' show jsonDecode, utf8;
 
 
 class CadastroWallet extends StatefulWidget {
@@ -39,7 +40,9 @@ class _CadastroWalletState extends State<CadastroWallet> {
                 wallet = value;
                 //inserir aqui função para enviar wallet id para o banco de dados
                 print(name + " " + email + " " + wallet);
-                cadastro(name, email, wallet);
+                cadastro(name, email, wallet).then((value){
+                  getInformation(email);
+                });
                 Navigator.of(context).pushReplacementNamed('/homepage');
               },
             ),
@@ -64,7 +67,7 @@ class _CadastroWalletState extends State<CadastroWallet> {
   }
 
     //Chama  a função de cadastrar
-  cadastro(String _name, String _email, String _wallet) async {
+  Future cadastro(String _name, String _email, String _wallet) async {
     String function = "createUser";
     // String name = "name="+ _name;
     String email = "email=" + _email;
@@ -85,5 +88,39 @@ class _CadastroWalletState extends State<CadastroWallet> {
         wallet;
     print(url);
     return await get(url);
+  }
+
+  //Get Rate e BikeID
+  Future getInformation(String _email) async {
+    String function = "retornaBikeRating";
+    String email = "email=" + _email;
+
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        email;
+
+    await get(url).then((response) {
+      if (response.statusCode == 200) {
+        print("Resposta ok");
+
+        Map<String, dynamic> information = jsonDecode(response.body);
+        String _rating = information['rating'] as String;
+        String _bikeID = information['bike_id'] as String;
+
+        debugPrint("$information");
+        // print(_rating);
+
+        userRate = _rating;
+        bike = _bikeID;
+        // getInformationFlag = true;
+      } else {
+        // msgErro();
+        userRate = "5,0";
+        bike = null;
+      //   showAlertDialog(
+      //       context, 'Erro ao pegar as informações', 'Tentaremos novamente mais');
+      }
+    });
   }
 }
