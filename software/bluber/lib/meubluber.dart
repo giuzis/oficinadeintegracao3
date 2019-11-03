@@ -4,6 +4,9 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 import 'package:bluber/userdata.dart';
 import 'package:http/http.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'dart:async';
+import 'dart:convert' show jsonDecode, utf8;
 
 class MeuBluberPage extends StatefulWidget {
   @override
@@ -14,6 +17,59 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
   String _barcode = ""; //Este barcode se refere ao ID da bike
   bool _disponivel = false;
   bool _trava_aberta = false;
+
+//Funções do Bluetooth
+  var bts = FlutterBluetoothSerial.instance;
+  List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
+  bool discovered = false;
+  String _hc05Adress = '20:16:07:25:05:13';
+
+  BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
+
+  String _address = "...";
+  String _name = "...";
+
+  Timer _discoverableTimeoutTimer;
+
+  //Variáveis de conexão
+  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
+  BluetoothConnection _connection;
+  bool isConnected = false;
+  bool bluetoothStateBool = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Get current state
+    bts.state.then((state) {
+      setState(() {
+        _bluetoothState = state;
+      });
+    });
+
+    bts.name.then((name) {
+      setState(() {
+        _name = name;
+      });
+    });
+
+    // Listen for futher state changes
+    bts.onStateChanged().listen((BluetoothState state) {
+      setState(() {
+        _bluetoothState = state;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    bts.setPairingRequestHandler(null);
+    //_connection.close();
+    _discoverableTimeoutTimer?.cancel();
+    _streamSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +129,21 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
           value: _trava_aberta,
           onChanged: (bool trava) {
             setState(() {
+              if (_bluetoothState.toString().contains('STATE_ON')) {
+                bluetoothConection(trava);
+              } else {
+                bluetoothRequest().then((value) {
+                  if (_bluetoothState.toString().contains('STATE_ON')) {
+                    print(_bluetoothState.toString());
+
+                    bluetoothConection(trava);
+                  } else {
+                    showAlertDialog(context, 'Bluetooth desligado!',
+                        'Ligue o bluetooth para terminar');
+                  }
+                });
+              }
+
               _trava_aberta = trava;
               if (_trava_aberta) _disponivel = false;
             });
@@ -141,28 +212,28 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
   //Get Rate e BikeID
   Future ativaBike(String _email, bool _status) async {
     String function = "ativaOuNaoBike";
-    String email = "email="+ _email;
-    String status = "liga="+ _status.toString();
+    String email = "email=" + _email;
+    String status = "liga=" + _status.toString();
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
         function +
         '?' +
         email +
         '&' +
-        status ;
+        status;
 
     print("ativa/Desativa Bike");
     print(url.toString());
-    await get(url).then((response){
-        if (response.statusCode == 200) {
-          print("Resposta ok");
+    await get(url).then((response) {
+      if (response.statusCode == 200) {
+        print("Resposta ok");
 
-          // Map<String, dynamic> information = jsonDecode(response.body);
-          // String _rating = information['rating'] as String;
-          // String _bikeID = information['bike_id']  as String;
+        // Map<String, dynamic> information = jsonDecode(response.body);
+        // String _rating = information['rating'] as String;
+        // String _bikeID = information['bike_id']  as String;
 
-        } else {
-          msgErro();
+      } else {
+        msgErro();
       }
     });
   }
@@ -192,5 +263,78 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
         );
       },
     );
+  }
+
+  //Pede para ligar o bluetooth
+  Future bluetoothRequest() async {
+    // async lambda seems to not working
+    await bts.requestEnable();
+  }
+
+  //Conecta ao dispositivo
+  Future bluetoothConection(bool trava) async {
+    // Some simplest connection :F
+    String message;
+    try {
+      _connection = await BluetoothConnection.toAddress(_hc05Adress);
+      isConnected = true;
+      if (trava)
+        message = unlock;
+      else
+        message = lock;
+      _sendMessage(message).then((onValue) {
+        setState(() {
+          _trava_aberta = trava;
+        });
+        _connection.close();
+      });
+      //
+      // }).catchError((onError) {
+      //   isConnected = false;
+      //   showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+      //       'Tente novamente mais tarde.');
+      // });
+
+      // connection.input.listen((Uint8List data) {
+      // }).onDone(() {
+      //   print('Disconnected by remote request');
+      // });
+    } catch (exception) {
+      isConnected = false;
+      showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+          'Tente novamente mais tarde.');
+      print('Cannot connect, exception occured');
+    }
+  }
+
+  showAlertDialog(BuildContext context, String title, String content) {
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(content),
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  //Envia mensagem
+  Future _sendMessage(String text) async {
+    text = text.trim();
+
+    if (text.length > 0) {
+      try {
+        _connection.output.add(utf8.encode(text + "\r\n"));
+        print('Enviando texto: ' + text);
+        await _connection.output.allSent;
+      } catch (e) {
+        // Ignore error, but notify state
+      }
+    }
   }
 }

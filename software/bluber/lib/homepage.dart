@@ -33,10 +33,9 @@ typedef Marker MarkerUpdateAction(Marker marker);
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-
   //Variáveis usadas para o Google maps
   GoogleMapController mapController;
-  Map<MarkerId, Marker>  markers = <MarkerId, Marker>{};
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   MarkerId selectedMarker;
   Location location = Location();
   // int _markerIdCounter = 1;
@@ -49,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage>
   //Variável que pega a leitura do QRCode
   String _barcode = "";
   bool getInformationFlag = false;
-  
+
   //Funções do Bluetooth
   var bts = FlutterBluetoothSerial.instance;
   List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
@@ -78,9 +77,9 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
-    
+
     BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(48, 48)), 'images/iconBubble.png')
+            ImageConfiguration(size: Size(48, 48)), 'images/iconBubble.png')
         .then((onValue) {
       myIcon = onValue;
     });
@@ -155,6 +154,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void dispose() {
     bts.setPairingRequestHandler(null);
+    _connection.close();
     _discoverableTimeoutTimer?.cancel();
     _streamSubscription?.cancel();
     super.dispose();
@@ -163,15 +163,14 @@ class _MyHomePageState extends State<MyHomePage>
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
-
-    if(!getInformationFlag){
+    if (!getInformationFlag) {
       //Esta função pega a rating e o bike ID
       getInformation(email);
     }
 
-    if(!bikesUpdated){
-        //Pega as bicicletas ativas
-        adicicionaBikes();
+    if (!bikesUpdated) {
+      //Pega as bicicletas ativas
+      adicicionaBikes();
     }
 
     // clearList().then((value){
@@ -212,12 +211,14 @@ class _MyHomePageState extends State<MyHomePage>
         onPressed: () {
           print('fora ' + _bluetoothState.toString());
           if (_bluetoothState.toString().contains('STATE_ON')) {
-            bluetoothDiscovery();
+            //bluetoothDiscovery();
+            bluetoothConection();
           } else {
             bluetoothRequest().then((value) {
               print('DENTRO ' + _bluetoothState.toString());
               if (_bluetoothState.toString().contains('STATE_ON')) {
-                bluetoothDiscovery();
+                bluetoothConection();
+                //bluetoothDiscovery();
               } else {
                 showAlertDialog(context, 'Bluetooth desligado!',
                     'Ligue o bluetooth para começar a pedalar');
@@ -397,7 +398,7 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  Marker marcelle=Marker(
+  Marker marcelle = Marker(
     markerId: MarkerId('marcelle'),
     position: LatLng(-25.439175, -49.265753),
     infoWindow: InfoWindow(title: 'Minha casa'),
@@ -406,7 +407,7 @@ class _MyHomePageState extends State<MyHomePage>
     ),
   );
 
-Future<void> msgErroBikes() async {
+  Future<void> msgErroBikes() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -434,76 +435,68 @@ Future<void> msgErroBikes() async {
   }
 
   void adicicionaBikes() {
-
     String function = "retornaBikes";
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
-        function;
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' + function;
 
-    http.get(url).then((response){
-        if (response.statusCode == 200) {
-          print("Resposta ok");
+    http.get(url).then((response) {
+      Map<String, dynamic> bikes = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print("Resposta ok");
 
-          Map<String, dynamic> bikes = jsonDecode(response.body);
+        String len = bikes.keys.toString();
+        len = len.replaceAll("(", "");
+        len = len.replaceAll(")", "");
+        List<String> name = len.split(", ");
 
-          String len = bikes.keys.toString();
-          len = len.replaceAll("(", "");
-          len = len.replaceAll(")", "");
-          List<String> name = len.split(", ");
-          
-          debugPrint("$bikes");
-          bikesUpdated = true;
-          // debugPrint("Testes: " + bikes[name[0]]['lat']);
-          
-          final int markerCount = name.length;
-          print(markerCount);
+        debugPrint("$bikes");
+        bikesUpdated = true;
+        // debugPrint("Testes: " + bikes[name[0]]['lat']);
 
-          for(int i=0;i<markerCount;i++){
-            // print("Estou aqui i = " + i.toString());
-            final String markerIdVal = name[i].toString();
-            print("markerIdVal = " + markerIdVal);
+        final int markerCount = name.length;
+        print(markerCount);
 
-            final MarkerId markerId = MarkerId(markerIdVal);
+        for (int i = 0; i < markerCount; i++) {
+          // print("Estou aqui i = " + i.toString());
+          final String markerIdVal = name[i].toString();
+          print("markerIdVal = " + markerIdVal);
 
-            double latitude = double.parse(bikes[name[i]]['lat']);
-            print("lat " + latitude.toString());
-            double longitude = double.parse(bikes[name[i]]['lon']);
-            print("lon" + longitude.toString());
+          final MarkerId markerId = MarkerId(markerIdVal);
 
-            final LatLng localizacao = LatLng(latitude, longitude);
+          double latitude = double.parse(bikes[name[i]]['lat']);
+          print("lat " + latitude.toString());
+          double longitude = double.parse(bikes[name[i]]['lon']);
+          print("lon" + longitude.toString());
 
-            Marker marker = Marker(
-              markerId: markerId,
-              position: LatLng(
-                localizacao.latitude,
-                localizacao.longitude
-              ),
-              infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
-              // icon: BitmapDescriptor.fromAssetImage(
-              //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
-              //     .then((onValue) {
-              //           myIcon = onValue;
-              // });
-              icon: myIcon,
-            );
+          final LatLng localizacao = LatLng(latitude, longitude);
 
-            debugPrint("Marker: $marker");
+          Marker marker = Marker(
+            markerId: markerId,
+            position: LatLng(localizacao.latitude, localizacao.longitude),
+            infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
+            // icon: BitmapDescriptor.fromAssetImage(
+            //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
+            //     .then((onValue) {
+            //           myIcon = onValue;
+            // });
+            icon: myIcon,
+          );
 
-            setState(() {
-              markers[markerId] = marker;
-            });
-          }
+          debugPrint("Marker: $marker");
 
-        } else {
-          msgErroBikes();
+          setState(() {
+            markers[markerId] = marker;
+          });
+        }
+      } else {
+        msgErroBikes();
       }
     });
-
   }
 
   _onMapCreated(GoogleMapController controller) {
     setState(() {
-      mapController =controller;
+      mapController = controller;
     });
   }
 
@@ -527,11 +520,15 @@ Future<void> msgErroBikes() async {
           bikeAlugada = barcode;
         });
         print(this._barcode);
-        _sendMessage(waitRent);
-        iniciaCorrida(email, _barcode).then((value) {
-          print("Corrida iniciada");
+        _sendMessage(waitRent).then((onValue) {
+          iniciaCorrida(email, _barcode).then((value) {
+            print("Corrida iniciada");
+            Navigator.of(context).pushReplacementNamed('/emviagem');
+          });
         });
-        Navigator.of(context).pushReplacementNamed('/emviagem');
+        // iniciaCorrida(email, _barcode).then((value) {
+        //   print("Corrida iniciada");
+        // });
       }).catchError((onError) {});
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
@@ -596,7 +593,7 @@ Future<void> msgErroBikes() async {
     } else {
       isConnected = false;
       showAlertDialog(context, 'Não foi possível conectar no Bluber!',
-          'Tente novamente mais tarde.');
+          'Tente novamente mais tarde.1');
     }
   }
 
@@ -612,33 +609,41 @@ Future<void> msgErroBikes() async {
   Future bluetoothConection() async {
     // Some simplest connection :F
     try {
-      await BluetoothConnection.toAddress(_hc05Adress).then((connection) {
-        print('Connected to the device');
-
-        _connection = connection;
-        isConnected = true;
-        discovered = false;
-        scan();
-      }).catchError((onError) {
-        isConnected = false;
-        // showAlertDialog(context, 'Não foi possível conectar no Bluber!',
-        //     'Tente novamente mais tarde.');
-      });
-
-      // connection.input.listen((Uint8List data) {
-      // }).onDone(() {
-      //   print('Disconnected by remote request');
-      // });
+      _connection = await BluetoothConnection.toAddress(_hc05Adress);
+      scan();
     } catch (exception) {
-      isConnected = false;
       showAlertDialog(context, 'Não foi possível conectar no Bluber!',
           'Tente novamente mais tarde.');
-      print('Cannot connect, exception occured');
+      print('Nada funciona');
     }
+
+    // try {
+    //   BluetoothConnection.toAddress(_hc05Adress).then((connection) {
+    //     print('Connected to the device');
+
+    //     _connection = connection;
+    //     isConnected = true;
+    //     scan();
+    //   }).catchError((onError) {
+    //     isConnected = false;
+    //     // showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+    //     //     'Tente novamente mais tarde.');
+    //   });
+
+    //   // connection.input.listen((Uint8List data) {
+    //   // }).onDone(() {
+    //   //   print('Disconnected by remote request');
+    //   // });
+    // } catch (exception) {
+    //   isConnected = false;
+    //   showAlertDialog(context, 'Não foi possível conectar no Bluber!',
+    //       'Tente novamente mais tarde.2');
+    //   print('Cannot connect, exception occured');
+    // }
   }
 
   //Envia mensagem
-  void _sendMessage(String text) async {
+  Future _sendMessage(String text) async {
     text = text.trim();
 
     if (text.length > 0) {
@@ -677,7 +682,10 @@ Future<void> msgErroBikes() async {
         print(_photoName);
 
         photoName = _photoName;
-        _sendMessage(unlock);
+        _sendMessage(unlock).then((onValue) {});
+        // .then((onValue){
+        //   _connection.close();
+        // });
       } else {
         _sendMessage(canceled);
         msgErro();
@@ -715,32 +723,31 @@ Future<void> msgErroBikes() async {
   //Get Rate e BikeID
   Future getInformation(String _email) async {
     String function = "retornaBikeRating";
-    String email = "email="+ _email;
+    String email = "email=" + _email;
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
         function +
         '?' +
         email;
 
-    await http.get(url).then((response){
-        if (response.statusCode == 200) {
-          print("Resposta ok");
+    await http.get(url).then((response) {
+      if (response.statusCode == 200) {
+        print("Resposta ok");
 
-          Map<String, dynamic> information = jsonDecode(response.body);
-          String _rating = information['rating'] as String;
-          String _bikeID = information['bike_id'] as String;
+        Map<String, dynamic> information = jsonDecode(response.body);
+        String _rating = information['rating'] as String;
+        String _bikeID = information['bike_id'] as String;
 
-          debugPrint("$information");
-          // print(_rating);
+        debugPrint("$information");
+        // print(_rating);
 
-          userRate = _rating;
-          bike = _bikeID;
-          getInformationFlag = true;
-
-        } else {
-          // msgErro();
-          userRate = "5";
-          bike = null;
+        userRate = _rating;
+        bike = _bikeID;
+        getInformationFlag = true;
+      } else {
+        // msgErro();
+        userRate = "5";
+        bike = null;
         showAlertDialog(
             context, 'Erro ao iniciar corrida', 'Tente novamente mais tarde');
       }
@@ -917,4 +924,34 @@ void pegaHistoPessoais(String _email) {
   
   }
 
+  // //Get Rate e BikeID
+  // Future getInformation(String _email) async {
+  //   String function = "retornaBikeRating";
+  //   String email = "email=" + _email;
+
+  //   var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+  //       function +
+  //       '?' +
+  //       email;
+
+  //   await http.get(url).then((response) {
+  //     if (response.statusCode == 200) {
+  //       print("Resposta ok");
+
+  //       Map<String, dynamic> information = jsonDecode(response.body);
+  //       String _rating = information['rating'] as String;
+  //       String _bikeID = information['bike_id'] as String;
+
+  //       debugPrint("$information");
+  //       // print(_rating);
+
+  //       userRate = _rating;
+  //       bike = _bikeID;
+  //     } else {
+  //       // msgErro();
+  //       userRate = "5";
+  //       bike = null;
+  //     }
+  //   });
+  // }
 }

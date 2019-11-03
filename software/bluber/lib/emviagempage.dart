@@ -5,6 +5,7 @@ import 'dart:async';
 import 'encerrarviagem.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:convert' show jsonDecode, utf8;
+import 'userdata.dart';
 
 //import 'package:slider/slider_button.dart';
 class EmViagemPage extends StatefulWidget {
@@ -73,6 +74,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
   @override
   void dispose() {
     bts.setPairingRequestHandler(null);
+    //_connection.close();
     _discoverableTimeoutTimer?.cancel();
     _streamSubscription?.cancel();
     stopwatch.reset();
@@ -218,34 +220,26 @@ class _EmViagemPageState extends State<EmViagemPage> {
         label: Text('Encerrar viagem!'),
         onPressed: () {
           if (_bluetoothState.toString().contains('STATE_ON')) {
-            bluetoothDiscovery();
+            //bluetoothDiscovery();
+            bluetoothConection();
           } else {
             bluetoothRequest().then((value) {
               if (_bluetoothState.toString().contains('STATE_ON')) {
-                bluetoothDiscovery();
+                //bluetoothDiscovery();
+                bluetoothConection();
               } else {
                 showAlertDialog(context, 'Bluetooth desligado!',
                     'Ligue o bluetooth para terminar');
               }
             });
           }
-
-          stopwatch.stop();
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ViagemEncerradaPage(
-                  valorCorrida: price,
-                  tempoCorrida: timetext,
-                ),
-              ));
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-//Pede para ligar o bluetooth
+  //Pede para ligar o bluetooth
   Future bluetoothRequest() async {
     // async lambda seems to not working
     await bts.requestEnable();
@@ -284,7 +278,18 @@ class _EmViagemPageState extends State<EmViagemPage> {
         //
         //mandar mensagem de lock bike e end trip
         //sendMessage(lock);
-        //sendMessage(endTrip);
+        _sendMessage(endTrip).then((onValue) {
+          stopwatch.stop();
+          _connection.close();
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ViagemEncerradaPage(
+                  valorCorrida: price,
+                  tempoCorrida: timetext,
+                ),
+              ));
+        });
         //
       }).catchError((onError) {
         isConnected = false;
@@ -321,7 +326,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
   }
 
   //Envia mensagem
-  void _sendMessage(String text) async {
+  Future _sendMessage(String text) async {
     text = text.trim();
 
     if (text.length > 0) {
@@ -335,48 +340,3 @@ class _EmViagemPageState extends State<EmViagemPage> {
     }
   }
 }
-
-// class QrScan extends StatefulWidget {
-//   @override
-//   State<StatefulWidget> createState() {
-//     return QrScanState();
-//   }
-// }
-
-// class QrScanState extends State<QrScan> {
-//   String _barcode = "";
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//         appBar: AppBar(
-//           title: Text('Lector QR flutter'),
-//         ),
-//         body: Container(
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.center,
-//             crossAxisAlignment: CrossAxisAlignment.stretch,
-//             children: <Widget>[
-
-//                       padding:
-//                           EdgeInsets.symmetric(horizontal: 80, vertical: 10.0),
-//                       child: RaisedButton(
-//                         color: Colors.amber,
-//                         textColor: Colors.black,
-//                         splashColor: Colors.blueGrey,
-//                         onPressed: scan,
-//                         child: const Text('Scanear el código QR.'),
-//                       ),
-//                     ),
-//                   Padding(
-//                       padding:
-//                           EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-//                       child: Text(
-//                         _barcode,
-//                         textAlign: TextAlign.center,
-//                         style: TextStyle(color: Colors.red),
-//                       ),
-//                     ),
-//             ],
-//           ),
-//         ));
-//   }
