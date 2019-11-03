@@ -260,64 +260,62 @@ class _MyHomePageState extends State<MyHomePage>
       height: 170.0, // definição da altura
 
       // stack para ajeitar os widgets dentro do container (funciona como uma pilha onde vc vai colocando um widget em cima do outro)
-      child: Stack(children: <Widget>[
-        // padding ajuda a alocar os widgets no lugar que queremos
+      child: Stack(
+        children: <Widget>[
+          // padding ajuda a alocar os widgets no lugar que queremos
 
-        // padding da imagem do user
-        Padding(
-          padding: EdgeInsets.only(
-              top: 70.0, left: 10.0), // define as coordenadas do widget
-          child: CircleAvatar(
-            radius: 30.0,
-            // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
-            backgroundImage: NetworkImage(
-              imageUrl,
+          // padding da imagem do user
+          Padding(
+            padding: EdgeInsets.only(
+                top: 70.0, left: 10.0), // define as coordenadas do widget
+            child: CircleAvatar(
+              radius: 30.0,
+              // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
+              backgroundImage: NetworkImage(
+                imageUrl,
+              ),
+              backgroundColor: Colors.transparent,
             ),
-            backgroundColor: Colors.transparent,
           ),
-        ),
 
-        // padding do nome do user
-        Padding(
-          padding: EdgeInsets.only(top: 75.0, left: 85.0),
-          // nome do usuário
-          child: Text(
-            name,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 25.0,
-              color: Colors.white,
+          // padding do nome do user
+          Padding(
+            padding: EdgeInsets.only(top: 75.0, left: 85.0),
+            // nome do usuário
+            child: Text(
+              name,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 25.0,
+                color: Colors.white,
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 105.0, left: 85.0),
-          // nome do usuário
-          child: Text(
-            email,
-            style: TextStyle(
-              fontSize: 15.0,
-              color: Colors.white,
+          Padding(
+            padding: EdgeInsets.only(top: 105.0, left: 85.0),
+            // nome do usuário
+            child: Text(
+              email,
+              style: TextStyle(
+                fontSize: 15.0,
+                color: Colors.white,
+              ),
             ),
           ),
-        ),
-        Padding(
-            padding: EdgeInsets.only(top: 135.0, left: 85.0),
-            child: Row(
-              children: <Widget>[
-                Icon(
-                  Icons.star,
-                  color: Colors.yellow,
-                ),
-                Text(userRate,
-                    //UserData.getName(),
-                    style: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.white,
-                    )),
-              ],
-            ))
-      ]),
+          // Padding(
+          //   padding: EdgeInsets.only(top: 135.0, left: 85.0),
+          //   // nome do usuário
+          //   child: Text(
+          //     userRate,
+          //     //UserData.getName(),
+          //     style: TextStyle(
+          //       fontSize: 15.0,
+          //       color: Colors.white,
+          //     ),
+          //   ),
+          // ),
+        ],
+      ),
     );
   }
 
@@ -429,7 +427,6 @@ class _MyHomePageState extends State<MyHomePage>
 
     http.get(url).then((response) {
       Map<String, dynamic> bikes = jsonDecode(response.body);
-
       if (response.statusCode == 200) {
         print("Resposta ok");
 
@@ -444,41 +441,38 @@ class _MyHomePageState extends State<MyHomePage>
 
         final int markerCount = name.length;
         print(markerCount);
-        // print("|" + name[0] + "|");
-        //Se a resposta é maior que zero ele coloca as bikes, se não, não entra
-        if (name[0] != "") {
-          for (int i = 0; i < markerCount; i++) {
-            // print("Estou aqui i = " + i.toString());
-            final String markerIdVal = name[i].toString();
-            print("markerIdVal = " + markerIdVal);
 
-            final MarkerId markerId = MarkerId(markerIdVal);
+        for (int i = 0; i < markerCount; i++) {
+          // print("Estou aqui i = " + i.toString());
+          final String markerIdVal = name[i].toString();
+          print("markerIdVal = " + markerIdVal);
 
-            double latitude = double.parse(bikes[name[i]]['lat']);
-            print("lat " + latitude.toString());
-            double longitude = double.parse(bikes[name[i]]['lon']);
-            print("lon" + longitude.toString());
+          final MarkerId markerId = MarkerId(markerIdVal);
 
-            final LatLng localizacao = LatLng(latitude, longitude);
+          double latitude = double.parse(bikes[name[i]]['lat']);
+          print("lat " + latitude.toString());
+          double longitude = double.parse(bikes[name[i]]['lon']);
+          print("lon" + longitude.toString());
 
-            Marker marker = Marker(
-              markerId: markerId,
-              position: LatLng(localizacao.latitude, localizacao.longitude),
-              infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
-              // icon: BitmapDescriptor.fromAssetImage(
-              //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
-              //     .then((onValue) {
-              //           myIcon = onValue;
-              // });
-              icon: myIcon,
-            );
+          final LatLng localizacao = LatLng(latitude, longitude);
 
-            debugPrint("Marker: $marker");
+          Marker marker = Marker(
+            markerId: markerId,
+            position: LatLng(localizacao.latitude, localizacao.longitude),
+            infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
+            // icon: BitmapDescriptor.fromAssetImage(
+            //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
+            //     .then((onValue) {
+            //           myIcon = onValue;
+            // });
+            icon: myIcon,
+          );
 
-            setState(() {
-              markers[markerId] = marker;
-            });
-          }
+          debugPrint("Marker: $marker");
+
+          setState(() {
+            markers[markerId] = marker;
+          });
         }
       } else {
         msgErroBikes();
@@ -738,10 +732,10 @@ class _MyHomePageState extends State<MyHomePage>
         getInformationFlag = true;
       } else {
         // msgErro();
-        userRate = "5,0";
+        userRate = "5";
         bike = null;
-        //   showAlertDialog(
-        //       context, 'Erro ao pegar as informações', 'Tentaremos novamente mais');
+        showAlertDialog(
+            context, 'Erro ao iniciar corrida', 'Tente novamente mais tarde');
       }
     });
   }
@@ -826,11 +820,7 @@ class _MyHomePageState extends State<MyHomePage>
 
         print(lista_historico_corridas.length.toString());
       } else {
-        if (response.statusCode == 201) {
-          print("Histórico vazio");
-        } else {
-          // msgErroViagem();
-        }
+        msgErroViagem();
       }
     });
   }
@@ -891,9 +881,8 @@ class _MyHomePageState extends State<MyHomePage>
       } else {
         if (response.statusCode == 201) {
           print("Histórico vazio");
-        } else {
-          // msgErroViagem();
         }
+        msgErroViagem();
       }
     });
   }
