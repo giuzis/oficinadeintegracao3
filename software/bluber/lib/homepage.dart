@@ -260,60 +260,64 @@ class _MyHomePageState extends State<MyHomePage>
       height: 170.0, // definição da altura
 
       // stack para ajeitar os widgets dentro do container (funciona como uma pilha onde vc vai colocando um widget em cima do outro)
-      child: Stack(
-        children: <Widget>[
-          // padding ajuda a alocar os widgets no lugar que queremos
+      child: Stack(children: <Widget>[
+        // padding ajuda a alocar os widgets no lugar que queremos
 
-          // padding da imagem do user
-          Padding(
-            padding: EdgeInsets.only(
-                top: 70.0, left: 10.0), // define as coordenadas do widget
-            child: CircleAvatar(
-              radius: 30.0,
-              // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
-              backgroundImage: NetworkImage(
-                imageUrl,
-              ),
-              backgroundColor: Colors.transparent,
+        // padding da imagem do user
+        Padding(
+          padding: EdgeInsets.only(
+              top: 70.0, left: 10.0), // define as coordenadas do widget
+          child: CircleAvatar(
+            radius: 30.0,
+            // para adicionar imagens é necessário modficar o pubspec.yaml (linha 45 em diante)
+            backgroundImage: NetworkImage(
+              imageUrl,
             ),
+            backgroundColor: Colors.transparent,
           ),
+        ),
 
-          // padding do nome do user
-          Padding(
-            padding: EdgeInsets.only(top: 75.0, left: 85.0),
-            // nome do usuário
-            child: Text(
-              name,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 25.0,
-                color: Colors.white,
-              ),
+        // padding do nome do user
+        Padding(
+          padding: EdgeInsets.only(top: 75.0, left: 85.0),
+          // nome do usuário
+          child: Text(
+            name,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 25.0,
+              color: Colors.white,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(top: 105.0, left: 85.0),
-            // nome do usuário
-            child: Text(
-              email,
-              style: TextStyle(
-                fontSize: 15.0,
-                color: Colors.white,
-              ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 105.0, left: 85.0),
+          // nome do usuário
+          child: Text(
+            email,
+            style: TextStyle(
+              fontSize: 15.0,
+              color: Colors.white,
             ),
           ),
-          Padding(
+        ),
+        Padding(
             padding: EdgeInsets.only(top: 135.0, left: 85.0),
-            child: Row(children: <Widget>[Icon(Icons.star, color: Colors.yellow), Text(
-              userRate,
-              //UserData.getName(),
-              style: TextStyle(
-                fontSize: 15.0,
-                color: Colors.white,
-              )),],)
-          )
-        ]
-      ),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.star,
+                  color: Colors.yellow,
+                ),
+                Text(userRate,
+                    //UserData.getName(),
+                    style: TextStyle(
+                      fontSize: 15.0,
+                      color: Colors.white,
+                    )),
+              ],
+            ))
+      ]),
     );
   }
 
@@ -424,9 +428,8 @@ class _MyHomePageState extends State<MyHomePage>
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' + function;
 
     http.get(url).then((response) {
-      
       Map<String, dynamic> bikes = jsonDecode(response.body);
-      
+
       if (response.statusCode == 200) {
         print("Resposta ok");
 
@@ -443,7 +446,7 @@ class _MyHomePageState extends State<MyHomePage>
         print(markerCount);
         // print("|" + name[0] + "|");
         //Se a resposta é maior que zero ele coloca as bikes, se não, não entra
-        if(name[0]!=""){
+        if (name[0] != "") {
           for (int i = 0; i < markerCount; i++) {
             // print("Estou aqui i = " + i.toString());
             final String markerIdVal = name[i].toString();
@@ -475,11 +478,11 @@ class _MyHomePageState extends State<MyHomePage>
             setState(() {
               markers[markerId] = marker;
             });
+          }
         }
-      } 
-    }else {
+      } else {
         msgErroBikes();
-    }   
+      }
     });
   }
 
@@ -737,8 +740,8 @@ class _MyHomePageState extends State<MyHomePage>
         // msgErro();
         userRate = "5,0";
         bike = null;
-      //   showAlertDialog(
-      //       context, 'Erro ao pegar as informações', 'Tentaremos novamente mais');
+        //   showAlertDialog(
+        //       context, 'Erro ao pegar as informações', 'Tentaremos novamente mais');
       }
     });
   }
@@ -823,7 +826,6 @@ class _MyHomePageState extends State<MyHomePage>
 
         print(lista_historico_corridas.length.toString());
       } else {
-
         if (response.statusCode == 201) {
           print("Histórico vazio");
         } else {
@@ -889,7 +891,7 @@ class _MyHomePageState extends State<MyHomePage>
       } else {
         if (response.statusCode == 201) {
           print("Histórico vazio");
-        }else{
+        } else {
           // msgErroViagem();
         }
       }

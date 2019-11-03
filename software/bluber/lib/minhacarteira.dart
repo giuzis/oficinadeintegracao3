@@ -55,9 +55,9 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
                   return CircularProgressIndicator();
                 }
               }),
-          Container(
-            height: 200,
-          ),
+          // Container(
+          //   height: 200,
+          // ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
