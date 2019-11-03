@@ -5,16 +5,16 @@ import 'userdata.dart';
 import 'dart:async';
 import 'package:http/http.dart';
 
-
 //Variáveis usadas no sign in + autenticação
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 //Funções da autenticação - sign in com o gmail
 Future<String> signInWithGoogle() async {
-  final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+  final GoogleSignInAccount googleSignInAccount =
+      await googleSignIn.signIn().catchError((onError) {});
   final GoogleSignInAuthentication googleSignInAuthentication =
-      await googleSignInAccount.authentication;
+      await googleSignInAccount.authentication.catchError((onError) {});
 
   final AuthCredential credential = GoogleAuthProvider.getCredential(
     accessToken: googleSignInAuthentication.accessToken,
@@ -57,26 +57,26 @@ void signOutGoogle() async {
   print("User Sign Out");
 }
 
-  //Chama  a função de cadastrar
-  // cadastro(String _name, String _email, String _wallet) async {
-  //   String function = "createUser";
-  //   // String name = "name="+ _name;
-  //   String email = "email=" + _email;
-  //   String wallet = "wallet_id=" + _wallet;
+//Chama  a função de cadastrar
+// cadastro(String _name, String _email, String _wallet) async {
+//   String function = "createUser";
+//   // String name = "name="+ _name;
+//   String email = "email=" + _email;
+//   String wallet = "wallet_id=" + _wallet;
 
-  //   print("Cadastrando -  name: " +
-  //       _name +
-  //       "email: " +
-  //       _email +
-  //       "wallet" +
-  //       _wallet);
+//   print("Cadastrando -  name: " +
+//       _name +
+//       "email: " +
+//       _email +
+//       "wallet" +
+//       _wallet);
 
-  //   String url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
-  //       function +
-  //       '?' +
-  //       email +
-  //       '&' +
-  //       wallet;
-  //   print(url);
-  //   return await get(url);
-  // }
+//   String url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+//       function +
+//       '?' +
+//       email +
+//       '&' +
+//       wallet;
+//   print(url);
+//   return await get(url);
+// }
