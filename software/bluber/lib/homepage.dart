@@ -44,7 +44,6 @@ class _MyHomePageState extends State<MyHomePage>
   bool bikesUpdated = false;
   bool pegouHistorico = false;
 
-  
   //Variável que pega a leitura do QRCode
   String _barcode = "";
   bool getInformationFlag = false;
@@ -174,10 +173,10 @@ class _MyHomePageState extends State<MyHomePage>
     }
 
     // clearList().then((value){
-      pegaHistoPessoais(email);
-      pegaHistoMeuBluber(email);
+    pegaHistoPessoais(email);
+    pegaHistoMeuBluber(email);
     // });
-    
+
     // nossa página inicial será um definida por um controle de abas
     return Scaffold(
       // característica do scaffold é a appbar já pronta (parte de cima da aplicação)
@@ -233,10 +232,6 @@ class _MyHomePageState extends State<MyHomePage>
       // é o botão que leva a outra página (nesse caso)
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
-
-
-
-    
   }
 
   showAlertDialog(BuildContext context, String title, String content) {
@@ -348,8 +343,8 @@ class _MyHomePageState extends State<MyHomePage>
           title: Text("Meu Bluber",
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.normal)),
           onTap: () {
-            pegaHistoMeuBluber(email).then((value){
-                Navigator.of(context).pushNamed('/meubluber');
+            pegaHistoMeuBluber(email).then((value) {
+              Navigator.of(context).pushNamed('/meubluber');
             });
           },
         )
@@ -397,15 +392,6 @@ class _MyHomePageState extends State<MyHomePage>
       markers: Set<Marker>.of(markers.values),
     );
   }
-
-  Marker marcelle = Marker(
-    markerId: MarkerId('marcelle'),
-    position: LatLng(-25.439175, -49.265753),
-    infoWindow: InfoWindow(title: 'Minha casa'),
-    icon: BitmapDescriptor.defaultMarkerWithHue(
-      BitmapDescriptor.hueViolet,
-    ),
-  );
 
   Future<void> msgErroBikes() async {
     return showDialog<void>(
@@ -782,132 +768,131 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-void pegaHistoPessoais(String _email) {
-
+  void pegaHistoPessoais(String _email) {
     String function = "retornaHistorico";
-    String email = "email="+_email;
-    String pref = "historico="+"viagens_pessoais";
-
+    String email = "email=" + _email;
+    String pref = "historico=" + "viagens_pessoais";
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
-        function + '?' + email + '&' + pref;
+        function +
+        '?' +
+        email +
+        '&' +
+        pref;
 
-    http.get(url).then((response){
-        if (response.statusCode == 200) {
-          print("Resposta ok");
+    http.get(url).then((response) {
+      if (response.statusCode == 200) {
+        print("Resposta ok");
 
-          Map<String, dynamic> corridas = jsonDecode(response.body);
+        Map<String, dynamic> corridas = jsonDecode(response.body);
 
-          String len = corridas.keys.toString();
-          len = len.replaceAll("(", "");
-          len = len.replaceAll(")", "");
-          len = len.replaceAll(" ", "");
-          List<String> _corrida = len.split(",");
-          
-          debugPrint("$corridas");
-          
-          final int numCorridas = _corrida.length;
-          // print(numCorridas);
+        String len = corridas.keys.toString();
+        len = len.replaceAll("(", "");
+        len = len.replaceAll(")", "");
+        len = len.replaceAll(" ", "");
+        List<String> _corrida = len.split(",");
 
-          lista_historico_corridas.clear();
-          for(int i=0;i<numCorridas;i++){
-            String corridaAtual = _corrida[i].toString().replaceAll(" ", "");
-            print(corridaAtual.toString());
-              String bike_id = corridas[corridaAtual]['bike_id'] as String;
-              String cliente = corridas[_corrida[i]]['cliente'] as String;
-              String data_e_hora_fim = corridas[_corrida[i]]['data_e_hora_fim'] as String;
-              String data_e_hora_inicio = corridas[_corrida[i]]['data_e_hora_inicio'] as String;
-              String preco = corridas[_corrida[i]]['preco'] as String;
-              String photoName = _corrida[i].toString();
-            
-            Viagem viagemNova = new Viagem(bike_id, 
-                                          cliente, 
-                                          data_e_hora_fim, 
-                                          data_e_hora_inicio, preco, photoName);
-            
-            // if(!lista_historico_corridas.contains(viagemNova)){
-                lista_historico_corridas.add(viagemNova);
-            // }
-          }
+        debugPrint("$corridas");
 
-          print(lista_historico_corridas.length.toString());
+        final int numCorridas = _corrida.length;
+        // print(numCorridas);
 
-        } else {
-          msgErroViagem();
+        lista_historico_corridas.clear();
+        for (int i = 0; i < numCorridas; i++) {
+          String corridaAtual = _corrida[i].toString().replaceAll(" ", "");
+          print(corridaAtual.toString());
+          String bike_id = corridas[corridaAtual]['bike_id'] as String;
+          String cliente = corridas[_corrida[i]]['cliente'] as String;
+          String data_e_hora_fim =
+              corridas[_corrida[i]]['data_e_hora_fim'] as String;
+          String data_e_hora_inicio =
+              corridas[_corrida[i]]['data_e_hora_inicio'] as String;
+          String preco = corridas[_corrida[i]]['preco'] as String;
+          String photoName = _corrida[i].toString();
+
+          Viagem viagemNova = new Viagem(bike_id, cliente, data_e_hora_fim,
+              data_e_hora_inicio, preco, photoName);
+
+          // if(!lista_historico_corridas.contains(viagemNova)){
+          lista_historico_corridas.add(viagemNova);
+          // }
         }
+
+        print(lista_historico_corridas.length.toString());
+      } else {
+        msgErroViagem();
+      }
     });
   }
 
-  Future pegaHistoMeuBluber (String _email) async {
-
+  Future pegaHistoMeuBluber(String _email) async {
     String function = "retornaHistorico";
-    String email = "email="+_email;
-    String pref = "historico="+"viagens_com_sua_bike";
-
+    String email = "email=" + _email;
+    String pref = "historico=" + "viagens_com_sua_bike";
 
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
-        function + '?' + email + '&' + pref;
+        function +
+        '?' +
+        email +
+        '&' +
+        pref;
 
-    http.get(url).then((response){
-        if (response.statusCode == 200) {
-          print("Resposta ok");
+    http.get(url).then((response) {
+      if (response.statusCode == 200) {
+        print("Resposta ok");
 
-          Map<String, dynamic> corridas = jsonDecode(response.body);
+        Map<String, dynamic> corridas = jsonDecode(response.body);
 
-          String len = corridas.keys.toString();
-          len = len.replaceAll("(", "");
-          len = len.replaceAll(")", "");
-          len = len.replaceAll(" ", "");
-          List<String> _corrida = len.split(",");
-          
-          debugPrint("$corridas");
-          
-          final int numCorridas = _corrida.length;
-          print(numCorridas);
+        String len = corridas.keys.toString();
+        len = len.replaceAll("(", "");
+        len = len.replaceAll(")", "");
+        len = len.replaceAll(" ", "");
+        List<String> _corrida = len.split(",");
 
-          lista_historico_meu_bluber.clear();
-          for(int i=0;i<numCorridas;i++){
-            String corridaAtual = _corrida[i].toString().replaceAll(" ", "");
-            print(corridaAtual.toString());
-              String bike_id = corridas[_corrida[i]]['bike_id'] as String;
-              String cliente = corridas[_corrida[i]]['cliente'] as String;
-              String data_e_hora_fim = corridas[_corrida[i]]['data_e_hora_fim'] as String;
-              String data_e_hora_inicio = corridas[_corrida[i]]['data_e_hora_inicio'] as String;
-              String preco = corridas[_corrida[i]]['preco'] as String;
-              String photoName = _corrida[i].toString();
+        debugPrint("$corridas");
 
-            Viagem viagemNova = new Viagem(bike_id, 
-                                          cliente, 
-                                          data_e_hora_fim, 
-                                          data_e_hora_inicio, preco, photoName);
-            
-            // print(lista_historico_meu_bluber.contains(viagemNova).toString());
-            // if(!lista_historico_meu_bluber.contains(viagemNova)){
-              lista_historico_meu_bluber.add(viagemNova);
-            // }
+        final int numCorridas = _corrida.length;
+        print(numCorridas);
 
-          }
+        lista_historico_meu_bluber.clear();
+        for (int i = 0; i < numCorridas; i++) {
+          String corridaAtual = _corrida[i].toString().replaceAll(" ", "");
+          print(corridaAtual.toString());
+          String bike_id = corridas[_corrida[i]]['bike_id'] as String;
+          String cliente = corridas[_corrida[i]]['cliente'] as String;
+          String data_e_hora_fim =
+              corridas[_corrida[i]]['data_e_hora_fim'] as String;
+          String data_e_hora_inicio =
+              corridas[_corrida[i]]['data_e_hora_inicio'] as String;
+          String preco = corridas[_corrida[i]]['preco'] as String;
+          String photoName = _corrida[i].toString();
 
-          print(lista_historico_meu_bluber.length.toString());
+          Viagem viagemNova = new Viagem(bike_id, cliente, data_e_hora_fim,
+              data_e_hora_inicio, preco, photoName);
+
+          // print(lista_historico_meu_bluber.contains(viagemNova).toString());
+          // if(!lista_historico_meu_bluber.contains(viagemNova)){
+          lista_historico_meu_bluber.add(viagemNova);
+          // }
 
         }
-        else {
-          if(response.statusCode == 201){
-            print("Histórico vazio");
-          }
-          msgErroViagem();
+
+        print(lista_historico_meu_bluber.length.toString());
+      } else {
+        if (response.statusCode == 201) {
+          print("Histórico vazio");
+        }
+        msgErroViagem();
       }
     });
   }
 
   Future clearList() async {
-
-    print("antes "+ lista_historico_meu_bluber.length.toString());
+    print("antes " + lista_historico_meu_bluber.length.toString());
     lista_historico_corridas.clear();
     lista_historico_meu_bluber.clear();
-    
-    print("depois + " + lista_historico_meu_bluber.length.toString());
 
+    print("depois + " + lista_historico_meu_bluber.length.toString());
 
     // lista_historico_corridas.removeRange(0, (lista_historico_corridas.length-1));
     // lista_historico_meu_bluber.removeRange(0, (lista_historico_meu_bluber.length-1));
@@ -921,7 +906,6 @@ void pegaHistoPessoais(String _email) {
     // for (var i = 0; i < lista_historico_meu_bluber.length - 1; i++) {
     //   lista_historico_meu_bluber.removeAt(i);
     // }
-  
   }
 
   // //Get Rate e BikeID
