@@ -3,18 +3,7 @@ import 'displayimage.dart';
 import 'package:http/http.dart';
 import 'userdata.dart';
 import 'dart:convert' show jsonDecode;
-
-class Viagem 
-{
-  String bike_id;
-  String cliente;
-  String data_e_hora_fim;
-  String data_e_hora_inicio;
-  String preco;
-
-  
-  Viagem(this.bike_id, this.cliente, this.data_e_hora_fim, this.data_e_hora_inicio, this.preco);
-}
+import 'package:bluber/userdata.dart';
 
 
 class HistoricoCorridasPage extends StatefulWidget {
@@ -24,7 +13,8 @@ class HistoricoCorridasPage extends StatefulWidget {
 
 class _HistoricoCorridasPageState extends State<HistoricoCorridasPage> {
   //final ref = FirebaseStorage.instance.ref().child('testimage');
-  List<Viagem> lista_historico = new List<Viagem>();
+  // bool pegouHistorico = false;
+
   // [
   //   [
   //     '00:00:00',
@@ -45,112 +35,118 @@ class _HistoricoCorridasPageState extends State<HistoricoCorridasPage> {
 
   @override
   Widget build(BuildContext context) {
-    adicicionaBikes(email, "viagens_pessoais");
+
+    // if(!pegouHistorico){
+    //   pegaHisto(email, "viagens_pessoais");
+    // }
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Histórico'),
-        ),
-        body: ListView.builder(
-            itemCount: lista_historico.length,
-            itemBuilder: (BuildContext ctxt, int index) {
-              return new Card(
-                child: ListTile(
-                  leading: Icon(Icons.directions_bike),
-                  title: Text(lista_historico[index].cliente),
-                  subtitle: Text(lista_historico[index].data_e_hora_inicio),
-                  trailing: Icon(Icons.arrow_right),
-                  onTap: () {
-                    // Navigator.push(
-                    //     context,
-                    //     // MaterialPageRoute(
-                    //     //   builder: (context) => 
-                    //     //   // DisplayImage(
-                    //     //   //   imageUrl: lista_historico[index],
-                    //     //   // ),
-                    //     // )
-                    //     );
-                  },
-                ),
-              );
-            })
-        //_corridasList(),
-        );
-  }
-
-  Future<void> msgErro() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          //title: Text('Rewind and remember'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Erro ao receber o Histório de Corridas!'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('Ok'),
-              onPressed: () {
-                Navigator.of(context).pop();
+    appBar: AppBar(
+      title: Text('Histórico'),
+    ),
+    body: ListView.builder(
+        itemCount: lista_historico_corridas.length,
+        itemBuilder: (BuildContext ctxt, int index) {
+          return new Card(
+            child: ListTile(
+              leading: Icon(Icons.directions_bike),
+              title: Text(lista_historico_corridas[index].bike_id),
+              subtitle: Text(lista_historico_corridas[index].data_e_hora_inicio),
+              trailing: Icon(Icons.arrow_right),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => 
+                      DisplayImage(
+                        imageName: lista_historico_corridas[index].photoName
+                      ),
+                    )
+                  );
               },
             ),
-          ],
-        );
-      },
+          );
+        })
+    //_corridasList(),
     );
   }
 
+//   Future<void> msgErro() async {
+//     return showDialog<void>(
+//       context: context,
+//       barrierDismissible: false, // user must tap button!
+//       builder: (BuildContext context) {
+//         return AlertDialog(
+//           //title: Text('Rewind and remember'),
+//           content: SingleChildScrollView(
+//             child: ListBody(
+//               children: <Widget>[
+//                 Text('Erro ao receber o Histório de Corridas!'),
+//               ],
+//             ),
+//           ),
+//           actions: <Widget>[
+//             FlatButton(
+//               child: Text('Ok'),
+//               onPressed: () {
+//                 Navigator.of(context).pop();
+//               },
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
 
-void adicicionaBikes(String _email, String _pref) {
 
-    String function = "retornaHistorico";
-    String email = "email="+_email;
-    String pref = "historico="+_pref;
+// Future pegaHisto(String _email, String _pref) {
+
+//     String function = "retornaHistorico";
+//     String email = "email="+_email;
+//     String pref = "historico="+_pref;
 
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
-        function + '?' + email + '&' + pref;
+//     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+//         function + '?' + email + '&' + pref;
 
-    get(url).then((response){
-        if (response.statusCode == 200) {
-          print("Resposta ok");
+//     get(url).then((response){
+//         if (response.statusCode == 200) {
+//           print("Resposta ok");
 
-          Map<String, dynamic> corridas = jsonDecode(response.body);
+//           Map<String, dynamic> corridas = jsonDecode(response.body);
 
-          String len = corridas.keys.toString();
-          len = len.replaceAll("(", "");
-          len = len.replaceAll(")", "");
-          List<String> _corrida = len.split(", ");
+//           String len = corridas.keys.toString();
+//           len = len.replaceAll("(", "");
+//           len = len.replaceAll(")", "");
+//           len = len.replaceAll(" ", "");
+//           List<String> _corrida = len.split(",");
           
-          debugPrint("$corridas");
+//           debugPrint("$corridas");
           
-          final int numCorridas = _corrida.length;
-          // print(numCorridas);
+//           final int numCorridas = _corrida.length;
+//           // print(numCorridas);
 
-          for(int i=0;i<numCorridas;i++){
-              String bike_id ;
-              String cliente;
-              String data_e_hora_fim;
-              String data_e_hora_inicio;
-              String preco;
-
-
+//           for(int i=0;i<numCorridas;i++){
+//             String corridaAtual = _corrida[i].toString().replaceAll(" ", "");
+//             print(corridaAtual.toString());
+//               String bike_id = corridas[corridaAtual]['bike_id'];
+//               String cliente = corridas[_corrida[i]]['cliente'];
+//               String data_e_hora_fim = corridas[_corrida[i]]['data_e_hora_fim'];
+//               String data_e_hora_inicio = corridas[_corrida[i]]['data_e_hora_inicio'];
+//               String preco = corridas[_corrida[i]]['preco'];
+//               String photoName = _corrida[i].toString();
             
-            // lista_historico.add(new Viagem())
-            // setState(() {
-            //   markers[markerId] = marker;
-            // });
-          }
+//             lista_historico_corridas.add(new Viagem(bike_id, 
+//                                           cliente, 
+//                                           data_e_hora_fim, 
+//                                           data_e_hora_inicio, preco, photoName));
 
-        } else {
-          msgErro();
-      }
-    });
-  }
+//           }
+
+//         } else {
+//           msgErro();
+//       }
+//     });
+//   }
 
 }
