@@ -502,7 +502,7 @@ class _MyHomePageState extends State<MyHomePage>
           
         }
       }
-    });
+    }});
   }
 
   _onMapCreated(GoogleMapController controller) {
