@@ -302,19 +302,17 @@ class _MyHomePageState extends State<MyHomePage>
               ),
             ),
           ),
-          // Padding(
-          //   padding: EdgeInsets.only(top: 135.0, left: 85.0),
-          //   // nome do usuário
-          //   child: Text(
-          //     userRate,
-          //     //UserData.getName(),
-          //     style: TextStyle(
-          //       fontSize: 15.0,
-          //       color: Colors.white,
-          //     ),
-          //   ),
-          // ),
-        ],
+          Padding(
+            padding: EdgeInsets.only(top: 135.0, left: 85.0),
+            child: Row(children: <Widget>[Icon(Icons.star, color: Colors.yellow), Text(
+              userRate,
+              //UserData.getName(),
+              style: TextStyle(
+                fontSize: 15.0,
+                color: Colors.white,
+              )),],)
+          )
+        ]
       ),
     );
   }
@@ -426,7 +424,9 @@ class _MyHomePageState extends State<MyHomePage>
     var url = 'https://us-central1-bluberstg.cloudfunctions.net/' + function;
 
     http.get(url).then((response) {
+      
       Map<String, dynamic> bikes = jsonDecode(response.body);
+      
       if (response.statusCode == 200) {
         print("Resposta ok");
 
@@ -441,42 +441,45 @@ class _MyHomePageState extends State<MyHomePage>
 
         final int markerCount = name.length;
         print(markerCount);
+        // print("|" + name[0] + "|");
+        //Se a resposta é maior que zero ele coloca as bikes, se não, não entra
+        if(name[0]!=""){
+          for (int i = 0; i < markerCount; i++) {
+            // print("Estou aqui i = " + i.toString());
+            final String markerIdVal = name[i].toString();
+            print("markerIdVal = " + markerIdVal);
 
-        for (int i = 0; i < markerCount; i++) {
-          // print("Estou aqui i = " + i.toString());
-          final String markerIdVal = name[i].toString();
-          print("markerIdVal = " + markerIdVal);
+            final MarkerId markerId = MarkerId(markerIdVal);
 
-          final MarkerId markerId = MarkerId(markerIdVal);
+            double latitude = double.parse(bikes[name[i]]['lat']);
+            print("lat " + latitude.toString());
+            double longitude = double.parse(bikes[name[i]]['lon']);
+            print("lon" + longitude.toString());
 
-          double latitude = double.parse(bikes[name[i]]['lat']);
-          print("lat " + latitude.toString());
-          double longitude = double.parse(bikes[name[i]]['lon']);
-          print("lon" + longitude.toString());
+            final LatLng localizacao = LatLng(latitude, longitude);
 
-          final LatLng localizacao = LatLng(latitude, longitude);
+            Marker marker = Marker(
+              markerId: markerId,
+              position: LatLng(localizacao.latitude, localizacao.longitude),
+              infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
+              // icon: BitmapDescriptor.fromAssetImage(
+              //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
+              //     .then((onValue) {
+              //           myIcon = onValue;
+              // });
+              icon: myIcon,
+            );
 
-          Marker marker = Marker(
-            markerId: markerId,
-            position: LatLng(localizacao.latitude, localizacao.longitude),
-            infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
-            // icon: BitmapDescriptor.fromAssetImage(
-            //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
-            //     .then((onValue) {
-            //           myIcon = onValue;
-            // });
-            icon: myIcon,
-          );
+            debugPrint("Marker: $marker");
 
-          debugPrint("Marker: $marker");
-
-          setState(() {
-            markers[markerId] = marker;
-          });
+            setState(() {
+              markers[markerId] = marker;
+            });
         }
-      } else {
+      } 
+    }else {
         msgErroBikes();
-      }
+    }   
     });
   }
 
@@ -732,10 +735,10 @@ class _MyHomePageState extends State<MyHomePage>
         getInformationFlag = true;
       } else {
         // msgErro();
-        userRate = "5";
+        userRate = "5,0";
         bike = null;
-        showAlertDialog(
-            context, 'Erro ao iniciar corrida', 'Tente novamente mais tarde');
+      //   showAlertDialog(
+      //       context, 'Erro ao pegar as informações', 'Tentaremos novamente mais');
       }
     });
   }
@@ -820,7 +823,12 @@ class _MyHomePageState extends State<MyHomePage>
 
         print(lista_historico_corridas.length.toString());
       } else {
-        msgErroViagem();
+
+        if (response.statusCode == 201) {
+          print("Histórico vazio");
+        } else {
+          // msgErroViagem();
+        }
       }
     });
   }
@@ -881,8 +889,9 @@ class _MyHomePageState extends State<MyHomePage>
       } else {
         if (response.statusCode == 201) {
           print("Histórico vazio");
+        }else{
+          // msgErroViagem();
         }
-        msgErroViagem();
       }
     });
   }
