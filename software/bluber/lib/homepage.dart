@@ -510,7 +510,7 @@ class _MyHomePageState extends State<MyHomePage>
       } else {
         msgErroBikes();
       }
-    });
+    }});
   }
 
   _onMapCreated(GoogleMapController controller) {
