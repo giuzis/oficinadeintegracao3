@@ -470,32 +470,34 @@ class _MyHomePageState extends State<MyHomePage>
 
             if (name[i] == bike) {
               Marker marker = Marker(
-                markerId: markerId,
-                position: LatLng(localizacao.latitude, localizacao.longitude),
-                infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
-                // icon: BitmapDescriptor.fromAssetImage(
-                //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
-                //     .then((onValue) {
-                //           myIcon = onValue;
-                // });
-                icon: myBikeIcon,
-              );
+                  markerId: markerId,
+                  position: LatLng(localizacao.latitude, localizacao.longitude),
+                  infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
+                  // icon: BitmapDescriptor.fromAssetImage(
+                  //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
+                  //     .then((onValue) {
+                  //           myIcon = onValue;
+                  // });
+                  // icon: myBikeIcon,
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                      BitmapDescriptor.hueViolet));
 
               setState(() {
                 markers[markerId] = marker;
               });
             } else {
               Marker marker = Marker(
-                markerId: markerId,
-                position: LatLng(localizacao.latitude, localizacao.longitude),
-                infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
-                // icon: BitmapDescriptor.fromAssetImage(
-                //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
-                //     .then((onValue) {
-                //           myIcon = onValue;
-                // });
-                icon: myIcon,
-              );
+                  markerId: markerId,
+                  position: LatLng(localizacao.latitude, localizacao.longitude),
+                  infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
+                  // icon: BitmapDescriptor.fromAssetImage(
+                  //     ImageConfiguration(size: Size(48, 48)), 'assets/my_icon.png')
+                  //     .then((onValue) {
+                  //           myIcon = onValue;
+                  // });
+                  // icon: myBikeIcon
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                      BitmapDescriptor.hueGreen));
 
               setState(() {
                 markers[markerId] = marker;
