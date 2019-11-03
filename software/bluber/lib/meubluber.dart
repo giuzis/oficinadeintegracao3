@@ -73,6 +73,13 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    if(ativada == null || ativada == 'false'){
+      _disponivel = false;
+    }else{
+      _disponivel = true;
+    }
+
     if (bike != null) {
       return Scaffold(
         appBar: AppBar(
@@ -227,7 +234,7 @@ class _MeuBluberPageState extends State<MeuBluberPage> {
     await get(url).then((response) {
       if (response.statusCode == 200) {
         print("Resposta ok");
-
+        ativada = _status.toString();
         // Map<String, dynamic> information = jsonDecode(response.body);
         // String _rating = information['rating'] as String;
         // String _bikeID = information['bike_id']  as String;

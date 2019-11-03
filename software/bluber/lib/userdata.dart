@@ -10,6 +10,7 @@ String imageUrl = null;
 String photoName = null;
 String bikeAlugada = null;
 String userRate = "5";
+String ativada = null;
 
 
 
