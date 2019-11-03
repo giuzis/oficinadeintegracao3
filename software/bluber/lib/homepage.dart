@@ -481,7 +481,8 @@ class _MyHomePageState extends State<MyHomePage>
                   //     .then((onValue) {
                   //           myIcon = onValue;
                   // });
-                  icon: myBikeIcon,
+                  // icon: myBikeIcon,
+                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet)
                 );
 
                 setState(() {
@@ -497,7 +498,8 @@ class _MyHomePageState extends State<MyHomePage>
                   //     .then((onValue) {
                   //           myIcon = onValue;
                   // });
-                  icon: myIcon,
+                  // icon: myBikeIcon
+                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)
                 );
 
                 setState(() {
