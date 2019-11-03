@@ -200,7 +200,8 @@ class _MyHomePageState extends State<MyHomePage>
             _drawerBanner(),
             _drawerList(),
             Padding(
-              padding: EdgeInsets.only(top: 150),
+              //padding: EdgeInsets.only(top: 150),
+              padding: EdgeInsets.only(top: 370),
               child: _signOutButton(),
             )
           ],
@@ -309,18 +310,29 @@ class _MyHomePageState extends State<MyHomePage>
               ),
             ),
           ),
-          // Padding(
-          //   padding: EdgeInsets.only(top: 135.0, left: 85.0),
-          //   // nome do usuário
-          //   child: Text(
-          //     userRate,
-          //     //UserData.getName(),
-          //     style: TextStyle(
-          //       fontSize: 15.0,
-          //       color: Colors.white,
-          //     ),
-          //   ),
-          // ),
+          Padding(
+            padding: EdgeInsets.only(top: 100.0, left: 85.0),
+            // nota do usuário
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.star,
+                  color: Colors.yellow,
+                  size: 20,
+                ),
+                Container(
+                  width: 5,
+                ),
+                Text(
+                  userRate,
+                  style: TextStyle(
+                    fontSize: 15.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -925,7 +937,6 @@ class _MyHomePageState extends State<MyHomePage>
         } else {
           // msgErroViagem();
         }
-        msgErroViagem();
       }
     });
   }

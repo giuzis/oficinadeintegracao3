@@ -47,7 +47,7 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(snapshot.data.credit.toString(),
-                        style: TextStyle(fontSize: 30)),
+                        style: TextStyle(fontSize: 40)),
                   );
                 } else if (snapshot.hasError) {
                   return Text("${snapshot.error}");
@@ -58,6 +58,9 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
           // Container(
           //   height: 200,
           // ),
+          Container(
+            height: 270,
+          ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[

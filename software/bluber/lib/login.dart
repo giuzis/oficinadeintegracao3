@@ -43,8 +43,8 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         Padding(
-          // padding: EdgeInsets.only(top: 700, left: 100),
-          padding: EdgeInsets.only(top: 400, left: 70),
+          padding: EdgeInsets.only(top: 700, left: 100),
+          //padding: EdgeInsets.only(top: 400, left: 70),
           child: _signInButton(),
         ),
       ]),
