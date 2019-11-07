@@ -137,6 +137,23 @@ class _MyHomePageState extends State<MyHomePage>
     firebaseMessaging.getToken().then((token) {
       update(token);
     });
+
+    if (!getInformationFlag) {
+      //Esta função pega a rating e o bike ID
+      getInformation(email);
+    }
+
+    if (!bikesUpdated) {
+      //Pega as bicicletas ativas
+      adicicionaBikes();
+    }
+
+    // clearList().then((value){
+    if (!pegouHistorico) {
+      pegaHistoPessoais(email);
+      pegaHistoMeuBluber(email);
+    }
+    // });
   }
 
   showNotification(Map<String, dynamic> msg) async {
@@ -161,29 +178,31 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void dispose() {
     bts.setPairingRequestHandler(null);
-    _connection.close();
-    _discoverableTimeoutTimer?.cancel();
-    _streamSubscription?.cancel();
+    //_connection.close();
+    //_discoverableTimeoutTimer?.cancel();
+    //_streamSubscription?.cancel();
     super.dispose();
   }
 
   // aqui no build que tudo acontece
   @override
   Widget build(BuildContext context) {
-    if (!getInformationFlag) {
-      //Esta função pega a rating e o bike ID
-      getInformation(email);
-    }
+    // if (!getInformationFlag) {
+    //   //Esta função pega a rating e o bike ID
+    //   getInformation(email);
+    // }
 
     // if (!bikesUpdated) {
-    //Pega as bicicletas ativas
-    adicicionaBikes();
-    //   }
+    //   //Pega as bicicletas ativas
+    //   adicicionaBikes();
+    // }
 
-    // clearList().then((value){
-    pegaHistoPessoais(email);
-    pegaHistoMeuBluber(email);
-    // });
+    // // clearList().then((value){
+    // if (!pegouHistorico) {
+    //   pegaHistoPessoais(email);
+    //   pegaHistoMeuBluber(email);
+    // }
+    // // });
 
     // nossa página inicial será um definida por um controle de abas
     return Scaffold(
@@ -220,20 +239,22 @@ class _MyHomePageState extends State<MyHomePage>
           print('fora ' + _bluetoothState.toString());
           if (_bluetoothState.toString().contains('STATE_ON')) {
             //bluetoothDiscovery();
-            bluetoothConection();
+            //bluetoothConection();
+            scan();
           } else {
             bluetoothRequest().then((value) {
               print('DENTRO ' + _bluetoothState.toString());
               if (_bluetoothState.toString().contains('STATE_ON')) {
-                bluetoothConection();
+                //bluetoothConection();
                 //bluetoothDiscovery();
+                scan();
               } else {
                 showAlertDialog(context, 'Bluetooth desligado!',
                     'Ligue o bluetooth para começar a pedalar');
               }
             });
           }
-          // scan();
+          //scan();
         },
       ),
 
@@ -363,9 +384,9 @@ class _MyHomePageState extends State<MyHomePage>
           title: Text("Meu Bluber",
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.normal)),
           onTap: () {
-            pegaHistoMeuBluber(email).then((value) {
-              Navigator.of(context).pushNamed('/meubluber');
-            });
+            //pegaHistoMeuBluber(email).then((value) {
+            Navigator.of(context).pushNamed('/meubluber');
+            //});
           },
         )
       ],
@@ -480,29 +501,27 @@ class _MyHomePageState extends State<MyHomePage>
             print("lon" + longitude.toString());
 
             final LatLng localizacao = LatLng(latitude, longitude);
-            
 
-
-            if(name[i] == bike){
+            if (name[i] == bike) {
               print("true: " + name[i] + bike);
             }
-            
+
             Marker marker = Marker(
               markerId: markerId,
               position: LatLng(localizacao.latitude, localizacao.longitude),
               infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
-              icon: (name[i] == bike)? myBikeIcon : myIcon,
-                          // BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+              icon: (name[i] == bike) ? myBikeIcon : myIcon,
+              // BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
               // icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet)
             );
 
             setState(() {
               markers[markerId] = marker;
             });
-          
+          }
         }
       }
-    }});
+    });
   }
 
   _onMapCreated(GoogleMapController controller) {
@@ -531,11 +550,11 @@ class _MyHomePageState extends State<MyHomePage>
           bikeAlugada = barcode;
         });
         print(this._barcode);
-        _sendMessage(waitRent).then((onValue) {
-          iniciaCorrida(email, _barcode).then((value) {
-            print("Corrida iniciada");
-            Navigator.of(context).pushReplacementNamed('/emviagem');
-          });
+        //_sendMessage(waitRent).then((onValue) {
+        iniciaCorrida(email, _barcode).then((value) {
+          print("Corrida iniciada");
+          Navigator.of(context).pushReplacementNamed('/emviagem');
+          //  });
         });
         // iniciaCorrida(email, _barcode).then((value) {
         //   print("Corrida iniciada");
@@ -824,13 +843,14 @@ class _MyHomePageState extends State<MyHomePage>
         debugPrint("$corridas");
 
         final int numCorridas = _corrida.length;
-        // print(numCorridas);
+        print(numCorridas);
 
         lista_historico_corridas.clear();
         for (int i = 0; i < numCorridas; i++) {
           String corridaAtual = _corrida[i].toString().replaceAll(" ", "");
-          print(corridaAtual.toString());
-          String bike_id = corridas[corridaAtual]['bike_id'] as String;
+          print('pega histo pessoais ' + corridaAtual.toString());
+          String bike_id = corridas[_corrida[i]]['bike_id'].toString();
+          print(bike_id);
           String cliente = corridas[_corrida[i]]['cliente'] as String;
           String data_e_hora_fim =
               corridas[_corrida[i]]['data_e_hora_fim'] as String;
@@ -890,8 +910,9 @@ class _MyHomePageState extends State<MyHomePage>
         lista_historico_meu_bluber.clear();
         for (int i = 0; i < numCorridas; i++) {
           String corridaAtual = _corrida[i].toString().replaceAll(" ", "");
-          print(corridaAtual.toString());
-          String bike_id = corridas[_corrida[i]]['bike_id'] as String;
+          print('pega corridas meu bluber ' + corridaAtual.toString());
+          String bike_id = corridas[_corrida[i]]['bike_id'].toString();
+          print(bike_id);
           String cliente = corridas[_corrida[i]]['cliente'] as String;
           String data_e_hora_fim =
               corridas[_corrida[i]]['data_e_hora_fim'] as String;
@@ -911,13 +932,8 @@ class _MyHomePageState extends State<MyHomePage>
         }
 
         print(lista_historico_meu_bluber.length.toString());
-      } else {
-        if (response.statusCode == 201) {
-          // print("Histórico vazio");
-        } else {
-          // msgErroViagem();
-        }
       }
+      pegouHistorico = true;
     });
   }
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'userdata.dart';
 
-
 class RetCreditosPage extends StatefulWidget {
   @override
   _RetCreditosPageState createState() => _RetCreditosPageState();
@@ -15,7 +14,7 @@ class _RetCreditosPageState extends State<RetCreditosPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Retirar créditos"),
+        title: Text("Resgatar créditos"),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -43,8 +42,7 @@ class _RetCreditosPageState extends State<RetCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00001 BTC",
-                        
+                        "0.0001 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -72,8 +70,7 @@ class _RetCreditosPageState extends State<RetCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00002 BTC",
-                        
+                        "0.0002 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -109,8 +106,7 @@ class _RetCreditosPageState extends State<RetCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00003 BTC",
-                        
+                        "0.0003 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -138,8 +134,7 @@ class _RetCreditosPageState extends State<RetCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00004 BTC",
-                        
+                        "0.0004 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -175,8 +170,7 @@ class _RetCreditosPageState extends State<RetCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00005 BTC",
-                        
+                        "0.0005 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -204,8 +198,7 @@ class _RetCreditosPageState extends State<RetCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00006 BTC",
-                        
+                        "0.0006 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -221,94 +214,97 @@ class _RetCreditosPageState extends State<RetCreditosPage> {
           Container(
             height: 300,
           ),
-          
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-            backgroundColor: Colors.grey,
-            label: Text(
-              "Retirar bitcoins",
-            ),
-            onPressed: () {
-              // _neverSatisfied();
-              retirarCreditos(email, _pressed.toDouble()/10000);
-              // retirarCreditos(email, 0.00001);
-              //Navigator.of(context).pushReplacementNamed('/minhacarteira');
-            },
-          ),
+        backgroundColor: Colors.grey,
+        label: Text(
+          "Resgatar bitcoins",
+        ),
+        onPressed: () {
+          // _neverSatisfied();
+          retirarCreditos(email, _pressed.toDouble() / 1000);
+          // retirarCreditos(email, 0.0001);
+          //Navigator.of(context).pushReplacementNamed('/minhacarteira');
+        },
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
   Future<void> _neverSatisfied() async {
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false, // user must tap button!
-    builder: (BuildContext context) {
-      return AlertDialog(
-        //title: Text('Rewind and remember'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text('Créditos retirados!'),
-            ],
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: Text('Rewind and remember'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Créditos retirados!'),
+              ],
+            ),
           ),
-        ),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Ok'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-Future<void> msgErro() async {
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false, // user must tap button!
-    builder: (BuildContext context) {
-      return AlertDialog(
-        //title: Text('Rewind and remember'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text('Erro na transação - Verifique sua conta'),
-            ],
+  Future<void> msgErro() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: Text('Rewind and remember'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Erro na transação - Verifique sua conta'),
+              ],
+            ),
           ),
-        ),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Ok'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   //Google functions - Adicionar créditos na carteira
   Future retirarCreditos(String _email, double _amount) async {
     String function = "recoverBluberCredit";
-    String email = "email="+ _email;
+    String email = "email=" + _email;
     String amount = "amount=" + _amount.toString();
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/'+function + '?' + amount + '&'  + email;
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' +
+        function +
+        '?' +
+        amount +
+        '&' +
+        email;
     print("retirando bitcoinds");
     var response = await http.get(url);
-     
-    if(response.statusCode == 200){
+
+    if (response.statusCode == 200) {
       _neverSatisfied();
-    }else{
+    } else {
       msgErro();
     }
-
   }
 }

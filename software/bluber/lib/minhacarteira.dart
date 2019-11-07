@@ -46,7 +46,7 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
                 if (snapshot.hasData) {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text(snapshot.data.credit.toString(),
+                    child: Text(snapshot.data.credit.toStringAsFixed(6),
                         style: TextStyle(fontSize: 40)),
                   );
                 } else if (snapshot.hasError) {
@@ -81,7 +81,7 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     child: new Text(
-                      "Retirar créditos",
+                      "Resgatar créditos",
                       style: TextStyle(color: Colors.white, fontSize: 15),
                     ),
                     onPressed: () {

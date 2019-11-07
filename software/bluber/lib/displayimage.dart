@@ -27,10 +27,7 @@ class _DisplayImageState extends State<DisplayImage> {
       appBar: AppBar(),
       body: imageUrl == null
           ? Center(
-              child: Text(
-                'Aconteceu algum erro :(',
-                style: TextStyle(fontSize: 30),
-              ),
+              child: CircularProgressIndicator(),
             )
           : Image.network(imageUrl),
     );

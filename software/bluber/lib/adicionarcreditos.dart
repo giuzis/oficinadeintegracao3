@@ -42,7 +42,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00001 BTC",
+                        "0.0001 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -70,7 +70,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00002 BTC",
+                        "0.0002 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -106,7 +106,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00003 BTC",
+                        "0.0003 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -134,7 +134,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00004 BTC",
+                        "0.0004 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -170,7 +170,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00005 BTC",
+                        "0.0005 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -198,7 +198,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
                   child: FlatButton(
                     child: Center(
                       child: Text(
-                        "0.00006 BTC",
+                        "0.0006 BTC",
                       ),
                     ),
                     onPressed: () {
@@ -223,7 +223,7 @@ class _AddCreditosPageState extends State<AddCreditosPage> {
         ),
         onPressed: () {
           // _neverSatisfied();
-          adicionarCredito(email, _pressed.toDouble() / 100000);
+          adicionarCredito(email, _pressed.toDouble() / 10000);
           // adicionarCredito(_pressed);
           //Navigator.of(context).pushReplacementNamed('/minhacarteira');
         },

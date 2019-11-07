@@ -221,12 +221,32 @@ class _EmViagemPageState extends State<EmViagemPage> {
         onPressed: () {
           if (_bluetoothState.toString().contains('STATE_ON')) {
             //bluetoothDiscovery();
-            bluetoothConection();
+            //bluetoothConection();
+            stopwatch.stop();
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ViagemEncerradaPage(
+                    valorCorrida: price,
+                    tempoCorrida: timetext,
+                  ),
+                ));
           } else {
             bluetoothRequest().then((value) {
               if (_bluetoothState.toString().contains('STATE_ON')) {
                 //bluetoothDiscovery();
-                bluetoothConection();
+                //bluetoothConection();
+                stopwatch.stop();
+
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ViagemEncerradaPage(
+                        valorCorrida: price,
+                        tempoCorrida: timetext,
+                      ),
+                    ));
               } else {
                 showAlertDialog(context, 'Bluetooth desligado!',
                     'Ligue o bluetooth para terminar');
