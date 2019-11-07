@@ -28,7 +28,7 @@ dependencies:
   camera: ^0.5.6+1
   flutter_rating_bar: ^3.0.0
   google_maps_flutter: ^0.5.21+7
-  location:
+  # location:
   firebase_storage: ^3.0.6
   firebase_auth: ^0.14.0+5
   cloud_firestore: ^0.12.9+5
@@ -42,6 +42,7 @@ dependencies:
   flutter_launcher_icons: ^0.7.4
   firebase_messaging: ^5.1.6
   flutter_local_notifications: ^0.8.4
+  location: ^2.3.5
 
 dev_dependencies:
   flutter_test:

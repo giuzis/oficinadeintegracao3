@@ -106,7 +106,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
     return GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
-        target: LatLng(37.42796133580664, -122.085749655962),
+        target: LatLng(-25.4391239,-49.2688287),
         zoom: 15,
       ),
       onMapCreated: _onMapCreated,

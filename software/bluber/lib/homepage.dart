@@ -38,6 +38,8 @@ class _MyHomePageState extends State<MyHomePage>
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   MarkerId selectedMarker;
   Location location = Location();
+
+  // var myLocation = new Location();
   // int _markerIdCounter = 1;
   static final LatLng center = const LatLng(-25.438376, -49.263781);
   BitmapDescriptor myIcon;
@@ -220,8 +222,8 @@ class _MyHomePageState extends State<MyHomePage>
             _drawerBanner(),
             _drawerList(),
             Padding(
-              //padding: EdgeInsets.only(top: 150),
-              padding: EdgeInsets.only(top: 370),
+              padding: EdgeInsets.only(top: 150),
+              // padding: EdgeInsets.only(top: 370),
               child: _signOutButton(),
             )
           ],
@@ -418,7 +420,7 @@ class _MyHomePageState extends State<MyHomePage>
     return GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
-        target: LatLng(-25.438376, -49.263781),
+        target: LatLng(-25.4391239, -49.2688287),
         zoom: 15,
       ),
       onMapCreated: _onMapCreated,
@@ -846,33 +848,34 @@ class _MyHomePageState extends State<MyHomePage>
         print(numCorridas);
 
         lista_historico_corridas.clear();
-        for (int i = 0; i < numCorridas; i++) {
-          String corridaAtual = _corrida[i].toString().replaceAll(" ", "");
-          print('pega histo pessoais ' + corridaAtual.toString());
-          String bike_id = corridas[_corrida[i]]['bike_id'].toString();
-          print(bike_id);
-          String cliente = corridas[_corrida[i]]['cliente'] as String;
-          String data_e_hora_fim =
-              corridas[_corrida[i]]['data_e_hora_fim'] as String;
-          String data_e_hora_inicio =
-              corridas[_corrida[i]]['data_e_hora_inicio'] as String;
-          String preco = corridas[_corrida[i]]['preco'] as String;
-          String photoName = _corrida[i].toString();
+        if (numCorridas < 1) {
+          for (int i = 0; i < numCorridas; i++) {
+            String corridaAtual = _corrida[i].toString().replaceAll(" ", "");
+            print(corridaAtual.toString());
+            String bike_id = corridas[corridaAtual]['bike_id'] as String;
+            String cliente = corridas[_corrida[i]]['cliente'] as String;
+            String data_e_hora_fim =
+                corridas[_corrida[i]]['data_e_hora_fim'] as String;
+            String data_e_hora_inicio =
+                corridas[_corrida[i]]['data_e_hora_inicio'] as String;
+            String preco = corridas[_corrida[i]]['preco'] as String;
+            String photoName = _corrida[i].toString();
 
-          Viagem viagemNova = new Viagem(bike_id, cliente, data_e_hora_fim,
-              data_e_hora_inicio, preco, photoName);
+            Viagem viagemNova = new Viagem(bike_id, cliente, data_e_hora_fim,
+                data_e_hora_inicio, preco, photoName);
 
-          // if(!lista_historico_corridas.contains(viagemNova)){
-          lista_historico_corridas.add(viagemNova);
-          // }
-        }
+            // if(!lista_historico_corridas.contains(viagemNova)){
+            lista_historico_corridas.add(viagemNova);
+            // }
+          }
 
-        print(lista_historico_corridas.length.toString());
-      } else {
-        if (response.statusCode == 201) {
-          // print("Histórico vazio");
+          print(lista_historico_corridas.length.toString());
         } else {
-          // msgErroViagem();
+          if (response.statusCode == 201) {
+            // print("Histórico vazio");
+          } else {
+            // msgErroViagem();
+          }
         }
       }
     });
