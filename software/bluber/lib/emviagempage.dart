@@ -106,7 +106,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
     return GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
-        target: LatLng(-25.4391239,-49.2688287),
+        target: LatLng(-25.4391239, -49.2688287),
         zoom: 15,
       ),
       onMapCreated: _onMapCreated,
@@ -221,8 +221,8 @@ class _EmViagemPageState extends State<EmViagemPage> {
         onPressed: () {
           if (_bluetoothState.toString().contains('STATE_ON')) {
             //bluetoothDiscovery();
-            //bluetoothConection();
-            stopwatch.stop();
+            bluetoothConection();
+            // stopwatch.stop();
 
             Navigator.push(
                 context,

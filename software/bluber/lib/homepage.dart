@@ -222,8 +222,8 @@ class _MyHomePageState extends State<MyHomePage>
             _drawerBanner(),
             _drawerList(),
             Padding(
-              padding: EdgeInsets.only(top: 150),
-              // padding: EdgeInsets.only(top: 370),
+              //padding: EdgeInsets.only(top: 150),
+              padding: EdgeInsets.only(top: 370),
               child: _signOutButton(),
             )
           ],
@@ -238,18 +238,18 @@ class _MyHomePageState extends State<MyHomePage>
         icon: Icon(Icons.directions_bike),
         label: Text('Quero pedalar!'),
         onPressed: () {
+          getBluetoothState();
           print('fora ' + _bluetoothState.toString());
           if (_bluetoothState.toString().contains('STATE_ON')) {
             //bluetoothDiscovery();
-            //bluetoothConection();
-            scan();
+            bluetoothConection();
           } else {
             bluetoothRequest().then((value) {
+              getBluetoothState();
               print('DENTRO ' + _bluetoothState.toString());
               if (_bluetoothState.toString().contains('STATE_ON')) {
-                //bluetoothConection();
-                //bluetoothDiscovery();
-                scan();
+                bluetoothConection();
+                // bluetoothDiscovery();
               } else {
                 showAlertDialog(context, 'Bluetooth desligado!',
                     'Ligue o bluetooth para começar a pedalar');
@@ -552,11 +552,11 @@ class _MyHomePageState extends State<MyHomePage>
           bikeAlugada = barcode;
         });
         print(this._barcode);
-        //_sendMessage(waitRent).then((onValue) {
-        iniciaCorrida(email, _barcode).then((value) {
-          print("Corrida iniciada");
-          Navigator.of(context).pushReplacementNamed('/emviagem');
-          //  });
+        _sendMessage(waitRent).then((onValue) {
+          iniciaCorrida(email, _barcode).then((value) {
+            print("Corrida iniciada");
+            Navigator.of(context).pushReplacementNamed('/emviagem');
+          });
         });
         // iniciaCorrida(email, _barcode).then((value) {
         //   print("Corrida iniciada");
@@ -594,17 +594,17 @@ class _MyHomePageState extends State<MyHomePage>
   //Bluetooth
   //Pega o status do bluetooth
   Future getBluetoothState() async {
-    return bts.state; //.then((state) {
-    // setState(() {
-    //   bluetoothState = state;
-    // });
+    return bts.state.then((state) {
+      setState(() {
+        _bluetoothState = state;
+      });
 
-    // if (bluetoothState.toString().contains('ON')) {
-    //   bluetoothStateBool = true;
-    // } else {
-    //   bluetoothStateBool = false;
-    // }
-    //});
+      // if (bluetoothState.toString().contains('ON')) {
+      //   bluetoothStateBool = true;
+      // } else {
+      //   bluetoothStateBool = false;
+      // }
+    });
   }
 
   //Descobre os dispositivos de Bluetooth
@@ -714,10 +714,9 @@ class _MyHomePageState extends State<MyHomePage>
         print(_photoName);
 
         photoName = _photoName;
-        _sendMessage(unlock).then((onValue) {});
-        // .then((onValue){
-        //   _connection.close();
-        // });
+        _sendMessage(unlock).then((onValue) {
+          _connection.close();
+        });
       } else {
         _sendMessage(canceled);
         msgErro();

@@ -55,12 +55,12 @@ class _MinhaCarteiraPageState extends State<MinhaCarteiraPage> {
                   return CircularProgressIndicator();
                 }
               }),
-          Container(
-            height: 50,
-          ),
           // Container(
-          //   height: 270,
+          //   height: 50,
           // ),
+          Container(
+            height: 270,
+          ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
