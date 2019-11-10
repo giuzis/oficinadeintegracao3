@@ -117,7 +117,7 @@ class _EmViagemPageState extends State<EmViagemPage> {
     GoogleMap map = new GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
-        target: LatLng(-25.4391239, -49.2688287),
+        target: localizacao,
         zoom: 15,
       ),
       onMapCreated: _onMapCreated,
@@ -233,39 +233,38 @@ class _EmViagemPageState extends State<EmViagemPage> {
         icon: Icon(Icons.directions_bike),
         label: Text('Encerrar viagem!'),
         onPressed: () {
-          if (_bluetoothState.toString().contains('STATE_ON')) {
-            //bluetoothDiscovery();
-            bluetoothConection();
-            // stopwatch.stop();
+          if (bluetooth_ativado) {
+            if (_bluetoothState.toString().contains('STATE_ON')) {
+              //bluetoothDiscovery();
+              bluetoothConection();
+              //stopwatch.stop();
 
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ViagemEncerradaPage(
-                    valorCorrida: price,
-                    tempoCorrida: timetext,
-                  ),
-                ));
+              showAlertDialogEncerrar(
+                  context,
+                  "Certifique-se de estacionar a bicicleta dentro da área permitida.",
+                  "A área permitida está delimitada em cinza no mapa.");
+            } else {
+              bluetoothRequest().then((value) {
+                if (_bluetoothState.toString().contains('STATE_ON')) {
+                  //bluetoothDiscovery();
+                  bluetoothConection();
+                  //stopwatch.stop();
+
+                  showAlertDialogEncerrar(
+                      context,
+                      "Certifique-se de estacionar a bicicleta dentro da área permitida.",
+                      "A área permitida está delimitada em cinza no mapa.");
+                } else {
+                  showAlertDialog(context, 'Bluetooth desligado!',
+                      'Ligue o bluetooth para terminar');
+                }
+              });
+            }
           } else {
-            bluetoothRequest().then((value) {
-              if (_bluetoothState.toString().contains('STATE_ON')) {
-                //bluetoothDiscovery();
-                //bluetoothConection();
-                stopwatch.stop();
-
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ViagemEncerradaPage(
-                        valorCorrida: price,
-                        tempoCorrida: timetext,
-                      ),
-                    ));
-              } else {
-                showAlertDialog(context, 'Bluetooth desligado!',
-                    'Ligue o bluetooth para terminar');
-              }
-            });
+            showAlertDialogEncerrar(
+                context,
+                "Certifique-se de estacionar a bicicleta dentro da área permitida.",
+                "A área permitida está delimitada em cinza no mapa.");
           }
         },
       ),
@@ -313,16 +312,10 @@ class _EmViagemPageState extends State<EmViagemPage> {
         //mandar mensagem de lock bike e end trip
         //sendMessage(lock);
         _sendMessage(endTrip).then((onValue) {
-          stopwatch.stop();
-          _connection.close();
-          Navigator.push(
+          showAlertDialogEncerrar(
               context,
-              MaterialPageRoute(
-                builder: (context) => ViagemEncerradaPage(
-                  valorCorrida: price,
-                  tempoCorrida: timetext,
-                ),
-              ));
+              "Certifique-se de estacionar a bicicleta dentro da área permitida.",
+              "A área permitida está delimitada em cinza no mapa.");
         });
         //
       }).catchError((onError) {
@@ -348,6 +341,39 @@ class _EmViagemPageState extends State<EmViagemPage> {
     AlertDialog alert = AlertDialog(
       title: Text(title),
       content: Text(content),
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showAlertDialogEncerrar(BuildContext context, String title, String content) {
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(content),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Ok!'),
+          onPressed: () {
+            stopwatch.stop();
+            if (bluetooth_ativado) _connection.close();
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ViagemEncerradaPage(
+                    valorCorrida: price,
+                    tempoCorrida: timetext,
+                  ),
+                ));
+          },
+        )
+      ],
     );
 
     // show the dialog

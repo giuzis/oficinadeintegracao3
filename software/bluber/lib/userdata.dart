@@ -11,10 +11,11 @@ String bike = null;
 String imageUrl = null;
 String photoName = null;
 String bikeAlugada = null;
-String userRate = "5";
+String userRate = "5.00";
 String ativada = null;
 String bikeEmTrip = null;
-LatLng localizacao = LatLng(-25.439477, -49.268963);
+LatLng localizacao = null;
+bool bluetooth_ativado = false;
 
 //Variáveis de Transição do Bluetooth
 String lock = 'L'; //Fechar a trava da Bike
