@@ -417,6 +417,16 @@ class _MyHomePageState extends State<MyHomePage>
   // modificar essas duas funções para incluir o mapa
   // tutorial que pode ajudar https://www.youtube.com/watch?v=lNqEfnnmoHk&t=347s
   Widget _googleMap1(BuildContext context) {
+    Set<Circle> circles = new Set<Circle>();
+    circles.add(
+      Circle(
+          circleId: CircleId('Geofencing'),
+          fillColor: Colors.black26,
+          center: localizacao,
+          radius: 1000,
+          strokeColor: Colors.black38,
+          strokeWidth: 3),
+    );
     return GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
@@ -433,6 +443,7 @@ class _MyHomePageState extends State<MyHomePage>
       compassEnabled: true,
       // markers: { marcelle },
       markers: Set<Marker>.of(markers.values),
+      circles: circles,
     );
   }
 
@@ -532,7 +543,7 @@ class _MyHomePageState extends State<MyHomePage>
     });
   }
 
-  _animateToUser() async {
+  void _animateToUser() async {
     var pos = await location.getLocation();
     mapController.animateCamera(
       CameraUpdate.newCameraPosition(

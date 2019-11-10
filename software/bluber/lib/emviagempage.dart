@@ -103,7 +103,18 @@ class _EmViagemPageState extends State<EmViagemPage> {
   }
 
   Widget _googleMap(BuildContext context) {
-    return GoogleMap(
+    Set<Circle> circles = new Set<Circle>();
+    circles.add(
+      Circle(
+        circleId: CircleId('Geofencing'),
+        fillColor: Colors.black26,
+        center: localizacao,
+        radius: 1000,
+        strokeColor: Colors.black38,
+        strokeWidth: 3,
+      ),
+    );
+    GoogleMap map = new GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: CameraPosition(
         target: LatLng(-25.4391239, -49.2688287),
@@ -112,7 +123,10 @@ class _EmViagemPageState extends State<EmViagemPage> {
       onMapCreated: _onMapCreated,
       myLocationEnabled: true,
       compassEnabled: true,
+      circles: circles,
     );
+
+    return map;
   }
 
   _onMapCreated(GoogleMapController controller) {
