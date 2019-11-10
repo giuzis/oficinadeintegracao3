@@ -11,6 +11,7 @@ String photoName = null;
 String bikeAlugada = null;
 String userRate = "5";
 String ativada = null;
+String bikeEmTrip = null;
 
 
 
