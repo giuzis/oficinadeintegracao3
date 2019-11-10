@@ -13,6 +13,7 @@ String photoName = null;
 String bikeAlugada = null;
 String userRate = "5";
 String ativada = null;
+String bikeEmTrip = null;
 LatLng localizacao = LatLng(-25.439477, -49.268963);
 
 //Variáveis de Transição do Bluetooth

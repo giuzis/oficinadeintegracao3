@@ -44,6 +44,8 @@ class _MyHomePageState extends State<MyHomePage>
   static final LatLng center = const LatLng(-25.438376, -49.263781);
   BitmapDescriptor myIcon;
   BitmapDescriptor myBikeIcon;
+  BitmapDescriptor inactiveBikeIcon;
+  BitmapDescriptor bikeAlugadaIcon;
   bool bikesUpdated = false;
   bool pegouHistorico = false;
 
@@ -90,6 +92,18 @@ class _MyHomePageState extends State<MyHomePage>
             ImageConfiguration(size: Size(48, 48)), 'images/myBike3.png')
         .then((onValue) {
       myBikeIcon = onValue;
+    });
+
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(48, 48)), 'images/inactive-bike.png')
+        .then((onValue) {
+      inactiveBikeIcon = onValue;
+    });
+
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(48, 48)), 'images/Bike_alugada.png')
+        .then((onValue) {
+      bikeAlugadaIcon = onValue;
     });
 
     // Get current state
@@ -147,7 +161,7 @@ class _MyHomePageState extends State<MyHomePage>
 
     if (!bikesUpdated) {
       //Pega as bicicletas ativas
-      adicicionaBikes();
+      adicicionaBikes(email);
     }
 
     // clearList().then((value){
@@ -191,12 +205,12 @@ class _MyHomePageState extends State<MyHomePage>
   Widget build(BuildContext context) {
     // if (!getInformationFlag) {
     //   //Esta função pega a rating e o bike ID
-    //   getInformation(email);
+      getInformation(email);
     // }
 
     // if (!bikesUpdated) {
     //   //Pega as bicicletas ativas
-    //   adicicionaBikes();
+      adicicionaBikes(email);
     // }
 
     // // clearList().then((value){
@@ -474,10 +488,11 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  void adicicionaBikes() {
+  void adicicionaBikes(String email) {
     String function = "retornaBikes";
+    String _email = "email=" + email;
 
-    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' + function;
+    var url = 'https://us-central1-bluberstg.cloudfunctions.net/' + function + '?' + _email;
 
     http.get(url).then((response) {
       Map<String, dynamic> bikes = jsonDecode(response.body);
@@ -523,7 +538,7 @@ class _MyHomePageState extends State<MyHomePage>
               markerId: markerId,
               position: LatLng(localizacao.latitude, localizacao.longitude),
               infoWindow: InfoWindow(title: markerIdVal, snippet: ''),
-              icon: (name[i] == bike) ? myBikeIcon : myIcon,
+              icon: (name[i] == bike) ? ((ativada == 'false') ? inactiveBikeIcon : (bikeEmTrip == 'true') ? bikeAlugadaIcon : myBikeIcon) : myIcon,
               // BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
               // icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet)
             );
@@ -780,6 +795,7 @@ class _MyHomePageState extends State<MyHomePage>
         String _rating = information['rating'] as String;
         String _bikeID = information['bike_id'] as String;
         String _ativada = information['ativada'] as String;
+        String _emTrip = information['in_trip'] as String;
 
         debugPrint("$information");
         // print(_rating);
@@ -787,13 +803,15 @@ class _MyHomePageState extends State<MyHomePage>
         userRate = _rating;
         bike = _bikeID;
         ativada = _ativada;
+        bikeEmTrip = _emTrip;
 
         getInformationFlag = true;
       } else {
         // msgErro();
-        userRate = "5";
+        userRate = "5,0";
         bike = null;
         ativada = null;
+        bikeEmTrip = null;
         //   showAlertDialog(
         //       context, 'Erro ao pegar as informações', 'Tentaremos novamente mais');
       }
